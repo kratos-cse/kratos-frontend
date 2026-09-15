@@ -1,4 +1,4 @@
-# KRATOS'26 — preview page
+# KRATOS'26 — preview page.
 
 Plain HTML / CSS / JS. No build step, no dependencies.
 
