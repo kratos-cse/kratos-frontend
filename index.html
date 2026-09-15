@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#070406" />
+<meta name="mobile-web-app-capable" content="yes" />
+<title>KRATOS'26 — Coming Soon</title>
+<meta name="description" content="Association of Computer Engineers · Easwari Engineering College, Ramapuram, Chennai" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<!-- ===================== HUD ===================== -->
+<header class="hud" id="hud">
+  <span class="hud-l">ACE</span>
+  <span class="hud-r"><b id="hud-dot"></b><span id="hud-status">SYSTEM STANDBY</span></span>
+</header>
+
+<!-- ===================== CONSOLE RIG ===================== -->
+<div class="rig" id="rig">
+
+  <div class="console-col">
+    <div class="pill"><i id="pill-fill"></i><b></b></div>
+    <div class="tab" id="tab">INSERT MODULE</div>
+
+    <div class="console" id="console">
+      <span class="rail rail-l"></span>
+      <span class="rail rail-r"></span>
+      <span class="screw tl"></span><span class="screw tr"></span>
+      <span class="screw bl"></span><span class="screw br"></span>
+
+      <!-- the dock is clipped exactly at the port line, so the cartridge
+           can only ever sit flush — a gap is impossible -->
+      <div class="dock" id="dock">
+        <img class="dock-cart" id="dock-cart" src="assets/cartridge.png" alt="" />
+      </div>
+      <div class="port" id="port"></div>
+
+      <div class="bezel">
+        <div class="screen" id="screen">
+
+          <!-- STATE 1 — awaiting cartridge -->
+          <div class="layer" id="l-await">
+            <span class="ghost-ace">ACE</span>
+            <p class="await-hd">AWAITING CARTRIDGE</p>
+            <p class="await-sb">PRESS INSERT CARTRIDGE TO BOOT</p>
+          </div>
+
+          <!-- STATE 2 — live campus map -->
+          <div class="layer" id="l-map">
+            <div class="map-frame">
+              <iframe id="osm" title="Easwari Engineering College" loading="lazy"
+                src="https://www.openstreetmap.org/export/embed.html?bbox=80.17342%2C13.02750%2C80.18542%2C13.03650&layer=mapnik&marker=13.0320%2C80.17942"></iframe>
+              <span class="map-tint"></span>
+              <span class="map-sweep"></span>
+            </div>
+
+            <p class="coords" id="coords">SEARCHING...</p>
+            <span class="detected" id="detected"><i></i>DETECTED</span>
+
+            <div class="signals" id="signals"></div>
+
+            <div class="pin" id="pin">
+              <span class="pin-ring"></span>
+              <span class="pin-core"><img src="assets/crest.png" alt="" /></span>
+            </div>
+
+            <div class="place" id="place">
+              <span class="pl-sm">LOCATION CONFIRMED</span>
+              <span class="pl-lg">EASWARI<br>ENGINEERING COLLEGE</span>
+              <span class="pl-xs">RAMAPURAM &middot; CHENNAI</span>
+            </div>
+
+            <div class="granted" id="granted">ACCESS GRANTED</div>
+          </div>
+
+          <!-- STATE 3 — loading with percentage -->
+          <div class="layer" id="l-load">
+            <p class="load-hd">DECRYPTING ACE MODULE</p>
+            <p class="load-big">LOADING</p>
+            <p class="load-pct" id="load-pct">0%</p>
+            <span class="load-bar"><i id="load-fill"></i></span>
+          </div>
+
+
+          <div class="scan"></div>
+          <div class="glass"></div>
+          <div class="vig"></div>
+        </div>
+      </div>
+
+      <div class="ctrl">
+        <span class="dpad"><i></i><i></i></span>
+        <span class="plate">ACE / NAV-SYS / REV 26</span>
+        <span class="lamps"><i class="l0"></i><i class="l1"></i><i class="l2"></i></span>
+      </div>
+    </div>
+  </div>
+
+  <aside class="cart-col">
+    <div class="cart" id="cart">
+      <img src="assets/cartridge.png" alt="ACE cartridge" draggable="false" />
+    </div>
+    <p class="cart-hint" id="cart-hint">ACE CARTRIDGE &middot; READY</p>
+    <button class="cart-btn" id="cart-btn" type="button">INSERT CARTRIDGE</button>
+  </aside>
+
+</div>
+
+<div id="flash"></div>
+
+<!-- ===================== VIDEO ===================== -->
+<section class="stage-video" id="stage-video">
+  <video id="intro" playsinline webkit-playsinline muted preload="auto">
+    <source src="assets/intro.mp4" type="video/mp4" />
+  </video>
+  <button class="sound" id="sound" type="button">&#128263; SOUND ON</button>
+  <button class="skip" id="skip" type="button">SKIP &#9656;</button>
+</section>
+
+<!-- ===================== FINALE ===================== -->
+<section class="finale-stage" id="finale">
+  <div class="finale-inner">
+    <img class="fin-lion" id="fin-lion" src="assets/lion-mark.png" alt="Association of Computer Engineers" />
+    <img class="fin-word" id="fin-word" src="assets/kratos26.png" alt="KRATOS'26" />
+    <p class="fin-soon" id="fin-soon">COMING SOON</p>
+  </div>
+</section>
+
+<button class="replay" id="replay" type="button">&#8635; REPLAY SEQUENCE</button>
+
+<script src="script.js"></script>
+</body>
+</html>
