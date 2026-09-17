@@ -1,5 +1,6 @@
 # KRATOS'26 — Temporal Monitor Teaser
 
+
 Next.js App Router teaser: CSS CRT shell + Loki-inspired Sacred Timeline canvas, then the intro video and coming-soon outro.
 
 ## Run
