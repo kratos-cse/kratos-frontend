@@ -1,85 +1,30 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import Countdown from "@/components/Countdown";
-import RegistrationsPanel from "@/components/RegistrationsPanel";
+import KratosNav from "@/components/kratos/KratosNav";
+import KratosFooter from "@/components/kratos/KratosFooter";
+import KratosHero from "@/components/kratos/KratosHero";
+import TimelineSpine from "@/components/kratos/TimelineSpine";
+import NexusSection from "@/components/kratos/NexusSection";
+import EventExplorer from "@/components/kratos/EventExplorer";
+import SectionReveal from "@/components/kratos/SectionReveal";
+import { useEvents } from "@/hooks/useEvents";
+import { uniqueCategories, rankNexusEvents } from "@/lib/events/utils";
 
 const ScrollIntro = dynamic(() => import("@/components/intro/ScrollIntro"), {
   ssr: false,
 });
 
-const TYPE_CARDS = [
-  {
-    href: "/spark",
-    className: "tc-spark",
-    icon: (
-      <path d="M12 2l2.2 6.8L21 11l-6.8 2.2L12 20l-2.2-6.8L3 11l6.8-2.2L12 2z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
-    ),
-    title: "Spark Events",
-    desc: "Keynotes, ceremonies & the moments that ignite the symposium.",
-  },
-  {
-    href: "/technical",
-    className: "tc-technical",
-    icon: <path d="M8 5l-6 7 6 7M16 5l6 7-6 7" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />,
-    title: "Technical Events",
-    desc: "Code Crucible, Project Expo & more — logic meets deadline.",
-  },
-  {
-    href: "/online",
-    className: "tc-online",
-    icon: (
-      <>
-        <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.4" />
-        <path d="M3 12h18M12 3c2.5 2.6 3.8 5.8 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.8-3.8-9s1.3-6.4 3.8-9z" stroke="currentColor" strokeWidth="1.4" />
-      </>
-    ),
-    title: "Online Events",
-    desc: "48-hour sprints & async challenges, open to every college.",
-  },
-  {
-    href: "/sports",
-    className: "tc-sports",
-    icon: (
-      <>
-        <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.4" />
-        <path
-          d="M12 3v18M3 12h18M6 6.5c2 1.6 4 2.2 6 2.2s4-.6 6-2.2M6 17.5c2-1.6 4-2.2 6-2.2s4 .6 6 2.2"
-          stroke="currentColor"
-          strokeWidth="1.2"
-        />
-      </>
-    ),
-    title: "Sports Events",
-    desc: "Football, courts & the ground — where the symposium gets physical.",
-  },
-  {
-    href: "/technical",
-    className: "tc-hackathon",
-    icon: <path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />,
-    title: "Hackathon",
-    desc: "Overnight build sprints — one problem statement, one shipped product.",
-  },
-  {
-    href: "/technical",
-    className: "tc-workshop",
-    icon: <path d="M14.7 6.3a4 4 0 0 1-5.4 5.4L4 17l3 3 5.3-5.3a4 4 0 0 1 5.4-5.4L15 12l-1.7-1.7 1.4-4z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />,
-    title: "Workshop",
-    desc: "Hands-on sessions with industry mentors — skills you take home.",
-  },
-];
-
 export default function Home() {
   const [introActive, setIntroActive] = useState(true);
-  const [panelOpen, setPanelOpen] = useState(false);
+  const { events, loading, error } = useEvents();
+  const categories = useMemo(() => uniqueCategories(events), [events]);
+  const nexus = useMemo(() => rankNexusEvents(events, 4), [events]);
 
   useEffect(() => {
     document.body.classList.add("intro-active");
-    if (window.location.hash === "#registrations") setPanelOpen(true);
   }, []);
 
   function handleIntroDone() {
@@ -91,85 +36,92 @@ export default function Home() {
     document.body.classList.add("intro-done");
   }
 
-  function handleSignIn(e) {
-    e.preventDefault();
-    setPanelOpen(true);
-    document.getElementById("registrations")?.scrollIntoView({ behavior: "smooth" });
-  }
-
   return (
     <>
       <ScrollIntro onDone={handleIntroDone} />
       <div className="landing-shell" {...(introActive ? { inert: "" } : {})}>
-        <Header onSignIn={handleSignIn} />
+        <KratosNav />
         <main>
-          <section id="home" className="hero">
-            <div className="brand-stack">
-              <div className="lion-wrap" id="landing-lion">
-                <div className="lion-glow" />
-                <img src="/assets/img/lion.png" alt="ACE lion mark" />
+          <KratosHero />
+
+          <section id="discovery" className="discovery-sec">
+            <div className="container">
+              <SectionReveal className="discovery-panel">
+                <span className="eyebrow">Discovery</span>
+                <h2>What is KRATOS?</h2>
+                <p>
+                  KRATOS&apos;26 is the ACE National Symposium at SRM Easwari Engineering College —
+                  a single timeline of technical, cultural, and competitive branches. You enter through
+                  the opening sequence, choose a node, and register for the events that define your path.
+                </p>
+              </SectionReveal>
+            </div>
+          </section>
+
+          <TimelineSpine categories={categories} loading={loading} error={error} />
+          <NexusSection events={nexus} loading={loading} />
+          <EventExplorer events={events} loading={loading} error={error} limit={8} />
+
+          <section id="dates" className="dates-sec">
+            <div className="container">
+              <SectionReveal className="sec-head">
+                <span className="eyebrow">Important Dates</span>
+                <h2>Mark the convergence</h2>
+                <p>Symposium day is locked. Registration windows follow each event&apos;s own rules.</p>
+              </SectionReveal>
+              <div className="dates-rail">
+                <div className="date-node">
+                  <span className="node-coord">D · 01</span>
+                  <h3>20 March 2026</h3>
+                  <p>Symposium day — SRM Easwari, Ramapuram</p>
+                </div>
+                <div className="date-node">
+                  <span className="node-coord">D · 02</span>
+                  <h3>Registration windows</h3>
+                  <p>Per-event open/close times from the live catalogue</p>
+                </div>
+                <div className="date-node">
+                  <span className="node-coord">D · 03</span>
+                  <h3>Check-in</h3>
+                  <p>QR confirmation after successful payment / team join</p>
+                </div>
               </div>
-              <img
-                className="wordmark-img"
-                id="landing-wordmark"
-                src="/assets/img/kratos-wordmark.webp"
-                alt="Kratos'26"
-              />
-            </div>
-            <Countdown />
-            <div className="hero-cta">
-              <Link href="/technical" className="btn btn-primary">
-                Explore Events
-              </Link>
-              <Link href="/feedback" className="btn btn-ghost">
-                Share Feedback
-              </Link>
             </div>
           </section>
 
-          <section id="pillars" className="types-sec">
-            <div className="pillars-mesh" />
-            <div className="pillars-head">
-              <span className="eyebrow">Pick Your Track</span>
-              <h2>Explore Event Types</h2>
-              <p>Six arenas, one symposium. Find where you belong.</p>
-            </div>
-            <div className="types-grid">
-              {TYPE_CARDS.map((card) => (
-                <Link key={card.title} href={card.href} className={`type-card ${card.className}`}>
-                  <div className="tc-glow" />
-                  <span className="tc-icon">
-                    <svg viewBox="0 0 24 24" fill="none">
-                      {card.icon}
-                    </svg>
-                  </span>
-                  <h3>{card.title}</h3>
-                  <p>{card.desc}</p>
-                  <span className="tc-cta">
-                    Explore <i>→</i>
-                  </span>
-                </Link>
-              ))}
+          <section id="register-cta" className="cta-sec">
+            <div className="container">
+              <SectionReveal className="cta-panel">
+                <span className="eyebrow">Participation</span>
+                <h2>Claim your place on the timeline</h2>
+                <p>Sign in, complete your profile, register, and pay only when the backend confirms an order.</p>
+                <div className="hero-cta">
+                  <Link href="/events" className="btn btn-primary">
+                    Browse Events
+                  </Link>
+                  <Link href="/login?next=/dashboard" className="btn btn-ghost">
+                    Sign in
+                  </Link>
+                </div>
+              </SectionReveal>
             </div>
           </section>
-
-          <RegistrationsPanel open={panelOpen} />
         </main>
         <div className="stats-bar">
           <div className="m">
-            <b data-live="symposium-days">1</b>
+            <b>1</b>
             <small>Day of Symposium</small>
           </div>
           <div className="m">
-            <b data-live="event-tracks">4</b>
-            <small>Event Tracks</small>
+            <b>{loading ? "—" : categories.length}</b>
+            <small>Timeline Branches</small>
           </div>
           <div className="m">
-            <b data-live="total-events">6</b>
-            <small>Total Events</small>
+            <b>{loading ? "—" : events.length}</b>
+            <small>Live Events</small>
           </div>
         </div>
-        <Footer />
+        <KratosFooter categories={categories} />
       </div>
     </>
   );
