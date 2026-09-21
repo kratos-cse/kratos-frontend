@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200" width="400" height="200">
+  <defs>
+    <linearGradient id="g3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#180a24" />
+      <stop offset="50%" stop-color="#3c1854" />
+      <stop offset="100%" stop-color="#7a2ea8" />
+    </linearGradient>
+    <filter id="glow3" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="5" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  <rect width="400" height="200" rx="20" fill="#0c0412" />
+  <rect width="396" height="196" x="2" y="2" rx="18" fill="url(#g3)" opacity="0.6" stroke="#c060f0" stroke-width="2" />
+  <g filter="url(#glow3)" transform="translate(200,100)" stroke="#e088ff" stroke-width="4" fill="none">
+    <circle cx="0" cy="0" r="40" />
+    <ellipse cx="0" cy="0" rx="20" ry="40" />
+    <line x1="-40" y1="0" x2="40" y2="0" />
+    <line x1="-34" y1="-20" x2="34" y2="-20" />
+    <line x1="-34" y1="20" x2="34" y2="20" />
+  </g>
+</svg>
