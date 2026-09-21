@@ -504,3 +504,47 @@ footer h4::after{content:'';position:absolute;left:0;bottom:0;width:34px;height:
   .btn,.node-panel,.kx-event-card,.nexus-card,.explorer-filters button{transition:opacity .2s ease,border-color .2s ease,background .2s ease,color .2s ease!important;}
   .btn:active,.node-panel:active,.kx-event-card:active{transform:none!important;}
 }
+@media(prefers-reduced-transparency:reduce){
+  header{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:rgba(10,6,4,.96)!important;}
+}
+
+/* ── participant journey: status, actions, QR, stepper ── */
+.status-banner{padding:14px 16px;border:1px solid var(--line);border-radius:4px;margin:0 0 18px;line-height:1.55;font-size:.95rem;}
+.status-banner strong{display:block;margin-bottom:4px;font-family:'Cinzel',serif;letter-spacing:.06em;text-transform:uppercase;font-size:.78rem;}
+.status-banner.ok{border-color:rgba(232,178,60,.45);background:rgba(232,178,60,.08);color:var(--gold-bright);}
+.status-banner.warn{border-color:rgba(255,90,20,.4);background:rgba(255,90,20,.08);color:#ffc4a0;}
+.status-banner.err{border-color:rgba(255,143,122,.45);background:rgba(255,90,20,.1);color:#ff8f7a;}
+.status-banner.info{border-color:var(--line);background:var(--surface-2);color:var(--ash);}
+.status-pill.pending{color:#ffc4a0;border-color:rgba(255,90,20,.4);background:rgba(255,90,20,.08);}
+.status-pill.confirmed{color:var(--gold-bright);border-color:rgba(232,178,60,.45);background:rgba(232,178,60,.08);}
+
+.action-stack{display:flex;flex-direction:column;gap:10px;margin-top:18px;}
+.action-stack .btn{width:100%;text-align:center;}
+.action-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px;}
+.confirm-list{display:grid;gap:10px;margin:14px 0 18px;}
+.confirm-list .row{display:flex;justify-content:space-between;gap:12px;padding-bottom:8px;border-bottom:1px solid var(--line);font-size:.95rem;}
+.confirm-list .row span{color:var(--ash-dim);}
+.confirm-list .row strong{color:var(--ash);text-align:right;font-weight:600;}
+
+.team-stepper{display:flex;align-items:center;justify-content:center;gap:18px;margin:16px 0;}
+.team-stepper button{width:44px;height:44px;border:1px solid var(--line);background:var(--surface-2);color:var(--gold-bright);font-size:1.4rem;line-height:1;border-radius:2px;cursor:pointer;transition:transform var(--duration-press) var(--ease-out),border-color var(--duration-ui) ease;}
+.team-stepper button:active{transform:scale(0.97);}
+.team-stepper button:disabled{opacity:.4;cursor:not-allowed;transform:none!important;}
+.team-stepper .count{font-family:'Cinzel',serif;font-size:1.8rem;color:var(--gold-bright);min-width:2ch;text-align:center;}
+
+.qr-panel{display:flex;flex-direction:column;align-items:center;gap:14px;padding:20px 0;text-align:center;}
+.qr-panel canvas,.qr-panel svg{background:#fff;padding:12px;border-radius:4px;}
+.qr-panel .qr-name{font-family:'Cinzel',serif;font-size:1.15rem;color:#fdf3e6;margin:0;}
+.qr-panel .qr-id{font-family:'Space Mono',monospace;font-size:.72rem;letter-spacing:.08em;color:var(--ash-dim);}
+.member-list{list-style:none;margin:12px 0;padding:0;display:grid;gap:8px;}
+.member-list li{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:2px;background:var(--surface-1);font-size:.95rem;}
+.member-list .tick{color:var(--gold-bright);font-weight:700;}
+.member-list .wait{color:var(--ash-dim);}
+.invite-box{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px;}
+.invite-box code{flex:1;min-width:160px;padding:10px 12px;border:1px solid var(--line);background:rgba(0,0,0,.25);font-family:'Space Mono',monospace;font-size:.72rem;word-break:break-all;color:var(--ash);}
+.field input:read-only{opacity:.75;cursor:default;}
+.btn:focus-visible,.team-stepper button:focus-visible,.reg-actions a:focus-visible,.reg-actions button:focus-visible{outline:2px solid var(--ember);outline-offset:2px;}
+.reg-detail-card{max-width:640px;margin:0 auto;padding:28px;border:1px solid var(--line);border-radius:4px;background:var(--surface-1);}
+.reg-detail-card h1{font-size:clamp(1.6rem,3vw,2.1rem);color:#fdf3e6;margin:0 0 8px;}
+.kx-event-meta{display:flex;flex-wrap:wrap;gap:8px 14px;font-size:.82rem;color:var(--ash-dim);}
+.kx-event-meta .meta-chip{letter-spacing:.04em;}

@@ -8,12 +8,27 @@ import KratosFooter from "@/components/kratos/KratosFooter";
 import { useEvent, useEvents } from "@/hooks/useEvents";
 import { formatFee, formatWhen, shortCoord, uniqueCategories, categoryToSlug } from "@/lib/events/utils";
 
+function formatCloses(at) {
+  if (!at) return null;
+  try {
+    return new Date(at).toLocaleString("en-IN", {
+      day: "numeric",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return String(at);
+  }
+}
+
 export default function EventDetailPage() {
   const params = useParams();
   const eventId = params?.eventId;
   const { event, loading, error } = useEvent(eventId);
   const { events } = useEvents();
   const categories = useMemo(() => uniqueCategories(events), [events]);
+  const closes = formatCloses(event?.registration_closes_at);
 
   return (
     <div className="page-shell">
@@ -37,7 +52,13 @@ export default function EventDetailPage() {
               <>
                 <div className="detail-main">
                   <h1>{event.name}</h1>
-                  <p className="lede">{event.long_desc || event.short_desc || "No description provided."}</p>
+                  <p className="lede">{event.short_desc || "No short description provided."}</p>
+                  {event.long_desc && event.long_desc !== event.short_desc ? (
+                    <div className="detail-block">
+                      <h2>About</h2>
+                      <p>{event.long_desc}</p>
+                    </div>
+                  ) : null}
                   {event.category && (
                     <div className="detail-block">
                       <h2>Branch</h2>
@@ -57,16 +78,6 @@ export default function EventDetailPage() {
                       </p>
                     </div>
                   )}
-                  {event.whatsapp_group_link && (
-                    <div className="detail-block">
-                      <h2>WhatsApp</h2>
-                      <p>
-                        <a href={event.whatsapp_group_link} target="_blank" rel="noopener noreferrer">
-                          Join event group ↗
-                        </a>
-                      </p>
-                    </div>
-                  )}
                 </div>
                 <aside className="detail-aside">
                   <div className="meta-row">
@@ -77,6 +88,12 @@ export default function EventDetailPage() {
                     <span>Venue</span>
                     <strong>{event.venue || "TBA"}</strong>
                   </div>
+                  {closes ? (
+                    <div className="meta-row">
+                      <span>Closes</span>
+                      <strong>{closes}</strong>
+                    </div>
+                  ) : null}
                   <div className="meta-row">
                     <span>Fee</span>
                     <strong>{formatFee(event.fee)}</strong>
@@ -84,9 +101,9 @@ export default function EventDetailPage() {
                   <div className="meta-row">
                     <span>Team</span>
                     <strong>
-                      {event.allow_individual && event.team_max_size <= 1
+                      {event.allow_individual && (event.team_max_size ?? 1) <= 1
                         ? "Solo"
-                        : `${event.team_min_size}–${event.team_max_size}`}
+                        : `${event.team_min_size ?? "—"}–${event.team_max_size ?? "—"}`}
                     </strong>
                   </div>
                   <div className="meta-row">
@@ -100,7 +117,7 @@ export default function EventDetailPage() {
                   )}
                   {event.registration_open ? (
                     <Link href={`/register/${event.id}`} className="btn btn-primary">
-                      Register
+                      Register now
                     </Link>
                   ) : (
                     <button type="button" className="btn btn-primary" disabled>

@@ -5,11 +5,40 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import KratosNav from "@/components/kratos/KratosNav";
 import KratosFooter from "@/components/kratos/KratosFooter";
+import StatusBanner from "@/components/kratos/ui/StatusBanner";
 import { useAuth } from "@/context/AuthProvider";
+import { useEvent } from "@/hooks/useEvents";
 import { useMyRegistrations } from "@/hooks/useMyRegistrations";
 import { updateMyProfile } from "@/lib/api/profile";
-import { getRegistrationQr, getRegistrationReceipt } from "@/lib/api/registrations";
+import {
+  isPaymentProcessing,
+  isRegistrationConfirmed,
+  toUserMessage,
+} from "@/lib/errors/userMessages";
 import { isProfileComplete } from "@/lib/events/utils";
+
+function RegListItem({ reg, profileId }) {
+  const { event } = useEvent(reg.event_id);
+  const confirmed = isRegistrationConfirmed(reg);
+  const processing = isPaymentProcessing(reg);
+  const isLeader = reg.team && profileId ? reg.team.leader_profile_id === profileId : !reg.team;
+  const role = reg.team ? (isLeader ? "Team Leader" : "Member") : "Solo";
+  const statusLabel = confirmed ? "Registered" : processing ? "Payment confirming" : reg.status || "Pending";
+
+  return (
+    <div className="reg-item">
+      <h3>{event?.name || "Registration"}</h3>
+      <p className="muted">
+        <span className={`status-pill ${confirmed ? "confirmed" : "pending"}`}>{statusLabel}</span>
+        {reg.team ? ` · Team · ${reg.team.name}` : null} · {role}
+      </p>
+      <div className="reg-actions">
+        <Link href={`/registrations/${reg.id}`}>View</Link>
+        {processing ? <Link href={`/register/${reg.event_id}`}>Check payment</Link> : null}
+      </div>
+    </div>
+  );
+}
 
 function DashboardInner() {
   const router = useRouter();
@@ -52,74 +81,95 @@ function DashboardInner() {
     setSaveMsg(null);
     setActionError(null);
     try {
-      const updated = await updateMyProfile(form);
+      const updated = await updateMyProfile({
+        full_name: form.full_name,
+        phone: form.phone,
+        college_name: form.college_name,
+        department: form.department,
+        year_of_study: form.year_of_study,
+        contact_email: form.contact_email || undefined,
+      });
       setProfile(updated);
       setSaveMsg("Profile saved.");
       await refresh();
     } catch (err) {
-      setActionError(err.message || "Failed to save profile");
+      setActionError(toUserMessage(err, "Failed to save profile"));
     } finally {
       setSaving(false);
     }
   }
 
-  async function handleReceipt(regId) {
-    setActionError(null);
-    try {
-      const receipt = await getRegistrationReceipt(regId);
-      if (receipt?.pdf_url) window.open(receipt.pdf_url, "_blank", "noopener");
-      else setActionError("Receipt URL not available yet");
-    } catch (err) {
-      setActionError(err.message || "Could not load receipt");
-    }
-  }
-
-  async function handleQr(regId) {
-    setActionError(null);
-    try {
-      const qr = await getRegistrationQr(regId);
-      if (qr?.token) {
-        alert(`QR token: ${qr.token}`);
-      } else setActionError("QR not available yet");
-    } catch (err) {
-      setActionError(err.message || "Could not load QR");
-    }
-  }
-
   if (authLoading || !isAuthenticated) {
-    return <p className="state-msg container">Loading dashboard…</p>;
+    return <p className="state-msg container">Loading…</p>;
   }
 
   return (
     <section>
       <div className="container dash-grid">
-        <div className="dash-card">
-          <h2 className="profile-title">Profile</h2>
+        <div className="dash-card" id="profile">
+          <h2 className="profile-title">My profile</h2>
           <p className="muted" style={{ marginBottom: 14 }}>
             Signed in as {user?.email}
             {!isProfileComplete(profile) && " — complete your profile before registering."}
           </p>
           <form className="profile-fields" onSubmit={handleSave}>
-            {[
-              ["full_name", "Full name"],
-              ["contact_email", "Contact email"],
-              ["phone", "Phone"],
-              ["college_name", "College"],
-              ["department", "Department"],
-              ["year_of_study", "Year of study"],
-            ].map(([key, label]) => (
-              <div className="field" key={key}>
-                <label htmlFor={`pf-${key}`}>{label}</label>
-                <input
-                  id={`pf-${key}`}
-                  value={form[key]}
-                  onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
-                  required={key !== "contact_email"}
-                />
-              </div>
-            ))}
+            <p className="muted" style={{ margin: 0 }}>
+              Personal
+            </p>
+            <div className="field">
+              <label htmlFor="pf-full_name">Name</label>
+              <input
+                id="pf-full_name"
+                value={form.full_name}
+                onChange={(e) => setForm((f) => ({ ...f, full_name: e.target.value }))}
+                required
+              />
+            </div>
+            <div className="field">
+              <label htmlFor="pf-email">Email</label>
+              <input id="pf-email" value={user?.email || ""} readOnly />
+            </div>
+            <div className="field">
+              <label htmlFor="pf-phone">Phone</label>
+              <input
+                id="pf-phone"
+                value={form.phone}
+                onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+                required
+              />
+            </div>
+            <p className="muted" style={{ margin: "8px 0 0" }}>
+              Academic
+            </p>
+            <div className="field">
+              <label htmlFor="pf-college_name">College</label>
+              <input
+                id="pf-college_name"
+                value={form.college_name}
+                onChange={(e) => setForm((f) => ({ ...f, college_name: e.target.value }))}
+                required
+              />
+            </div>
+            <div className="field">
+              <label htmlFor="pf-department">Department</label>
+              <input
+                id="pf-department"
+                value={form.department}
+                onChange={(e) => setForm((f) => ({ ...f, department: e.target.value }))}
+                required
+              />
+            </div>
+            <div className="field">
+              <label htmlFor="pf-year_of_study">Year</label>
+              <input
+                id="pf-year_of_study"
+                value={form.year_of_study}
+                onChange={(e) => setForm((f) => ({ ...f, year_of_study: e.target.value }))}
+                required
+              />
+            </div>
             <button type="submit" className="btn btn-primary" disabled={saving}>
-              {saving ? "Saving…" : "Save profile"}
+              {saving ? "Saving…" : "Save changes"}
             </button>
             {saveMsg && <p className="muted">{saveMsg}</p>}
           </form>
@@ -127,15 +177,18 @@ function DashboardInner() {
 
         <div>
           <div className="dash-card" style={{ maxWidth: "none", marginBottom: 18 }}>
-            <h2 className="profile-title">Registrations</h2>
+            <h2 className="profile-title">My registrations</h2>
+            <p className="muted" style={{ marginBottom: 14 }}>
+              Open a registration for QR, receipt, WhatsApp, and team invites.
+            </p>
             <button type="button" className="btn btn-ghost" onClick={reload} style={{ marginBottom: 14 }}>
               Refresh
             </button>
             {regsLoading && <p className="muted">Loading registrations…</p>}
             {regsError && (
-              <p className="state-error" role="alert">
-                {regsError.message}
-              </p>
+              <StatusBanner tone="err" title="Couldn’t load registrations">
+                {toUserMessage(regsError)}
+              </StatusBanner>
             )}
             {!regsLoading && registrations.length === 0 && (
               <p className="muted">
@@ -144,33 +197,13 @@ function DashboardInner() {
             )}
             <div className="reg-list">
               {registrations.map((reg) => (
-                <div key={reg.id} className="reg-item">
-                  <h3>Registration</h3>
-                  <p className="muted">
-                    ID · {String(reg.id).slice(0, 8)}… · Status · {reg.status}
-                    {reg.payment ? ` · Payment · ${reg.payment.status}` : ""}
-                  </p>
-                  {reg.team && (
-                    <p className="muted">
-                      Team · {reg.team.name} ({reg.team.status})
-                    </p>
-                  )}
-                  <div className="reg-actions">
-                    <Link href={`/events/${reg.event_id}`}>Event</Link>
-                    <button type="button" onClick={() => handleReceipt(reg.id)}>
-                      Receipt
-                    </button>
-                    <button type="button" onClick={() => handleQr(reg.id)}>
-                      QR
-                    </button>
-                  </div>
-                </div>
+                <RegListItem key={reg.id} reg={reg} profileId={profile?.id} />
               ))}
             </div>
             {actionError && (
-              <p className="state-error" role="alert">
+              <StatusBanner tone="err" title="Something went wrong">
                 {actionError}
-              </p>
+              </StatusBanner>
             )}
           </div>
         </div>
@@ -186,9 +219,9 @@ export default function DashboardPage() {
       <main>
         <section className="page-banner">
           <div className="container">
-            <span className="eyebrow">Participant Area</span>
-            <h1>Dashboard</h1>
-            <p>Profile, registrations, payment status, receipts, and QR — all from the backend.</p>
+            <span className="eyebrow">Participant</span>
+            <h1>My registrations</h1>
+            <p>Overview of your profile and event registrations.</p>
           </div>
         </section>
         <Suspense fallback={<p className="state-msg container">Loading…</p>}>

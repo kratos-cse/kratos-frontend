@@ -11,6 +11,8 @@ const NAV_LINKS = [
   { href: "/feedback", label: "Feedback" },
 ];
 
+const AUTH_NAV_LINKS = [{ href: "/dashboard", label: "My Registrations" }];
+
 export default function KratosNav() {
   const pathname = usePathname();
   const router = useRouter();
@@ -58,6 +60,18 @@ export default function KratosNav() {
               {link.label}
             </Link>
           ))}
+          {isAuthenticated
+            ? AUTH_NAV_LINKS.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={pathname === link.href || pathname.startsWith("/registrations") ? "active" : ""}
+                  onClick={() => setNavOpen(false)}
+                >
+                  {link.label}
+                </Link>
+              ))
+            : null}
         </nav>
         <div className="nav-right">
           <img className="nav-org-logo" src="/assets/img/dept-logo.webp" alt="CSE Department" />
@@ -98,7 +112,15 @@ export default function KratosNav() {
                     {user?.email}
                   </p>
                   <Link href="/dashboard" className="dd-link" role="menuitem" onClick={() => setProfileOpen(false)}>
-                    Dashboard →
+                    My registrations →
+                  </Link>
+                  <Link
+                    href="/dashboard#profile"
+                    className="dd-link"
+                    role="menuitem"
+                    onClick={() => setProfileOpen(false)}
+                  >
+                    Profile →
                   </Link>
                   <button
                     type="button"

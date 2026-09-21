@@ -6,15 +6,25 @@ import { useParams, useRouter } from "next/navigation";
 import KratosNav from "@/components/kratos/KratosNav";
 import KratosFooter from "@/components/kratos/KratosFooter";
 import { openRazorpayCheckout } from "@/components/kratos/PaymentCheckout";
+import StatusBanner from "@/components/kratos/ui/StatusBanner";
+import PaymentStatus from "@/components/registration/PaymentStatus";
+import ProfileConfirm, { getMissingProfileKeys } from "@/components/registration/ProfileConfirm";
+import RegistrationPreview from "@/components/registration/RegistrationPreview";
+import TeamSizeStepper from "@/components/registration/TeamSizeStepper";
 import { useAuth } from "@/context/AuthProvider";
 import { useEvent } from "@/hooks/useEvents";
-import { createRegistration, getRegistration } from "@/lib/api/registrations";
-import { createInvitation } from "@/lib/api/teams";
 import { createOrder, verifyPayment } from "@/lib/api/payments";
 import { updateMyProfile } from "@/lib/api/profile";
+import { createRegistration, getRegistration, getRegistrationReceipt, listMyRegistrations } from "@/lib/api/registrations";
+import {
+  canRetryPayment,
+  isPaymentProcessing,
+  isRegistrationConfirmed,
+  toUserMessage,
+} from "@/lib/errors/userMessages";
 import { formatFee, isProfileComplete } from "@/lib/events/utils";
 
-const STEPS = ["Auth", "Profile", "Register", "Payment", "Done"];
+const STEP_LABELS = ["Profile", "Setup", "Preview", "Payment"];
 
 function RegisterWizard() {
   const params = useParams();
@@ -23,11 +33,12 @@ function RegisterWizard() {
   const { isAuthenticated, loading: authLoading, profile, user, setProfile, refresh } = useAuth();
   const { event, loading: eventLoading, error: eventError } = useEvent(eventId);
 
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(0); // 0 profile, 1 setup, 2 preview, 3 payment
   const [regType, setRegType] = useState("SOLO");
   const [teamName, setTeamName] = useState("");
+  const [teamSize, setTeamSize] = useState(2);
   const [registration, setRegistration] = useState(null);
-  const [inviteCode, setInviteCode] = useState(null);
+  const [payMode, setPayMode] = useState("ready"); // ready | verifying | pending | failed
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   const [form, setForm] = useState({
@@ -46,13 +57,32 @@ function RegisterWizard() {
     event?.registration_mode === "TEAM_ONLY" ||
     event?.registration_mode === "TEAM_OR_INDIVIDUAL";
 
+  const feeLabel = useMemo(() => formatFee(event?.fee), [event]);
+  const needsPayment = event && Number(event.fee) > 0;
+  const missingKeys = useMemo(() => getMissingProfileKeys(profile || form), [profile, form]);
+
+  const goToDetail = useCallback(
+    (reg) => {
+      if (!reg?.id) return;
+      router.replace(`/registrations/${reg.id}`);
+    },
+    [router]
+  );
+
+  const tryAutoReceipt = useCallback(async (regId) => {
+    try {
+      const receipt = await getRegistrationReceipt(regId);
+      if (receipt?.pdf_url) window.open(receipt.pdf_url, "_blank", "noopener");
+    } catch {
+      /* optional */
+    }
+  }, []);
+
   useEffect(() => {
     if (authLoading) return;
     if (!isAuthenticated) {
       router.replace(`/login?next=${encodeURIComponent(`/register/${eventId}`)}`);
-      return;
     }
-    setStep(1);
   }, [authLoading, isAuthenticated, eventId, router]);
 
   useEffect(() => {
@@ -65,7 +95,7 @@ function RegisterWizard() {
         year_of_study: profile.year_of_study || "",
         contact_email: profile.contact_email || "",
       });
-      if (isProfileComplete(profile)) setStep((s) => Math.max(s, 2));
+      if (isProfileComplete(profile)) setStep((s) => Math.max(s, 1));
     }
   }, [profile]);
 
@@ -73,65 +103,109 @@ function RegisterWizard() {
     if (!event) return;
     if (allowsSolo && !allowsTeam) setRegType("SOLO");
     else if (!allowsSolo && allowsTeam) setRegType("TEAM");
+    const min = event.team_min_size || 2;
+    const max = event.team_max_size || min;
+    setTeamSize((n) => Math.min(max, Math.max(min, n || min)));
   }, [event, allowsSolo, allowsTeam]);
 
-  const feeLabel = useMemo(() => formatFee(event?.fee), [event]);
-  const needsPayment = event && Number(event.fee) > 0;
-
-  const saveProfile = useCallback(
-    async (e) => {
-      e.preventDefault();
-      setBusy(true);
-      setError(null);
+  // Recover existing registration for this event (payment recovery)
+  useEffect(() => {
+    if (!isAuthenticated || !eventId || authLoading) return;
+    let cancelled = false;
+    (async () => {
       try {
-        const updated = await updateMyProfile(form);
-        setProfile(updated);
-        await refresh();
-        setStep(2);
-      } catch (err) {
-        setError(err.message || "Profile update failed");
-      } finally {
-        setBusy(false);
+        const list = await listMyRegistrations();
+        const existing = (list || []).find((r) => String(r.event_id) === String(eventId));
+        if (!existing || cancelled) return;
+        const fresh = await getRegistration(existing.id);
+        if (cancelled) return;
+        setRegistration(fresh);
+        if (isRegistrationConfirmed(fresh)) {
+          goToDetail(fresh);
+          return;
+        }
+        if (needsPayment) {
+          setStep(3);
+          if (isPaymentProcessing(fresh)) setPayMode("pending");
+          else if (canRetryPayment(fresh)) setPayMode("ready");
+          else setPayMode("pending");
+        }
+      } catch {
+        /* ignore */
       }
-    },
-    [form, refresh, setProfile]
-  );
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated, eventId, authLoading, needsPayment, goToDetail]);
+
+  const saveProfile = useCallback(async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      const updated = await updateMyProfile(form);
+      setProfile(updated);
+      await refresh();
+      setStep(1);
+    } catch (err) {
+      setError(toUserMessage(err, "Profile update failed"));
+    } finally {
+      setBusy(false);
+    }
+  }, [form, refresh, setProfile]);
 
   const submitRegistration = useCallback(async () => {
     setBusy(true);
     setError(null);
     try {
-      const payload = {
-        registration_type: regType,
-        ...(regType === "TEAM" ? { team_name: teamName.trim() } : {}),
-      };
-      const reg = await createRegistration(eventId, payload);
-      setRegistration(reg);
-      if (reg.team?.id) {
-        try {
-          const inv = await createInvitation(reg.team.id);
-          setInviteCode(inv?.code || null);
-        } catch {
-          /* invitation optional if create fails */
-        }
+      let reg = registration;
+      if (!reg) {
+        const payload = {
+          registration_type: regType,
+          ...(regType === "TEAM" ? { team_name: teamName.trim() } : {}),
+        };
+        reg = await createRegistration(eventId, payload);
+        setRegistration(reg);
       }
-      if (needsPayment) setStep(3);
-      else {
+      if (needsPayment) {
+        setStep(3);
+        setPayMode(isPaymentProcessing(reg) ? "pending" : "ready");
+      } else {
         const fresh = await getRegistration(reg.id);
         setRegistration(fresh);
-        setStep(4);
+        await tryAutoReceipt(fresh.id);
+        goToDetail(fresh);
       }
     } catch (err) {
-      setError(err.message || "Registration failed");
+      const msg = toUserMessage(err);
+      setError(msg);
+      if (/already registered/i.test(err?.message || "")) {
+        try {
+          const list = await listMyRegistrations();
+          const existing = (list || []).find((r) => String(r.event_id) === String(eventId));
+          if (existing) goToDetail(existing);
+        } catch {
+          /* ignore */
+        }
+      }
     } finally {
       setBusy(false);
     }
-  }, [eventId, needsPayment, regType, teamName]);
+  }, [
+    registration,
+    regType,
+    teamName,
+    eventId,
+    needsPayment,
+    tryAutoReceipt,
+    goToDetail,
+  ]);
 
   const startPayment = useCallback(async () => {
     if (!registration) return;
     setBusy(true);
     setError(null);
+    setPayMode("verifying");
     try {
       const paymentType = regType === "TEAM" ? "TEAM_REGISTRATION" : "SOLO_REGISTRATION";
       const order = await createOrder({
@@ -139,7 +213,7 @@ function RegisterWizard() {
         paymentType,
         registrationId: registration.id,
       });
-      await openRazorpayCheckout({
+      const response = await openRazorpayCheckout({
         keyId: order.razorpayKeyId,
         orderId: order.razorpayOrderId,
         amountPaise: order.amountPaise,
@@ -151,35 +225,94 @@ function RegisterWizard() {
           contact: profile?.phone,
         },
         onSuccess: async () => {},
-      }).then(async (response) => {
-        await verifyPayment({
-          razorpayOrderId: response.razorpay_order_id,
-          razorpayPaymentId: response.razorpay_payment_id,
-          razorpaySignature: response.razorpay_signature,
-        });
-        const fresh = await getRegistration(registration.id);
-        setRegistration(fresh);
-        setStep(4);
       });
+      setPayMode("verifying");
+      await verifyPayment({
+        razorpayOrderId: response.razorpay_order_id,
+        razorpayPaymentId: response.razorpay_payment_id,
+        razorpaySignature: response.razorpay_signature,
+      });
+      const fresh = await getRegistration(registration.id);
+      setRegistration(fresh);
+      if (isRegistrationConfirmed(fresh)) {
+        await tryAutoReceipt(fresh.id);
+        goToDetail(fresh);
+      } else {
+        setPayMode("pending");
+      }
     } catch (err) {
-      if (err?.message === "Payment cancelled") setError("Payment was cancelled. You can try again.");
-      else setError(err.message || "Payment failed");
+      if (err?.message === "Payment cancelled") {
+        setPayMode("failed");
+        setError(toUserMessage(err));
+      } else {
+        setPayMode("pending");
+        setError(toUserMessage(err, "We’re confirming your payment. You don’t need to pay again."));
+      }
     } finally {
       setBusy(false);
     }
-  }, [event?.name, eventId, profile, registration, regType, user?.email]);
+  }, [
+    registration,
+    regType,
+    eventId,
+    event?.name,
+    profile,
+    user?.email,
+    tryAutoReceipt,
+    goToDetail,
+  ]);
+
+  const checkStatus = useCallback(async () => {
+    if (!registration?.id) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const fresh = await getRegistration(registration.id);
+      setRegistration(fresh);
+      if (isRegistrationConfirmed(fresh)) {
+        await tryAutoReceipt(fresh.id);
+        goToDetail(fresh);
+      } else if (isPaymentProcessing(fresh)) {
+        setPayMode("pending");
+      } else if (canRetryPayment(fresh)) {
+        setPayMode("failed");
+      } else {
+        setPayMode("pending");
+      }
+    } catch (err) {
+      setError(toUserMessage(err));
+    } finally {
+      setBusy(false);
+    }
+  }, [registration, tryAutoReceipt, goToDetail]);
 
   if (eventLoading || authLoading) {
     return <p className="state-msg">Loading registration…</p>;
   }
   if (eventError) {
     return (
-      <p className="state-error" role="alert">
-        {eventError.message}
-      </p>
+      <StatusBanner tone="err" title="Event unavailable">
+        {toUserMessage(eventError)}
+      </StatusBanner>
     );
   }
   if (!event) return null;
+
+  const previewRows = [
+    ["Event", event.name],
+    ["Type", regType === "TEAM" ? "Team" : "Solo"],
+    ...(regType === "TEAM"
+      ? [
+          ["Team name", teamName],
+          ["Team size", String(teamSize)],
+        ]
+      : []),
+    ["Name", form.full_name || profile?.full_name],
+    ["Email", user?.email],
+    ["College", form.college_name || profile?.college_name],
+    ["Phone", form.phone || profile?.phone],
+    ["Fee", feeLabel],
+  ];
 
   return (
     <div className="wizard-card" style={{ maxWidth: 560 }}>
@@ -190,7 +323,7 @@ function RegisterWizard() {
       </p>
 
       <div className="wizard-steps" aria-label="Registration steps">
-        {STEPS.map((label, i) => (
+        {STEP_LABELS.map((label, i) => (
           <span key={label} className={i === step ? "active" : i < step ? "done" : ""}>
             {label}
           </span>
@@ -198,114 +331,111 @@ function RegisterWizard() {
       </div>
 
       {!event.registration_open && (
-        <p className="state-error" role="alert">
-          Registration is closed for this event.
-        </p>
+        <StatusBanner tone="err" title="Registration closed">
+          This registration has closed.
+        </StatusBanner>
       )}
 
-      {step === 1 && (
-        <form className="profile-fields" onSubmit={saveProfile}>
-          <p className="muted">Complete your participant profile before continuing.</p>
-          {[
-            ["full_name", "Full name"],
-            ["phone", "Phone"],
-            ["college_name", "College"],
-            ["department", "Department"],
-            ["year_of_study", "Year of study"],
-            ["contact_email", "Contact email"],
-          ].map(([key, label]) => (
-            <div className="field" key={key}>
-              <label htmlFor={`reg-${key}`}>{label}</label>
-              <input
-                id={`reg-${key}`}
-                value={form[key]}
-                onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
-                required={key !== "contact_email"}
-              />
-            </div>
-          ))}
-          <button type="submit" className="btn btn-primary" disabled={busy}>
-            {busy ? "Saving…" : "Continue"}
-          </button>
-        </form>
+      {step === 0 && (
+        <ProfileConfirm
+          form={form}
+          setForm={setForm}
+          email={user?.email}
+          missingKeys={missingKeys.length ? missingKeys : null}
+          onSubmit={saveProfile}
+          busy={busy}
+        />
       )}
 
-      {step === 2 && event.registration_open && (
+      {step === 1 && event.registration_open && (
         <div className="profile-fields">
-          <p className="muted">Choose registration type supported by this event.</p>
+          <p className="muted">Choose how you want to register for this event.</p>
           <div className="explorer-filters" role="group" aria-label="Registration type">
             {allowsSolo && (
-              <button type="button" className={regType === "SOLO" ? "active" : ""} onClick={() => setRegType("SOLO")}>
+              <button
+                type="button"
+                className={regType === "SOLO" ? "active" : ""}
+                onClick={() => setRegType("SOLO")}
+              >
                 Solo
               </button>
             )}
             {allowsTeam && (
-              <button type="button" className={regType === "TEAM" ? "active" : ""} onClick={() => setRegType("TEAM")}>
+              <button
+                type="button"
+                className={regType === "TEAM" ? "active" : ""}
+                onClick={() => setRegType("TEAM")}
+              >
                 Team
               </button>
             )}
           </div>
           {regType === "TEAM" && (
-            <div className="field">
-              <label htmlFor="team-name">Team name</label>
-              <input
-                id="team-name"
-                value={teamName}
-                onChange={(e) => setTeamName(e.target.value)}
-                required
-                minLength={1}
+            <>
+              <TeamSizeStepper
+                value={teamSize}
+                min={event.team_min_size || 2}
+                max={event.team_max_size || 10}
+                onChange={setTeamSize}
               />
-            </div>
+              <div className="field">
+                <label htmlFor="team-name">Team name</label>
+                <input
+                  id="team-name"
+                  value={teamName}
+                  onChange={(e) => setTeamName(e.target.value)}
+                  required
+                  minLength={1}
+                />
+              </div>
+            </>
           )}
           <button
             type="button"
             className="btn btn-primary"
             disabled={busy || (regType === "TEAM" && !teamName.trim())}
-            onClick={submitRegistration}
+            onClick={() => setStep(2)}
           >
-            {busy ? "Submitting…" : "Submit registration"}
+            Continue
           </button>
         </div>
+      )}
+
+      {step === 2 && event.registration_open && (
+        <RegistrationPreview
+          rows={previewRows}
+          onEdit={() => setStep(1)}
+          onConfirm={submitRegistration}
+          busy={busy}
+          confirmLabel={needsPayment ? "Confirm & continue to pay" : "Confirm registration"}
+        />
       )}
 
       {step === 3 && (
-        <div>
-          <p className="muted" style={{ marginBottom: 14 }}>
-            Backend will create a Razorpay order. Success only after verification.
-          </p>
-          <button type="button" className="btn btn-primary" disabled={busy} onClick={startPayment}>
-            {busy ? "Processing…" : `Pay ${feeLabel}`}
-          </button>
-        </div>
-      )}
-
-      {step === 4 && registration && (
-        <div>
-          <p className="muted">
-            Registration status: <strong>{registration.status}</strong>
-            {registration.payment ? ` · Payment: ${registration.payment.status}` : ""}
-          </p>
-          {inviteCode && (
-            <p className="muted">
-              Invite teammates: <Link href={`/join/${inviteCode}`}>{inviteCode}</Link>
-            </p>
-          )}
-          <div className="hero-cta" style={{ justifyContent: "flex-start", marginTop: 16 }}>
-            <Link href="/dashboard" className="btn btn-primary">
-              Dashboard
-            </Link>
-            <Link href={`/events/${eventId}`} className="btn btn-ghost">
-              Event
-            </Link>
-          </div>
-        </div>
+        <PaymentStatus
+          mode={payMode}
+          feeLabel={feeLabel}
+          summaryRows={[
+            ["Event", event.name],
+            ["Type", regType === "TEAM" ? `Team · ${teamName || registration?.team?.name || ""}` : "Solo"],
+            ...(regType === "TEAM" ? [["Team size", String(teamSize)]] : []),
+            ["Leader", profile?.full_name || form.full_name],
+          ]}
+          onPay={startPayment}
+          onCheckStatus={checkStatus}
+          busy={busy}
+        />
       )}
 
       {error && (
-        <p className="state-error" role="alert" style={{ marginTop: 14 }}>
+        <StatusBanner tone="err" title="Something went wrong">
           {error}
-        </p>
+        </StatusBanner>
       )}
+
+      <p className="muted" style={{ marginTop: 18 }}>
+        <Link href={`/events/${eventId}`}>← Back to event</Link>
+      </p>
     </div>
   );
 }
