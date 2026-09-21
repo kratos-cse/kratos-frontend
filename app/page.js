@@ -1,12 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Countdown from "@/components/Countdown";
 import RegistrationsPanel from "@/components/RegistrationsPanel";
-import IntroOverlay from "@/components/IntroOverlay";
+
+const ScrollIntro = dynamic(() => import("@/components/intro/ScrollIntro"), {
+  ssr: false,
+});
 
 const TYPE_CARDS = [
   {
@@ -81,6 +85,9 @@ export default function Home() {
   function handleIntroDone() {
     setIntroActive(false);
     document.body.classList.remove("intro-active");
+    document.body.classList.remove("kratos-stage");
+    document.documentElement.classList.remove("intro-doc-lock");
+    document.body.classList.remove("intro-doc-lock");
     document.body.classList.add("intro-done");
   }
 
@@ -92,16 +99,23 @@ export default function Home() {
 
   return (
     <>
-      <IntroOverlay onDone={handleIntroDone} />
-      <div {...(introActive ? { inert: "" } : {})}>
+      <ScrollIntro onDone={handleIntroDone} />
+      <div className="landing-shell" {...(introActive ? { inert: "" } : {})}>
         <Header onSignIn={handleSignIn} />
         <main>
           <section id="home" className="hero">
-            <div className="lion-wrap">
-              <div className="lion-glow" />
-              <img src="/assets/img/lion-logo.webp" alt="ACE lion mark" />
+            <div className="brand-stack">
+              <div className="lion-wrap" id="landing-lion">
+                <div className="lion-glow" />
+                <img src="/assets/img/lion.png" alt="ACE lion mark" />
+              </div>
+              <img
+                className="wordmark-img"
+                id="landing-wordmark"
+                src="/assets/img/kratos-wordmark.webp"
+                alt="Kratos'26"
+              />
             </div>
-            <img className="wordmark-img" src="/assets/img/kratos-wordmark.webp" alt="Kratos'26" />
             <Countdown />
             <div className="hero-cta">
               <Link href="/technical" className="btn btn-primary">
