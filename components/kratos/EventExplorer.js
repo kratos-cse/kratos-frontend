@@ -17,6 +17,7 @@ export default function EventExplorer({
   showSearch = true,
   initialCategory = "all",
   limit,
+  emptyMessage = "No events match this filter.",
 }) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState(initialCategory);
@@ -103,7 +104,7 @@ export default function EventExplorer({
         </div>
 
         {!loading && !error && filtered.length === 0 && (
-          <p className="state-msg">No events match this filter.</p>
+          <p className="state-msg">{emptyMessage}</p>
         )}
       </div>
     </section>

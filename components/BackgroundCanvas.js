@@ -61,9 +61,6 @@ export default function BackgroundCanvas({ introActive = false }) {
     buildNodes();
     window.addEventListener("resize", buildNodes);
 
-    let bolts = [];
-    let bt = 160;
-
     function draw(t) {
       if (introActiveRef.current) {
         raf = requestAnimationFrame(draw);
@@ -98,35 +95,6 @@ export default function BackgroundCanvas({ introActive = false }) {
         ctx.fill();
       }
       ctx.shadowBlur = 0;
-
-      if (!noM) {
-        bt--;
-        if (bt <= 0) {
-          const sx = Math.random() * W;
-          const sg = 5 + Math.floor(Math.random() * 4);
-          const pts = [{ x: sx, y: -10 }];
-          let x = sx;
-          for (let i = 1; i <= sg; i++) {
-            x += (Math.random() - 0.5) * 65;
-            pts.push({ x, y: ((H + 20) * i) / sg });
-          }
-          bolts.push({ pts, life: 1 });
-          bt = 280 + Math.random() * 360;
-        }
-      }
-      bolts.forEach((b) => {
-        ctx.beginPath();
-        ctx.moveTo(b.pts[0].x, b.pts[0].y);
-        for (let i = 1; i < b.pts.length; i++) ctx.lineTo(b.pts[i].x, b.pts[i].y);
-        ctx.strokeStyle = `rgba(255,190,120,${0.45 * b.life})`;
-        ctx.lineWidth = 1;
-        ctx.shadowColor = "rgba(255,140,60,.7)";
-        ctx.shadowBlur = 8;
-        ctx.stroke();
-        b.life -= 0.018;
-      });
-      ctx.shadowBlur = 0;
-      bolts = bolts.filter((b) => b.life > 0);
 
       raf = requestAnimationFrame(draw);
     }

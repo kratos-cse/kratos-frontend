@@ -5,7 +5,11 @@ import { useEffect, useState } from "react";
 const TARGET = new Date("2026-03-20T09:00:00+05:30");
 
 function getParts() {
-  let d = Math.max(0, TARGET - new Date());
+  if (!TARGET || Number.isNaN(TARGET.getTime()) || TARGET <= new Date()) {
+    return { day: null, hour: null, min: null, sec: null };
+  }
+
+  let d = TARGET - new Date();
   const dd = Math.floor(d / 864e5);
   d -= dd * 864e5;
   const hh = Math.floor(d / 36e5);
@@ -18,12 +22,11 @@ function getParts() {
     hour: String(hh).padStart(2, "0"),
     min: String(mm).padStart(2, "0"),
     sec: String(ss).padStart(2, "0"),
-    calDay: TARGET.getDate(),
   };
 }
 
 export default function Countdown() {
-  const [parts, setParts] = useState({ day: "00", hour: "00", min: "00", sec: "00", calDay: "—" });
+  const [parts, setParts] = useState({ day: null, hour: null, min: null, sec: null });
 
   useEffect(() => {
     setParts(getParts());
@@ -32,28 +35,22 @@ export default function Countdown() {
   }, []);
 
   return (
-    <div className="calendar-row">
-      <div className="cal-icon">
-        <div className="top" />
-        <div className="num" id="calDay">
-          {parts.calDay}
-        </div>
-      </div>
+    <div className="countdown-row">
       <div className="countdown">
         <div className="cd">
-          <b id="cdD">{parts.day}</b>
+          <b>{parts.day ?? "--"}</b>
           <small>Days</small>
         </div>
         <div className="cd">
-          <b id="cdH">{parts.hour}</b>
+          <b>{parts.hour ?? "--"}</b>
           <small>Hrs</small>
         </div>
         <div className="cd">
-          <b id="cdM">{parts.min}</b>
+          <b>{parts.min ?? "--"}</b>
           <small>Min</small>
         </div>
         <div className="cd">
-          <b id="cdS">{parts.sec}</b>
+          <b>{parts.sec ?? "--"}</b>
           <small>Sec</small>
         </div>
       </div>

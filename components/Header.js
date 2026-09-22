@@ -40,7 +40,7 @@ export default function Header({ showBrandIcon = false, onSignIn }) {
     <header>
       <div className="navwrap">
         <Link href="/" className="navbrand">
-          <img src="/assets/img/easwari-logo.webp" alt="Easwari Engineering College" />
+          <img src="/assets/img/easwari-logo.webp" alt="Easwari Engineering College" loading="lazy" />
           <span>KRATOS&apos;26</span>
         </Link>
         <button className="navtoggle" id="navToggle" aria-label="Menu" onClick={() => setNavOpen((v) => !v)}>
@@ -61,8 +61,8 @@ export default function Header({ showBrandIcon = false, onSignIn }) {
           ))}
         </nav>
         <div className="nav-right">
-          <img className="nav-org-logo" src="/assets/img/dept-logo.webp" alt="CSE Department" />
-          <img className="nav-org-logo nav-ace-logo" src="/assets/img/ace-logo.webp" alt="ACE" />
+          <img className="nav-org-logo" src="/assets/img/dept-logo.webp" alt="CSE Department" loading="lazy" />
+          <img className="nav-org-logo nav-ace-logo" src="/assets/img/ace-logo.webp" alt="ACE" loading="lazy" />
           <a href="/#registrations" id="signInBtn" className="nav-signin" onClick={handleSignIn}>
             <svg width="14" height="14" viewBox="0 0 24 24">
               <path

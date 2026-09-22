@@ -15,10 +15,11 @@ export default function FeedbackPage() {
     <div className="page-shell">
       <KratosNav />
       <main>
+        <img className="lion-watermark" src="/assets/img/lion.png" alt="" aria-hidden="true" />
         <section className="page-banner">
           <div className="container">
             <span className="eyebrow">Tell Us Where It Landed</span>
-            <h1>Feedback</h1>
+            <h1><span className="brand-red">FE</span><span className="brand-gold">E</span><span className="brand-red">DBACK</span></h1>
             <p>Whether you competed, judged, or just walked through — this shapes next year&apos;s symposium.</p>
           </div>
         </section>

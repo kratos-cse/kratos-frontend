@@ -92,9 +92,9 @@ export default function GoogleSignInButton({ onCredential, text = "signin_with",
 
   if (error) {
     return (
-      <p className="auth-config-error" role="alert">
-        {error}
-      </p>
+      <button type="button" className="google-fallback" disabled={disabled} title={error}>
+        Sign in with Google
+      </button>
     );
   }
 

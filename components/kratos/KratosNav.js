@@ -7,7 +7,11 @@ import { useAuth } from "@/context/AuthProvider";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
-  { href: "/events", label: "Events" },
+  { href: "/technical", label: "Technical" },
+  { href: "/spark", label: "Spark" },
+  { href: "/playground", label: "Playground" },
+  { href: "/online", label: "Online" },
+  { href: "https://unstop.com", label: "Hackathon ↗", external: true },
   { href: "/feedback", label: "Feedback" },
 ];
 
@@ -37,8 +41,12 @@ export default function KratosNav() {
     <header>
       <div className="navwrap">
         <Link href="/" className="navbrand">
-          <img src="/assets/img/easwari-logo.webp" alt="Easwari Engineering College" />
-          <span>KRATOS&apos;26</span>
+            <img src="/assets/img/easwari-logo.webp" alt="Easwari Engineering College" loading="lazy" />
+          <span className="brand-text">
+            <span className="brand-red">KRA</span>
+            <span className="brand-gold">T</span>
+            <span className="brand-red">OS&apos;26</span>
+          </span>
         </Link>
         <button
           className="navtoggle"
@@ -50,16 +58,28 @@ export default function KratosNav() {
           ☰
         </button>
         <nav className={`links${navOpen ? " open" : ""}`} id="navLinks">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href)) ? "active" : ""}
-              onClick={() => setNavOpen(false)}
-            >
-              {link.label}
-            </Link>
-          ))}
+          {NAV_LINKS.map((link) =>
+            link.external ? (
+              <a
+                key={link.href}
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setNavOpen(false)}
+              >
+                {link.label}
+              </a>
+            ) : (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href)) ? "active" : ""}
+                onClick={() => setNavOpen(false)}
+              >
+                {link.label}
+              </Link>
+            ),
+          )}
           {isAuthenticated
             ? AUTH_NAV_LINKS.map((link) => (
                 <Link
@@ -74,10 +94,16 @@ export default function KratosNav() {
             : null}
         </nav>
         <div className="nav-right">
-          <img className="nav-org-logo" src="/assets/img/dept-logo.webp" alt="CSE Department" />
-          <img className="nav-org-logo nav-ace-logo" src="/assets/img/ace-logo.webp" alt="ACE" />
+          <img className="nav-org-logo" src="/assets/img/dept-logo.webp" alt="CSE Department" loading="lazy" />
+          <img className="nav-org-logo nav-ace-logo" src="/assets/img/ace-logo.webp" alt="ACE" loading="lazy" />
           {!loading && !isAuthenticated && (
-            <Link href={`/login?next=${encodeURIComponent(pathname || "/")}`} className="nav-signin">
+            <Link href={`/signin?next=${encodeURIComponent(pathname || "/")}`} className="nav-signin">
+              <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true">
+                <path fill="#fff" d="M21.35 12.23c0-.72-.06-1.42-.18-2.09H12v3.96h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.14c1.84-1.69 2.91-4.18 2.91-7.26Z" />
+                <path fill="#fff" d="M12 21.67c2.63 0 4.84-.87 6.45-2.36l-3.14-2.45c-.87.58-1.98.92-3.31.92-2.54 0-4.69-1.72-5.46-4.03H3.3v2.53A9.74 9.74 0 0 0 12 21.67Z" />
+                <path fill="#fff" d="M6.54 13.75a5.86 5.86 0 0 1 0-3.5V7.72H3.3a9.74 9.74 0 0 0 0 8.56l3.24-2.53Z" />
+                <path fill="#fff" d="M12 6.22c1.43 0 2.71.49 3.72 1.46l2.79-2.79C16.84 3.3 14.63 2.33 12 2.33A9.74 9.74 0 0 0 3.3 7.72l3.24 2.53C7.31 7.94 9.46 6.22 12 6.22Z" />
+              </svg>
               Sign in
             </Link>
           )}
@@ -143,7 +169,7 @@ export default function KratosNav() {
                     Sign in with Google to register and manage events.
                   </p>
                   <Link
-                    href={`/login?next=${encodeURIComponent(pathname || "/")}`}
+                    href={`/signin?next=${encodeURIComponent(pathname || "/")}`}
                     className="dd-link"
                     role="menuitem"
                     onClick={() => setProfileOpen(false)}

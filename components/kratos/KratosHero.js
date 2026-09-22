@@ -13,24 +13,19 @@ export default function KratosHero() {
       <div className="brand-stack">
         <div className="lion-wrap" id="landing-lion">
           <div className="lion-glow" />
-          <img src="/assets/img/lion.png" alt="ACE lion mark" />
+          <img src="/assets/img/lion.png" alt="ACE lion mark" loading="lazy" />
         </div>
         <img
           className="wordmark-img"
           id="landing-wordmark"
           src="/assets/img/kratos-wordmark.webp"
           alt="Kratos'26"
+          loading="lazy"
         />
       </div>
-      <p className="hero-tagline">
-        The ACE National Symposium — enter the timeline, choose your branch, reach the nexus.
-      </p>
       <Countdown />
       <div className="hero-cta">
-        <a href="#timeline" className="btn btn-primary">
-          Enter Timeline
-        </a>
-        <Link href="/events" className="btn btn-ghost">
+        <Link href="/technical" className="btn btn-glass">
           Explore Events
         </Link>
       </div>

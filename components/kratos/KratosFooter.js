@@ -7,9 +7,9 @@ export default function KratosFooter({ categories = [] }) {
         <div className="foot-grid">
           <div className="foot-brand">
             <div className="foot-logos">
-              <img src="/assets/img/dept-logo.webp" alt="Dept of CSE" />
-              <img className="foot-wordmark" src="/assets/img/kratos-wordmark.webp" alt="Kratos'26" />
-              <img className="foot-ace" src="/assets/img/ace-logo.webp" alt="ACE" />
+              <img src="/assets/img/dept-logo.webp" alt="Dept of CSE" loading="lazy" />
+              <img className="foot-wordmark" src="/assets/img/kratos-wordmark.webp" alt="Kratos'26" loading="lazy" />
+              <img className="foot-ace" src="/assets/img/ace-logo.webp" alt="ACE" loading="lazy" />
             </div>
             <p className="foot-tag">ACE National Symposium</p>
           </div>
@@ -29,12 +29,10 @@ export default function KratosFooter({ categories = [] }) {
             <h4>Explore</h4>
             <nav className="foot-nav">
               <Link href="/">Home</Link>
-              <Link href="/events">Events</Link>
-              {categories.slice(0, 6).map((c) => (
-                <Link key={c.slug} href={`/categories/${c.slug}`}>
-                  {c.label}
-                </Link>
-              ))}
+              <Link href="/technical">Technical</Link>
+              <Link href="/spark">Spark</Link>
+              <Link href="/playground">Playground</Link>
+              <Link href="/online">Online</Link>
               <Link href="/feedback">Feedback</Link>
               <Link href="/dashboard">Dashboard</Link>
             </nav>

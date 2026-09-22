@@ -7,9 +7,9 @@ export default function Footer() {
         <div className="foot-grid">
           <div className="foot-brand">
             <div className="foot-logos">
-              <img src="/assets/img/dept-logo.webp" alt="Dept of CSE" />
-              <img className="foot-wordmark" src="/assets/img/kratos-wordmark.webp" alt="Kratos'26" />
-              <img className="foot-ace" src="/assets/img/ace-logo.webp" alt="ACE" />
+              <img src="/assets/img/dept-logo.webp" alt="Dept of CSE" loading="lazy" />
+              <img className="foot-wordmark" src="/assets/img/kratos-wordmark.webp" alt="Kratos'26" loading="lazy" />
+              <img className="foot-ace" src="/assets/img/ace-logo.webp" alt="ACE" loading="lazy" />
             </div>
             <p className="foot-tag">ACE National Symposium</p>
           </div>
