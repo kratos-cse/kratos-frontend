@@ -1,10 +1,17 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect } from "react";
 import { useModal } from "@/context/ModalContext";
+import StatusBanner from "@/components/kratos/ui/StatusBanner";
+import useUserRegistrations from "@/hooks/useUserRegistrations";
+import { useAuth } from "@/context/AuthProvider";
 
 export default function EventModal() {
   const { event, closeModal, regMode, setRegMode } = useModal();
+  const { isAuthenticated } = useAuth();
+  const { getStatus } = useUserRegistrations();
+  const registrationStatus = event ? getStatus(event.id) : null;
 
   useEffect(() => {
     function onKeyDown(e) {
@@ -68,6 +75,39 @@ export default function EventModal() {
                 <p className="form-note">Roster populated by backend.</p>
               </div>
             )}
+            {registrationStatus === "confirmed" && (
+              <>
+                <StatusBanner tone="ok" title="Registered">
+                  You are already registered for this event. Check your dashboard for details.
+                </StatusBanner>
+                <Link href="/dashboard" className="btn btn-ghost">
+                  View My Registrations
+                </Link>
+              </>
+            )}
+            {registrationStatus === "failed" && (
+              <>
+                <StatusBanner tone="err" title="Payment Failed">
+                  Your previous payment was not successful. Please try again.
+                </StatusBanner>
+                <button type="button" className="btn btn-primary">
+                  Retry Payment
+                </button>
+              </>
+            )}
+            {registrationStatus === "pending" && (
+              <>
+                <StatusBanner tone="warn" title="Payment Pending">
+                  Your payment is being processed. If not confirmed within 15 minutes, you can retry.
+                </StatusBanner>
+                <button type="button" className="btn btn-ghost">
+                  Retry Payment
+                </button>
+              </>
+            )}
+            {!registrationStatus && (
+              <>
+                {!isAuthenticated && <p className="form-note">Sign in to register.</p>}
             <div className="reg-toggle">
               <button
                 type="button"
@@ -99,6 +139,8 @@ export default function EventModal() {
                 Register & Pay
               </button>
             </div>
+              </>
+            )}
           </>
         )}
       </div>

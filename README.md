@@ -1,4 +1,5 @@
 # Kratos'26 — Next.js Frontend.
+
 Next.js 14 (App Router) version of the Kratos'26 ACE National Symposium site.
 
 ## Run

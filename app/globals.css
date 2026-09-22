@@ -573,11 +573,11 @@ footer h4::after{content:'';position:absolute;left:0;bottom:0;width:34px;height:
 }
 
 /* ── participant journey: status, actions, QR, stepper ── */
-.status-banner{padding:14px 16px;border:1px solid var(--line);border-radius:4px;margin:0 0 18px;line-height:1.55;font-size:.95rem;}
-.status-banner strong{display:block;margin-bottom:4px;font-family:'Cinzel Decorative','Cinzel',serif;letter-spacing:.06em;text-transform:uppercase;font-size:.78rem;}
+.status-banner{padding:18px 20px;border:1px solid var(--line);border-radius:8px;margin:0 0 18px;line-height:1.55;font-size:.95rem;}
+.status-banner strong{display:block;margin-bottom:6px;font-family:'Oswald',sans-serif;letter-spacing:.06em;text-transform:uppercase;font-size:.82rem;}
 .status-banner.ok{border-color:rgba(232,178,60,.45);background:rgba(232,178,60,.08);color:var(--gold-bright);}
-.status-banner.warn{border-color:rgba(255,90,20,.4);background:rgba(255,90,20,.08);color:#ffc4a0;}
-.status-banner.err{border-color:rgba(255,143,122,.45);background:rgba(255,90,20,.1);color:#ff8f7a;}
+.status-banner.warn{border-color:rgba(255,160,60,.4);background:rgba(255,160,60,.08);color:#ffc4a0;}
+.status-banner.err{border-color:rgba(255,90,20,.45);background:rgba(255,90,20,.1);color:#ff8f7a;}
 .status-banner.info{border-color:var(--line);background:var(--surface-2);color:var(--ash);}
 .status-pill.pending{color:#ffc4a0;border-color:rgba(255,90,20,.4);background:rgba(255,90,20,.08);}
 .status-pill.confirmed{color:var(--gold-bright);border-color:rgba(232,178,60,.45);background:rgba(232,178,60,.08);}
