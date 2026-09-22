@@ -9,14 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@react-three/drei": "^9.122.0",
-    "@react-three/fiber": "^8.18.0",
-    "motion": "^13.4.0",
     "next": "14.2.35",
-    "qrcode.react": "^4.2.0",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "three": "^0.186.0"
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "eslint": "^8.57.1",
