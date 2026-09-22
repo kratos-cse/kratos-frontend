@@ -1,5 +1,6 @@
 # KRATOS'26 Frontend
 
+
 Participant frontend scaffold. UI removed for redesign; backend connection kept.
 
 ## Kept
