@@ -1,0 +1,60 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.default {
+  background: var(--surface-2);
+  color: var(--text-secondary);
+}
+
+.brand {
+  background: rgba(198, 40, 40, 0.16);
+  border-color: rgba(198, 40, 40, 0.35);
+  color: #ff8a80;
+}
+
+.gold {
+  background: rgba(228, 184, 74, 0.14);
+  border-color: rgba(228, 184, 74, 0.35);
+  color: var(--accent-gold);
+}
+
+.ok {
+  background: var(--ok-bg);
+  border-color: rgba(52, 211, 153, 0.35);
+  color: var(--ok);
+}
+
+.warn {
+  background: var(--warn-bg);
+  border-color: rgba(251, 191, 36, 0.35);
+  color: var(--warn);
+}
+
+.err {
+  background: var(--err-bg);
+  border-color: rgba(248, 113, 113, 0.35);
+  color: var(--err);
+}
+
+.info {
+  background: var(--info-bg);
+  border-color: rgba(94, 184, 232, 0.35);
+  color: var(--info);
+}
+
+.muted {
+  background: transparent;
+  color: var(--text-muted);
+}

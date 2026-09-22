@@ -1,0 +1,31 @@
+.wrap {
+  display: grid;
+  place-items: center;
+  min-height: min(70vh, 560px);
+  padding-block: var(--space-6);
+}
+
+.card {
+  width: min(100%, 420px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  align-items: flex-start;
+}
+
+.logo {
+  width: auto;
+  height: 40px;
+  object-fit: contain;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+}
+
+.lead {
+  margin: 0;
+  color: var(--text-secondary);
+}

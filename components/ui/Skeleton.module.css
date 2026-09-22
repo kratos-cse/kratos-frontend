@@ -1,0 +1,106 @@
+.skeleton {
+  display: block;
+  background: linear-gradient(90deg, var(--surface-2) 0%, var(--surface-3) 50%, var(--surface-2) 100%);
+  background-size: 200% 100%;
+  border-radius: var(--radius-sm);
+  animation: shimmer 1.2s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+    background: var(--surface-2);
+  }
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.title {
+  height: 2.25rem;
+  width: min(16rem, 70%);
+}
+
+.lead {
+  height: 1rem;
+  width: min(28rem, 90%);
+}
+
+.grid {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 720px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.chip {
+  height: 1.25rem;
+  width: 5rem;
+}
+
+.cardTitle {
+  height: 1.5rem;
+  width: 70%;
+}
+
+.line {
+  height: 0.85rem;
+  width: 100%;
+}
+
+.lineShort {
+  height: 0.85rem;
+  width: 55%;
+}
+
+.cta {
+  height: 2.5rem;
+  width: 8rem;
+  margin-top: var(--space-2);
+  border-radius: var(--radius);
+}
+
+.members {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.member {
+  height: 2.5rem;
+  width: 100%;
+  border-radius: var(--radius);
+}

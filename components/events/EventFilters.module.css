@@ -1,0 +1,13 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.search {
+  max-width: 28rem;
+}
+
+.search :global(label span:first-child) {
+  /* keep accessible label but visually quieter */
+}

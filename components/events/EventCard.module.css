@@ -1,0 +1,74 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  height: 100%;
+  min-height: 100%;
+}
+
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  justify-content: space-between;
+}
+
+.titleLink {
+  color: inherit;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.tagline {
+  margin: 0;
+  color: var(--accent-gold);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.desc {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.meta {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.meta dt {
+  margin: 0;
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.meta dd {
+  margin: 0.15rem 0 0;
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+.actions {
+  margin-top: auto;
+  padding-top: var(--space-2);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
