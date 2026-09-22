@@ -3,6 +3,7 @@
 
 Participant frontend scaffold. UI removed for redesign; backend connection kept.
 
+
 ## Kept
 
 - `lib/api/*` — auth, events, payments, profile, registrations, teams + shared client
