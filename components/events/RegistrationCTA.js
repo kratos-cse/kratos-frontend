@@ -3,12 +3,13 @@
 import { useAuth } from "@/context/AuthProvider";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import { deriveEventUiState } from "@/lib/events/utils";
+import { formatFee } from "@/lib/events/utils";
+import { deriveEventUiState } from "@/lib/events/registrationUiState";
 import styles from "./RegistrationCTA.module.css";
 
 export function RegistrationCTA({ event, registration, sticky = false }) {
-  const { isAuthenticated, loading } = useAuth();
-  const ui = deriveEventUiState(event, registration);
+  const { isAuthenticated, loading, profile } = useAuth();
+  const ui = deriveEventUiState(event, registration, { profileId: profile?.id });
   const loginNext = `/register/${event.id}`;
 
   let primary = null;
@@ -43,7 +44,7 @@ export function RegistrationCTA({ event, registration, sticky = false }) {
     } else {
       primary = (
         <Button href={`/register/${event.id}`} size="lg">
-          Register
+          Register · {formatFee(event.fee)}
         </Button>
       );
     }
@@ -57,12 +58,18 @@ export function RegistrationCTA({ event, registration, sticky = false }) {
   }
 
   return (
-    <div className={[styles.wrap, sticky ? styles.sticky : ""].filter(Boolean).join(" ")}>
-      <div className={styles.status}>
-        <Badge tone={ui.tone || "default"}>{ui.label}</Badge>
+    <aside className={[styles.wrap, sticky ? styles.sticky : ""].filter(Boolean).join(" ")}>
+      <div className={styles.summary}>
+        <div className={styles.status}>
+          <Badge tone={ui.tone || "default"}>{ui.label}</Badge>
+        </div>
+        <p className={styles.feeLine}>
+          <span className={styles.feeLabel}>Fee</span>
+          <strong className={styles.feeValue}>{formatFee(event?.fee)}</strong>
+        </p>
       </div>
       <div className={styles.actions}>{primary}</div>
       {note ? <p className={styles.note}>{note}</p> : null}
-    </div>
+    </aside>
   );
 }

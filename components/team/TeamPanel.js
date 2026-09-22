@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/context/AuthProvider";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -24,41 +24,89 @@ function memberTone(status) {
   return "default";
 }
 
-export function TeamPanel({ registration, event, onUpdated }) {
+function displayName(member, profileId) {
+  if (String(member.profile_id) === String(profileId)) return "YOU";
+  if (member.full_name?.trim()) return member.full_name.trim();
+  return "Member";
+}
+
+/**
+ * Authoritative team UI — loads GET /teams/{id} (includes full_name).
+ * Registration.team nest lacks full_name; do not rely on it for the roster.
+ */
+export function TeamPanel({ teamId, event, onChanged }) {
   const { profile } = useAuth();
-  const team = registration?.team;
+  const [team, setTeam] = useState(null);
+  const [loading, setLoading] = useState(Boolean(teamId));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   const [inviteCode, setInviteCode] = useState(null);
   const [loadingInvite, setLoadingInvite] = useState(false);
 
-  const members = useMemo(
-    () => (team?.members || []).filter((m) => !["LEFT", "REMOVED"].includes(String(m.status).toUpperCase())),
-    [team]
-  );
+  const refresh = useCallback(async ({ notify = false } = {}) => {
+    if (!teamId) {
+      setTeam(null);
+      setLoading(false);
+      return null;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const fresh = await getTeam(teamId);
+      setTeam(fresh);
+      if (notify) onChanged?.(fresh);
+      return fresh;
+    } catch (err) {
+      setError(toUserMessage(err));
+      setTeam(null);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, [teamId, onChanged]);
+
+  useEffect(() => {
+    refresh({ notify: false });
+  }, [teamId]); // eslint-disable-line react-hooks/exhaustive-deps -- load once per teamId
+
+  const members = useMemo(() => {
+    const list = Array.isArray(team?.members) ? team.members : [];
+    return list
+      .filter((m) => !["LEFT", "REMOVED"].includes(String(m.status).toUpperCase()))
+      .slice()
+      .sort((a, b) => {
+        const aLead = String(a.role).toUpperCase() === "LEADER" ? 0 : 1;
+        const bLead = String(b.role).toUpperCase() === "LEADER" ? 0 : 1;
+        if (aLead !== bLead) return aLead - bLead;
+        return String(a.joined_at || "").localeCompare(String(b.joined_at || ""));
+      });
+  }, [team]);
 
   const myMember = members.find((m) => String(m.profile_id) === String(profile?.id));
-  const isLeader = String(team?.leader_profile_id) === String(profile?.id) || String(myMember?.role).toUpperCase() === "LEADER";
+  const isLeader =
+    String(team?.leader_profile_id) === String(profile?.id) ||
+    String(myMember?.role).toUpperCase() === "LEADER";
   const teamStatus = String(team?.status || "").toUpperCase();
-  const maxSize = event?.team_max_size;
-  const minSize = event?.team_min_size;
-  const openSlots =
-    typeof maxSize === "number" ? Math.max(0, maxSize - members.length) : null;
 
-  if (!team) return null;
-
-  async function refreshTeam() {
-    const fresh = await getTeam(team.id);
-    onUpdated?.(fresh);
-    return fresh;
-  }
+  const maxSize =
+    typeof team?.team_max_size === "number"
+      ? team.team_max_size
+      : typeof event?.team_max_size === "number"
+        ? event.team_max_size
+        : null;
+  const minSize = typeof event?.team_min_size === "number" ? event.team_min_size : null;
+  const activeCount =
+    typeof team?.active_member_count === "number" ? team.active_member_count : members.length;
+  const openSlots = typeof maxSize === "number" ? Math.max(0, maxSize - activeCount) : null;
 
   async function onCreateInvite() {
+    if (!team?.id) return;
     setLoadingInvite(true);
     setError(null);
     try {
       const inv = await createInvitation(team.id);
       setInviteCode(inv.code);
+      await refresh({ notify: true });
     } catch (err) {
       setError(toUserMessage(err));
     } finally {
@@ -67,12 +115,12 @@ export function TeamPanel({ registration, event, onUpdated }) {
   }
 
   async function onLeave() {
-    if (!myMember) return;
+    if (!team?.id || !myMember) return;
     setBusy(true);
     setError(null);
     try {
       await leaveTeam(team.id, myMember.id);
-      await refreshTeam();
+      await refresh({ notify: true });
     } catch (err) {
       setError(toUserMessage(err));
     } finally {
@@ -81,16 +129,31 @@ export function TeamPanel({ registration, event, onUpdated }) {
   }
 
   async function onRemove(memberId) {
+    if (!team?.id) return;
     setBusy(true);
     setError(null);
     try {
       await removeMember(team.id, memberId);
-      await refreshTeam();
+      await refresh({ notify: true });
     } catch (err) {
       setError(toUserMessage(err));
     } finally {
       setBusy(false);
     }
+  }
+
+  if (!teamId) return null;
+  if (loading && !team) return <TeamSkeleton />;
+
+  if (!team) {
+    return (
+      <Card className={styles.wrap}>
+        <StatusBanner tone="err">{error || "Couldn’t load team."}</StatusBanner>
+        <Button type="button" variant="secondary" onClick={() => refresh({ notify: false })}>
+          Retry
+        </Button>
+      </Card>
+    );
   }
 
   const inviteUrl =
@@ -106,14 +169,27 @@ export function TeamPanel({ registration, event, onUpdated }) {
         <div>
           <h2 className={styles.title}>{team.name}</h2>
           <p className="meta">
-            {members.length}
+            {activeCount}
             {maxSize != null ? ` / ${maxSize}` : ""} members
             {minSize != null ? ` · min ${minSize}` : ""}
           </p>
         </div>
-        <Badge tone={teamStatus === "PAID" || teamStatus === "COMPLETE" ? "ok" : teamStatus === "CANCELLED" ? "err" : "warn"}>
-          {teamStatus || "TEAM"}
-        </Badge>
+        <div className={styles.headActions}>
+          <Badge
+            tone={
+              teamStatus === "PAID" || teamStatus === "COMPLETE"
+                ? "ok"
+                : teamStatus === "CANCELLED"
+                  ? "err"
+                  : "warn"
+            }
+          >
+            {teamStatus || "TEAM"}
+          </Badge>
+          <Button type="button" size="sm" variant="ghost" onClick={() => refresh({ notify: false })} disabled={loading}>
+            Refresh
+          </Button>
+        </div>
       </div>
 
       {error ? <StatusBanner tone="err">{error}</StatusBanner> : null}
@@ -124,13 +200,11 @@ export function TeamPanel({ registration, event, onUpdated }) {
           const role = String(m.role || "MEMBER").toUpperCase();
           return (
             <li key={m.id} className={styles.member}>
-              <div>
-                <strong>
-                  {you ? "YOU" : m.full_name || "Member"} — {role}
+              <div className={styles.memberInfo}>
+                <strong className={styles.memberName}>
+                  {displayName(m, profile?.id)} — {role}
                 </strong>
-                <div>
-                  <Badge tone={memberTone(m.status)}>{String(m.status || "").replace(/_/g, " ")}</Badge>
-                </div>
+                <Badge tone={memberTone(m.status)}>{String(m.status || "").replace(/_/g, " ")}</Badge>
               </div>
               {isLeader && !you && role !== "LEADER" ? (
                 <Button size="sm" variant="danger" disabled={busy} onClick={() => onRemove(m.id)}>

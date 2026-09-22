@@ -22,7 +22,7 @@ export function EventFilters({
   ];
 
   return (
-    <div className={styles.wrap}>
+    <div className={styles.toolbar}>
       <Tabs
         ariaLabel="Event categories"
         items={items}
@@ -34,7 +34,7 @@ export function EventFilters({
           id="event-search"
           label="Search events"
           type="search"
-          placeholder="Search by name or tagline"
+          placeholder="Name, tagline, or keyword"
           value={query}
           onChange={(e) => onQueryChange?.(e.target.value)}
           autoComplete="off"

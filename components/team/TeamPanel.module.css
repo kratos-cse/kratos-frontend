@@ -1,14 +1,15 @@
-.wrap {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
 .head {
   display: flex;
   justify-content: space-between;
   gap: var(--space-3);
   align-items: flex-start;
+}
+
+.headActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .title {
@@ -36,6 +37,19 @@
   border-radius: var(--radius);
   border: 1px solid var(--border);
   background: var(--bg-elevated);
+}
+
+.memberInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.memberName {
+  font-size: var(--text-sm);
+  letter-spacing: 0.02em;
 }
 
 .openSlot {
@@ -67,4 +81,10 @@
   font-size: var(--text-xs);
   word-break: break-all;
   color: var(--accent-cyan);
+}
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
 }

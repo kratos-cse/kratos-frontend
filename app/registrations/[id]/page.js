@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { PageShell } from "@/components/layout/PageShell";
 import { RequireAuth } from "@/components/layout/RequireAuth";
@@ -24,7 +24,7 @@ import {
   toUserMessage,
   canRetryPayment,
   isRegistrationConfirmed,
-  isPaymentProcessing,
+  needsPaymentSync,
 } from "@/lib/errors/userMessages";
 import { formatFee } from "@/lib/events/utils";
 import styles from "./detail.module.css";
@@ -37,8 +37,10 @@ function RegistrationDetailInner() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [syncing, setSyncing] = useState(false);
   const [whatsapp, setWhatsapp] = useState(null);
   const [waNote, setWaNote] = useState(null);
+  const autoSynced = useRef(false);
 
   const { event } = useEvent(registration?.event_id);
 
@@ -46,19 +48,46 @@ function RegistrationDetailInner() {
     setLoading(true);
     setError(null);
     try {
+      // Backend getRegistration also syncs CREATED Razorpay payments when possible.
       const data = await getRegistration(id);
       setRegistration(data);
+      return data;
     } catch (err) {
       setError(err);
       setRegistration(null);
+      return null;
     } finally {
       setLoading(false);
     }
   }, [id]);
 
   useEffect(() => {
+    autoSynced.current = false;
     refresh();
   }, [refresh]);
+
+  // Explicit reconcile: if payment still CREATED after load, call sync once.
+  useEffect(() => {
+    if (!registration || autoSynced.current) return;
+    if (!needsPaymentSync(registration)) return;
+
+    autoSynced.current = true;
+    let cancelled = false;
+    (async () => {
+      setSyncing(true);
+      try {
+        await syncPayment(registration.payment.id);
+        if (!cancelled) await refresh();
+      } catch {
+        /* keep CREATED UI; user can Sync or Continue payment */
+      } finally {
+        if (!cancelled) setSyncing(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [registration, refresh]);
 
   useEffect(() => {
     let cancelled = false;
@@ -97,6 +126,17 @@ function RegistrationDetailInner() {
     setBusy(true);
     setError(null);
     try {
+      if (needsPaymentSync(registration)) {
+        try {
+          await syncPayment(registration.payment.id);
+          const after = await getRegistration(id);
+          setRegistration(after);
+          if (isRegistrationConfirmed(after)) return;
+        } catch {
+          /* proceed to create-order / checkout */
+        }
+      }
+
       const order = await createOrder({
         eventId: registration.event_id,
         paymentType: registration.team ? "TEAM_REGISTRATION" : "SOLO_REGISTRATION",
@@ -123,7 +163,7 @@ function RegistrationDetailInner() {
             try {
               await syncPayment(order.paymentId);
             } catch {
-              /* ok */
+              /* verify already applied */
             }
           }
           await refresh();
@@ -132,6 +172,8 @@ function RegistrationDetailInner() {
     } catch (err) {
       if (!String(err?.message || "").toLowerCase().includes("cancelled")) {
         setError(err);
+      } else {
+        await refresh();
       }
     } finally {
       setBusy(false);
@@ -141,6 +183,7 @@ function RegistrationDetailInner() {
   async function onSync() {
     if (!registration?.payment?.id) return;
     setBusy(true);
+    setError(null);
     try {
       await syncPayment(registration.payment.id);
       await refresh();
@@ -179,7 +222,7 @@ function RegistrationDetailInner() {
     }
   }
 
-  if (loading) return <PageSkeleton />;
+  if (loading && !registration) return <PageSkeleton />;
   if (error && !registration) {
     return (
       <ErrorState
@@ -195,6 +238,7 @@ function RegistrationDetailInner() {
   const status = String(registration.status || "").toUpperCase();
   const pay = String(registration.payment?.status || "").toUpperCase();
   const confirmed = isRegistrationConfirmed(registration);
+  const teamId = registration.team?.id;
 
   return (
     <div className={styles.wrap}>
@@ -212,17 +256,21 @@ function RegistrationDetailInner() {
       </header>
 
       {error ? <StatusBanner tone="err">{toUserMessage(error)}</StatusBanner> : null}
+      {syncing ? <StatusBanner tone="info">Checking payment status with the server…</StatusBanner> : null}
 
       {!confirmed && status === "PENDING" && Number(event?.fee) > 0 ? (
         <Card className="stack">
           <h2 className={styles.h2}>Payment required</h2>
-          <p className="muted">Complete payment to confirm. Backend status is authoritative.</p>
+          <p className="muted">
+            Status comes from the backend. If you already paid, use Sync — don’t pay twice until Sync says
+            it failed.
+          </p>
           <div className={styles.actions}>
             <Button loading={busy} disabled={!canRetryPayment(registration)} onClick={onPay}>
-              {canRetryPayment(registration) ? "Continue payment" : "Processing…"}
+              Continue payment
             </Button>
-            {isPaymentProcessing(registration) || registration.payment?.id ? (
-              <Button variant="secondary" loading={busy} onClick={onSync}>
+            {registration.payment?.id ? (
+              <Button variant="secondary" loading={busy || syncing} onClick={onSync}>
                 Sync payment status
               </Button>
             ) : null}
@@ -262,12 +310,17 @@ function RegistrationDetailInner() {
         </div>
       ) : null}
 
-      {registration.team ? (
+      {teamId ? (
         <TeamPanel
-          registration={registration}
+          teamId={teamId}
           event={event}
-          onUpdated={async () => {
-            await refresh();
+          onChanged={async () => {
+            try {
+              const data = await getRegistration(id);
+              setRegistration(data);
+            } catch {
+              /* team panel already shows its own errors */
+            }
           }}
         />
       ) : null}

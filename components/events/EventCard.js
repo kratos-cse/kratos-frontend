@@ -4,16 +4,14 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { SpotlightCard } from "@/components/effects/SpotlightCard";
+import { useAuth } from "@/context/AuthProvider";
 import { formatCategory } from "@/lib/events/categories";
 import { deriveEventUiState, formatFee, formatWhen, registrationModeLabel } from "@/lib/events/utils";
 import styles from "./EventCard.module.css";
 
-function toneFor(ui) {
-  return ui?.tone || "default";
-}
-
 export function EventCard({ event, registration }) {
-  const ui = deriveEventUiState(event, registration);
+  const { profile } = useAuth();
+  const ui = deriveEventUiState(event, registration, { profileId: profile?.id });
   const href = `/events/${event.id}`;
   const mode = registrationModeLabel(
     event.registration_mode,
@@ -53,7 +51,7 @@ export function EventCard({ event, registration }) {
     <SpotlightCard className={styles.card}>
       <div className={styles.top}>
         <Badge tone="brand">{formatCategory(event.category)}</Badge>
-        <Badge tone={toneFor(ui)}>{ui.label}</Badge>
+        <Badge tone={ui.tone || "default"}>{ui.label}</Badge>
       </div>
       <Link href={href} className={styles.titleLink}>
         <h3 className={styles.title}>{event.name}</h3>
@@ -71,7 +69,7 @@ export function EventCard({ event, registration }) {
         </div>
         <div>
           <dt>Fee</dt>
-          <dd>{formatFee(event.fee)}</dd>
+          <dd className={styles.fee}>{formatFee(event.fee)}</dd>
         </div>
         <div>
           <dt>Type</dt>
