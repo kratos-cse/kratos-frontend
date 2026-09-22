@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Component, Suspense, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import KratosNav from "@/components/kratos/KratosNav";
@@ -12,23 +12,71 @@ import EventExplorer from "@/components/kratos/EventExplorer";
 import SectionReveal from "@/components/kratos/SectionReveal";
 import { useEvents } from "@/hooks/useEvents";
 import { uniqueCategories, rankNexusEvents } from "@/lib/events/utils";
+import { useAuth } from "@/context/AuthProvider";
 
 const ScrollIntro = dynamic(() => import("@/components/intro/ScrollIntro"), {
   ssr: false,
 });
 
+class HomeErrorBoundary extends Component {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  render() {
+    return this.state.hasError ? <HomeLoading /> : this.props.children;
+  }
+}
+
+function HomeLoading() {
+  return (
+    <main>
+      <div className="container">
+        <p className="state-msg">Loading...</p>
+      </div>
+    </main>
+  );
+}
+
 export default function Home() {
   const [introActive, setIntroActive] = useState(true);
-  const { events, loading, error } = useEvents();
+  const { events: fetchedEvents, loading, error } = useEvents();
+  const { user, isAuthenticated } = useAuth();
+  const session = useMemo(() => (isAuthenticated ? { authenticated: true } : null), [isAuthenticated]);
+  const events = useMemo(() => fetchedEvents ?? [], [fetchedEvents]);
   const categories = useMemo(() => uniqueCategories(events), [events]);
   const nexus = useMemo(() => rankNexusEvents(events, 4), [events]);
 
   useEffect(() => {
     document.body.classList.add("intro-active");
+    console.log("Home page mounted");
+    document.body.classList.remove("intro-done");
+    return () => {
+      console.log("Home page unmounted");
+      document.body.classList.remove("intro-active");
+      document.body.classList.remove("intro-done");
+      document.documentElement.classList.remove("intro-doc-lock");
+      document.body.classList.remove("intro-doc-lock");
+      document.body.classList.remove("kratos-stage");
+    };
+  }, []);
+
+  useEffect(() => {
+    console.log("Home rendered", { session, user });
+  }, [session, user]);
+
+  useEffect(() => {
+    if (window.sessionStorage.getItem("kratos-intro-seen") === "1") {
+      setIntroActive(false);
+      document.body.classList.remove("intro-active");
+    }
   }, []);
 
   function handleIntroDone() {
     setIntroActive(false);
+    window.sessionStorage.setItem("kratos-intro-seen", "1");
     document.body.classList.remove("intro-active");
     document.body.classList.remove("kratos-stage");
     document.documentElement.classList.remove("intro-doc-lock");
@@ -38,10 +86,12 @@ export default function Home() {
 
   return (
     <>
-      <ScrollIntro onDone={handleIntroDone} />
+      {introActive && <ScrollIntro onDone={handleIntroDone} />}
       <div className="landing-shell" {...(introActive ? { inert: "" } : {})}>
         <KratosNav />
-        <main>
+        <HomeErrorBoundary>
+          <Suspense fallback={<HomeLoading />}>
+            <main>
           <KratosHero />
 
           <section id="discovery" className="discovery-sec">
@@ -106,22 +156,24 @@ export default function Home() {
               </SectionReveal>
             </div>
           </section>
-        </main>
-        <div className="stats-bar">
-          <div className="m">
-            <b>1</b>
-            <small>Day of Symposium</small>
-          </div>
-          <div className="m">
-            <b>{loading ? "—" : categories.length}</b>
-            <small>Timeline Branches</small>
-          </div>
-          <div className="m">
-            <b>{loading ? "—" : events.length}</b>
-            <small>Live Events</small>
-          </div>
-        </div>
-        <KratosFooter categories={categories} />
+            </main>
+            <div className="stats-bar">
+              <div className="m">
+                <b>1</b>
+                <small>Day of Symposium</small>
+              </div>
+              <div className="m">
+                <b>{loading ? "—" : categories.length}</b>
+                <small>Timeline Branches</small>
+              </div>
+              <div className="m">
+                <b>{loading ? "—" : events.length}</b>
+                <small>Live Events</small>
+              </div>
+            </div>
+            <KratosFooter categories={categories} />
+          </Suspense>
+        </HomeErrorBoundary>
       </div>
     </>
   );
