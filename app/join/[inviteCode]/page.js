@@ -10,7 +10,7 @@ import { ErrorState, StatusBanner } from "@/components/ui/ErrorState";
 import { PageSkeleton } from "@/components/ui/Skeleton";
 import { useAuth } from "@/context/AuthProvider";
 import { getInvitation, joinInvitation } from "@/lib/api/teams";
-import { isProfileComplete } from "@/lib/events/utils";
+import { formatRosterLabel, isProfileComplete } from "@/lib/events/utils";
 import { toUserMessage } from "@/lib/errors/userMessages";
 import styles from "./join.module.css";
 
@@ -92,6 +92,13 @@ function JoinInner() {
     );
   }
 
+  const rosterLabel = formatRosterLabel(
+    invite?.required_member_count,
+    invite?.substitute_count,
+    invite?.required_member_count,
+    invite?.team_max_size,
+  );
+
   return (
     <div className={styles.wrap}>
       <h1 className="page-title">Join team</h1>
@@ -111,8 +118,9 @@ function JoinInner() {
         ) : (
           <StatusBanner tone="info">
             Join works only when the team status is PAID or COMPLETE (leader must finish payment first).
+            {rosterLabel ? ` Roster: ${rosterLabel}.` : ""}
             {typeof invite?.active_member_count === "number"
-              ? ` Members: ${invite.active_member_count}/${invite.team_max_size}.`
+              ? ` Filled: ${invite.active_member_count}/${invite.team_max_size}.`
               : ""}
           </StatusBanner>
         )}

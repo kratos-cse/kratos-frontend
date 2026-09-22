@@ -86,7 +86,7 @@ export default function HomePage() {
       <Reveal delay={0.04}>
         <section className={styles.section}>
           <div className={styles.sectionHead}>
-            <h2 className="section-title">Featured events</h2>
+            <h2 className="section-title">Open now</h2>
             <Button href="/events" variant="ghost" size="sm">
               View all
             </Button>

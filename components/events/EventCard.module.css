@@ -7,109 +7,359 @@
   min-height: 100%;
   transition:
     border-color var(--duration-fast) var(--ease-out),
-    transform var(--duration-press) var(--ease-out);
+    transform var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
 }
 
-.card:active {
-  transform: scale(0.99);
+@media (hover: hover) and (pointer: fine) {
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--border-strong);
+  }
+
+  .card:hover .viewEvent {
+    color: var(--text);
+  }
 }
 
-.top {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  justify-content: space-between;
-  align-items: flex-start;
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: border-color var(--duration-fast) var(--ease-out);
+  }
+
+  .card:hover {
+    transform: none;
+  }
 }
 
-.titleLink {
-  color: inherit;
-}
-
-.titleLink:focus-visible {
-  outline-offset: 4px;
+.category {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 650;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
 }
 
 .title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(1.15rem, 1.5vw, 1.35rem);
+  font-size: clamp(1.25rem, 2vw, 1.5rem);
   font-weight: 700;
-  letter-spacing: -0.025em;
-  line-height: 1.25;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
 }
 
-@media (hover: hover) and (pointer: fine) {
-  .titleLink:hover .title {
-    color: #ff8a80;
-  }
+.titleLink {
+  color: inherit;
+  text-decoration: none;
+}
+
+.titleLink:hover {
+  color: var(--text);
+}
+
+.titleLink:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 3px;
+  border-radius: 2px;
 }
 
 .tagline {
   margin: 0;
-  color: var(--accent-gold);
-  font-size: var(--text-sm);
-  font-weight: 600;
-  line-height: 1.35;
-}
-
-.desc {
-  margin: 0;
   color: var(--text-secondary);
   font-size: var(--text-sm);
-  line-height: 1.5;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  line-height: 1.45;
+  font-weight: 500;
 }
 
-.meta {
+.schedule {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.when {
   margin: 0;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-3);
-  padding-top: var(--space-2);
-  border-top: 1px solid var(--border);
-}
-
-.meta dt {
-  margin: 0;
-  font-size: 0.68rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-muted);
-  font-weight: 600;
-}
-
-.meta dd {
-  margin: 0.2rem 0 0;
   font-size: var(--text-sm);
-  font-weight: 550;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--text);
-}
-
-.fee {
-  color: var(--accent-gold);
   font-variant-numeric: tabular-nums;
 }
 
-.actions {
+.venue {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: var(--space-1) 0;
+}
+
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.fee {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--accent-gold);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.format {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.2rem;
+  text-align: right;
+  min-width: 0;
+}
+
+.regMode,
+.roster {
+  font-size: 0.68rem;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+.roster {
+  color: var(--text-secondary);
+}
+
+.status {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.statusDot {
+  font-size: 0.55rem;
+  line-height: 1;
+}
+
+.status_ok {
+  color: var(--status-ok, #4ade80);
+}
+
+.status_warn {
+  color: var(--accent-gold);
+}
+
+.status_err {
+  color: var(--status-err, #f87171);
+}
+
+.status_muted,
+.status_default {
+  color: var(--text-muted);
+}
+
+.teamSummary {
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.teamKicker {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 650;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+}
+
+.teamName {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-base);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.teamCounts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-top: 0.25rem;
+}
+
+.teamCount {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.countLabel {
+  font-size: 0.62rem;
+  font-weight: 650;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+
+.countValue {
+  font-size: var(--text-sm);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+.teamMemberName {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.footer {
   margin-top: auto;
   padding-top: var(--space-3);
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
+  flex-direction: column;
+  gap: var(--space-3);
 }
 
-.actions :global(a),
-.actions :global(button) {
-  width: 100%;
-}
-
-@media (min-width: 420px) {
-  .actions :global(a),
-  .actions :global(button) {
-    width: auto;
+@media (min-width: 480px) {
+  .footer {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
   }
+}
+
+.viewEvent {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-decoration: none;
+  padding: 0.35rem 0;
+  min-height: 44px;
+  align-self: flex-start;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.viewEvent:hover {
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.viewEvent:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.primaryBtn {
+  width: 100%;
+  min-height: 44px;
+}
+
+@media (min-width: 480px) {
+  .primaryBtn {
+    width: auto;
+    min-width: 8.5rem;
+  }
+}
+
+/* Skeleton blocks — shared with EventCardSkeleton */
+.skelCategory {
+  height: 0.75rem;
+  width: 5.5rem;
+}
+
+.skelTitle {
+  height: 1.6rem;
+  width: 72%;
+}
+
+.skelTagline {
+  height: 0.9rem;
+  width: 88%;
+}
+
+.skelWhen {
+  height: 0.85rem;
+  width: 55%;
+}
+
+.skelVenue {
+  height: 0.85rem;
+  width: 40%;
+}
+
+.skelDivider {
+  height: 1px;
+  width: 100%;
+  background: var(--border);
+}
+
+.skelFacts {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.skelFee {
+  height: 1.25rem;
+  width: 3.5rem;
+}
+
+.skelFormat {
+  height: 0.85rem;
+  width: 7rem;
+}
+
+.skelStatus {
+  height: 0.85rem;
+  width: 9rem;
+}
+
+.skelFooter {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: auto;
+  padding-top: var(--space-3);
+}
+
+.skelView {
+  height: 1rem;
+  width: 5.5rem;
+}
+
+.skelBtn {
+  height: 2.5rem;
+  width: 6.5rem;
+  border-radius: var(--radius);
 }

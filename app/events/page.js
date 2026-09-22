@@ -85,7 +85,7 @@ function EventsExplorer() {
 
       <div style={{ marginTop: "var(--space-5)" }}>
         {error ? (
-          <ErrorState title="Couldn’t load events" description={errorMessage} onRetry={refresh} />
+          <ErrorState title="We couldn't load events." description={errorMessage} onRetry={refresh} />
         ) : (
           <EventGrid
             key={gridKey}

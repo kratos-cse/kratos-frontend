@@ -1,3 +1,4 @@
+import { EventCardSkeleton as EventCardSkeletonBlock } from "@/components/events/EventCardSkeleton";
 import styles from "./Skeleton.module.css";
 
 export function Skeleton({ className = "", style, ...rest }) {
@@ -20,15 +21,7 @@ export function PageSkeleton() {
 }
 
 export function EventCardSkeleton() {
-  return (
-    <div className={styles.card}>
-      <Skeleton className={styles.chip} />
-      <Skeleton className={styles.cardTitle} />
-      <Skeleton className={styles.line} />
-      <Skeleton className={styles.lineShort} />
-      <Skeleton className={styles.cta} />
-    </div>
-  );
+  return <EventCardSkeletonBlock />;
 }
 
 export function RegistrationSkeleton() {

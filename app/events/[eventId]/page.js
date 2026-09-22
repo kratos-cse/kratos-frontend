@@ -57,7 +57,9 @@ export default function EventDetailPage() {
     event.registration_mode,
     event.allow_individual,
     event.team_min_size,
-    event.team_max_size
+    event.team_max_size,
+    event.required_member_count,
+    event.substitute_count
   );
 
   return (

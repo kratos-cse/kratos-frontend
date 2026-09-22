@@ -5,9 +5,11 @@ import { useAuth } from "@/context/AuthProvider";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { Input } from "@/components/ui/Input";
 import { StatusBanner } from "@/components/ui/ErrorState";
 import { TeamSkeleton } from "@/components/ui/Skeleton";
 import {
+  addRosterMember,
   createInvitation,
   getTeam,
   leaveTeam,
@@ -25,14 +27,23 @@ function memberTone(status) {
 }
 
 function displayName(member, profileId) {
-  if (String(member.profile_id) === String(profileId)) return "YOU";
+  if (member.profile_id && String(member.profile_id) === String(profileId)) return "YOU";
   if (member.full_name?.trim()) return member.full_name.trim();
   return "Member";
 }
 
+function roleLabel(role) {
+  const r = String(role || "MEMBER").toUpperCase();
+  if (r === "LEADER") return "Leader";
+  if (r === "SUBSTITUTE") return "Substitute";
+  return "Member";
+}
+
+const EMPTY_FORM = { full_name: "", phone: "", contact_email: "", college_name: "", year_of_study: "" };
+
 /**
- * Authoritative team UI — loads GET /teams/{id} (includes full_name).
- * Registration.team nest lacks full_name; do not rely on it for the roster.
+ * Authoritative team UI — loads GET /teams/{id}.
+ * Shows mandatory vs substitute sections from backend roster fields.
  */
 export function TeamPanel({ teamId, event, onChanged }) {
   const { profile } = useAuth();
@@ -42,6 +53,8 @@ export function TeamPanel({ teamId, event, onChanged }) {
   const [error, setError] = useState(null);
   const [inviteCode, setInviteCode] = useState(null);
   const [loadingInvite, setLoadingInvite] = useState(false);
+  const [addRole, setAddRole] = useState(null); // MEMBER | SUBSTITUTE | null
+  const [form, setForm] = useState(EMPTY_FORM);
 
   const refresh = useCallback(async ({ notify = false } = {}) => {
     if (!teamId) {
@@ -75,29 +88,55 @@ export function TeamPanel({ teamId, event, onChanged }) {
       .filter((m) => !["LEFT", "REMOVED"].includes(String(m.status).toUpperCase()))
       .slice()
       .sort((a, b) => {
-        const aLead = String(a.role).toUpperCase() === "LEADER" ? 0 : 1;
-        const bLead = String(b.role).toUpperCase() === "LEADER" ? 0 : 1;
-        if (aLead !== bLead) return aLead - bLead;
+        const order = { LEADER: 0, MEMBER: 1, SUBSTITUTE: 2 };
+        const ar = order[String(a.role).toUpperCase()] ?? 1;
+        const br = order[String(b.role).toUpperCase()] ?? 1;
+        if (ar !== br) return ar - br;
         return String(a.joined_at || "").localeCompare(String(b.joined_at || ""));
       });
   }, [team]);
 
-  const myMember = members.find((m) => String(m.profile_id) === String(profile?.id));
+  const mandatory = members.filter((m) => {
+    const r = String(m.role).toUpperCase();
+    return r === "LEADER" || r === "MEMBER";
+  });
+  const substitutes = members.filter((m) => String(m.role).toUpperCase() === "SUBSTITUTE");
+
+  const myMember = members.find((m) => m.profile_id && String(m.profile_id) === String(profile?.id));
   const isLeader =
     String(team?.leader_profile_id) === String(profile?.id) ||
     String(myMember?.role).toUpperCase() === "LEADER";
   const teamStatus = String(team?.status || "").toUpperCase();
 
-  const maxSize =
-    typeof team?.team_max_size === "number"
-      ? team.team_max_size
-      : typeof event?.team_max_size === "number"
-        ? event.team_max_size
-        : null;
-  const minSize = typeof event?.team_min_size === "number" ? event.team_min_size : null;
-  const activeCount =
-    typeof team?.active_member_count === "number" ? team.active_member_count : members.length;
-  const openSlots = typeof maxSize === "number" ? Math.max(0, maxSize - activeCount) : null;
+  const required =
+    typeof team?.required_member_count === "number"
+      ? team.required_member_count
+      : typeof event?.required_member_count === "number"
+        ? event.required_member_count
+        : typeof event?.team_min_size === "number"
+          ? event.team_min_size
+          : null;
+  const maxSubs =
+    typeof team?.substitute_count === "number"
+      ? team.substitute_count
+      : typeof event?.substitute_count === "number"
+        ? event.substitute_count
+        : typeof event?.team_max_size === "number" && typeof event?.team_min_size === "number"
+          ? Math.max(0, event.team_max_size - event.team_min_size)
+          : 0;
+  const mandatoryFilled =
+    typeof team?.mandatory_filled === "number" ? team.mandatory_filled : mandatory.length;
+  const subsFilled =
+    typeof team?.substitutes_filled === "number" ? team.substitutes_filled : substitutes.length;
+  const mandatoryOpen =
+    typeof required === "number" ? Math.max(0, required - mandatoryFilled) : 0;
+  const subOpen = Math.max(0, maxSubs - subsFilled);
+
+  const memberMode = String(event?.member_registration_mode || "").toUpperCase();
+  const leaderCanEnter = memberMode === "LEADER_MANAGED";
+  const allowInvite = event?.allow_team_invite_flow !== false;
+  const canManageRoster =
+    isLeader && (teamStatus === "PAID" || teamStatus === "COMPLETE" || teamStatus === "FORMING");
 
   async function onCreateInvite() {
     if (!team?.id) return;
@@ -142,6 +181,30 @@ export function TeamPanel({ teamId, event, onChanged }) {
     }
   }
 
+  async function onAddRoster(e) {
+    e.preventDefault();
+    if (!team?.id || !addRole) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await addRosterMember(team.id, {
+        role: addRole,
+        full_name: form.full_name.trim(),
+        phone: form.phone.trim(),
+        contact_email: form.contact_email.trim() || undefined,
+        college_name: form.college_name.trim() || undefined,
+        year_of_study: form.year_of_study.trim() || undefined,
+      });
+      setForm(EMPTY_FORM);
+      setAddRole(null);
+      await refresh({ notify: true });
+    } catch (err) {
+      setError(toUserMessage(err));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   if (!teamId) return null;
   if (loading && !team) return <TeamSkeleton />;
 
@@ -163,15 +226,48 @@ export function TeamPanel({ teamId, event, onChanged }) {
         ? `/join/${inviteCode}`
         : null;
 
+  const rosterLine =
+    typeof required === "number"
+      ? maxSubs > 0
+        ? `${required} members + up to ${maxSubs} substitutes`
+        : `${required} members`
+      : null;
+
+  function renderMember(m) {
+    const you = m.profile_id && String(m.profile_id) === String(profile?.id);
+    const role = String(m.role || "MEMBER").toUpperCase();
+    const entry = String(m.entry_source || "").toUpperCase();
+    return (
+      <li key={m.id} className={styles.member}>
+        <div className={styles.memberInfo}>
+          <strong className={styles.memberName}>
+            {displayName(m, profile?.id)} — {roleLabel(role)}
+          </strong>
+          <div className={styles.metaRow}>
+            <Badge tone={memberTone(m.status)}>{String(m.status || "").replace(/_/g, " ")}</Badge>
+            {entry === "LEADER_ENTERED" ? <Badge tone="muted">Leader entered</Badge> : null}
+          </div>
+        </div>
+        {isLeader && !you && role !== "LEADER" ? (
+          <Button size="sm" variant="danger" disabled={busy} onClick={() => onRemove(m.id)}>
+            Remove
+          </Button>
+        ) : null}
+      </li>
+    );
+  }
+
   return (
     <Card className={styles.wrap}>
       <div className={styles.head}>
         <div>
           <h2 className={styles.title}>{team.name}</h2>
           <p className="meta">
-            {activeCount}
-            {maxSize != null ? ` / ${maxSize}` : ""} members
-            {minSize != null ? ` · min ${minSize}` : ""}
+            {rosterLine || `${members.length} on roster`}
+            {typeof required === "number"
+              ? ` · mandatory ${mandatoryFilled}/${required}`
+              : null}
+            {maxSubs > 0 ? ` · substitutes ${subsFilled}/${maxSubs}` : null}
           </p>
         </div>
         <div className={styles.headActions}>
@@ -194,44 +290,114 @@ export function TeamPanel({ teamId, event, onChanged }) {
 
       {error ? <StatusBanner tone="err">{error}</StatusBanner> : null}
 
-      <ul className={styles.list}>
-        {members.map((m) => {
-          const you = String(m.profile_id) === String(profile?.id);
-          const role = String(m.role || "MEMBER").toUpperCase();
-          return (
-            <li key={m.id} className={styles.member}>
-              <div className={styles.memberInfo}>
-                <strong className={styles.memberName}>
-                  {displayName(m, profile?.id)} — {role}
-                </strong>
-                <Badge tone={memberTone(m.status)}>{String(m.status || "").replace(/_/g, " ")}</Badge>
-              </div>
-              {isLeader && !you && role !== "LEADER" ? (
-                <Button size="sm" variant="danger" disabled={busy} onClick={() => onRemove(m.id)}>
-                  Remove
-                </Button>
-              ) : null}
+      <section className={styles.section}>
+        <h3 className={styles.sectionTitle}>Mandatory members</h3>
+        <ul className={styles.list}>
+          {mandatory.map(renderMember)}
+          {Array.from({ length: mandatoryOpen }).map((_, i) => (
+            <li key={`m-open-${i}`} className={styles.openSlot}>
+              OPEN MANDATORY SLOT
             </li>
-          );
-        })}
-        {openSlots != null
-          ? Array.from({ length: openSlots }).map((_, i) => (
-              <li key={`open-${i}`} className={styles.openSlot}>
-                OPEN SLOT
+          ))}
+        </ul>
+      </section>
+
+      {maxSubs > 0 ? (
+        <section className={styles.section}>
+          <h3 className={styles.sectionTitle}>Substitutes</h3>
+          <ul className={styles.list}>
+            {substitutes.map(renderMember)}
+            {Array.from({ length: subOpen }).map((_, i) => (
+              <li key={`s-open-${i}`} className={`${styles.openSlot} ${styles.subSlot}`}>
+                OPEN SUBSTITUTE SLOT
               </li>
-            ))
-          : null}
-      </ul>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       <div className={styles.actions}>
-        {isLeader && (teamStatus === "PAID" || teamStatus === "COMPLETE") ? (
+        {isLeader && teamStatus === "FORMING" && allowInvite ? (
+          <StatusBanner tone="info">
+            Finish payment before sharing invite links. You can still add members manually below.
+          </StatusBanner>
+        ) : null}
+
+        {canManageRoster && leaderCanEnter ? (
+          <div className={styles.addActions}>
+            {mandatoryOpen > 0 ? (
+              <Button
+                type="button"
+                variant={addRole === "MEMBER" ? "primary" : "secondary"}
+                size="sm"
+                onClick={() => setAddRole(addRole === "MEMBER" ? null : "MEMBER")}
+              >
+                Add member
+              </Button>
+            ) : null}
+            {subOpen > 0 ? (
+              <Button
+                type="button"
+                variant={addRole === "SUBSTITUTE" ? "primary" : "secondary"}
+                size="sm"
+                onClick={() => setAddRole(addRole === "SUBSTITUTE" ? null : "SUBSTITUTE")}
+              >
+                Add substitute
+              </Button>
+            ) : null}
+          </div>
+        ) : null}
+
+        {addRole && leaderCanEnter ? (
+          <form className={styles.addForm} onSubmit={onAddRoster}>
+            <p className="meta">
+              Adding {addRole === "SUBSTITUTE" ? "substitute" : "mandatory member"} (no account required)
+            </p>
+            <Input
+              label="Full name"
+              required
+              value={form.full_name}
+              onChange={(e) => setForm((f) => ({ ...f, full_name: e.target.value }))}
+            />
+            <Input
+              label="Phone"
+              required
+              value={form.phone}
+              onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+            />
+            <Input
+              label="Email"
+              type="email"
+              value={form.contact_email}
+              onChange={(e) => setForm((f) => ({ ...f, contact_email: e.target.value }))}
+            />
+            <Input
+              label="College"
+              value={form.college_name}
+              onChange={(e) => setForm((f) => ({ ...f, college_name: e.target.value }))}
+            />
+            <Input
+              label="Year of study"
+              value={form.year_of_study}
+              onChange={(e) => setForm((f) => ({ ...f, year_of_study: e.target.value }))}
+            />
+            <div className={styles.addFormActions}>
+              <Button type="button" variant="ghost" size="sm" onClick={() => setAddRole(null)}>
+                Cancel
+              </Button>
+              <Button type="submit" size="sm" loading={busy}>
+                Save to roster
+              </Button>
+            </div>
+          </form>
+        ) : null}
+
+        {isLeader && allowInvite && (teamStatus === "PAID" || teamStatus === "COMPLETE") ? (
           <Button type="button" loading={loadingInvite} onClick={onCreateInvite}>
             {inviteCode ? "Refresh invite" : "Create invite"}
           </Button>
         ) : null}
-        {isLeader && teamStatus === "FORMING" ? (
-          <StatusBanner tone="info">Finish payment before inviting members.</StatusBanner>
-        ) : null}
+
         {!isLeader && myMember ? (
           <Button type="button" variant="ghost" loading={busy} onClick={onLeave}>
             Leave team

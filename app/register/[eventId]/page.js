@@ -255,8 +255,18 @@ function RegisterWizard() {
                 value={teamName}
                 onChange={(e) => setTeamName(e.target.value)}
                 hint={
-                  event.team_min_size != null
-                    ? `Team size ${event.team_min_size}–${event.team_max_size ?? "∞"} (managed after payment)`
+                  event.required_member_count != null || event.team_min_size != null
+                    ? (() => {
+                        const req = Number(event.required_member_count ?? event.team_min_size ?? 1);
+                        const subs = Number(
+                          event.substitute_count ??
+                            Math.max(0, Number(event.team_max_size ?? req) - req),
+                        );
+                        if (subs > 0) {
+                          return `Roster: ${req} members + up to ${subs} substitutes (managed after payment)`;
+                        }
+                        return `Team of ${req} (managed after payment)`;
+                      })()
                     : undefined
                 }
               />

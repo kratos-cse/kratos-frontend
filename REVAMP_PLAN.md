@@ -38,16 +38,34 @@ Studied `lion-mark.png`, `kratos26.png`, institutional logos, React Bits Spotlig
 
 ## Verification status
 
-### Ran successfully
-- `npm install` (motion, qrcode.react)
+### Ran successfully (participant frontend)
 - `npm run lint` — pass
 - `npm run build` — pass
+- `npm run test:matrix` — 12/12 registration UI state cases
 
-### Not yet verified (backend unreachable in this environment)
-- No `.env.local` present; `GET http://localhost:8000/health` timed out
-- Google auth, live events, registration, team, payment, QR, receipt, WhatsApp, cancel — **do not claim working until exercised against a running API**
+### Backend roster (kratos-backend)
+- Alembic `0008_team_roster_model` — `required_member_count`, `substitute_count`, `SUBSTITUTE` role, leader-entered members
+- `POST /teams/{id}/roster`, roster-aware join/team detail, admin roster on create/rules patch
+- `tests/test_roster.py` — 12 unit tests for 5+2 validation rules
+
+### Admin CMS (Admin-Frontend)
+- Event create/edit with mandatory + substitute fields, preview page, typed API client
+- `GET /admin/events/{id}` for editor detail (WhatsApp link, nested rules)
+
+### Participant roster UI
+- Event cards/detail/register copy uses `required_member_count` + `substitute_count`
+- `TeamPanel` — mandatory vs substitute sections, leader-entered add via `POST /teams/{id}/roster`
+- Join page shows roster summary from invitation payload
+
+### Not yet verified live (E2E)
+- No `.env.local` / running API in agent environment — **do not claim full 5+2 E2E until exercised locally**
+
+E2E checklist (admin → participant):
+1. Admin creates 5+2 team event, opens registration
+2. Leader registers, adds mandatory members + substitutes (leader-managed or invite)
+3. Payment → confirmation; roster limits enforced by API (`TEAM_MANDATORY_FULL`, `TEAM_SUBSTITUTE_LIMIT`)
 
 To verify locally:
-1. Start backend with CORS + Google/Razorpay configured
-2. Copy `.env.local.example` → `.env.local` with `API_BASE_URL` and `GOOGLE_CLIENT_ID`
-3. `npm run dev` and walk the acceptance checklist in the product brief
+1. Run backend migrations (`alembic upgrade head`), start API with CORS + Google/Razorpay
+2. Admin-Frontend on :3001, participant on :3000 — both proxy to API
+3. Walk the checklist above end-to-end

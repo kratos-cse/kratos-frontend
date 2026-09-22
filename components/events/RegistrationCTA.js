@@ -44,7 +44,7 @@ export function RegistrationCTA({ event, registration, sticky = false }) {
     } else {
       primary = (
         <Button href={`/register/${event.id}`} size="lg">
-          Register · {formatFee(event.fee)}
+          Register Now
         </Button>
       );
     }
