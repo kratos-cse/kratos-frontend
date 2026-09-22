@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useAuth } from "@/context/AuthProvider";
 import { Button } from "@/components/ui/Button";
 import styles from "./Navbar.module.css";
@@ -19,6 +19,7 @@ export function Navbar() {
   const { isAuthenticated, loading, user, signOut } = useAuth();
   const [open, setOpen] = useState(false);
   const panelId = useId();
+  const firstLinkRef = useRef(null);
 
   useEffect(() => {
     setOpen(false);
@@ -32,6 +33,8 @@ export function Navbar() {
     document.addEventListener("keydown", onKey);
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    // Focus first nav item for keyboard users (no enter animation delay)
+    requestAnimationFrame(() => firstLinkRef.current?.focus());
     return () => {
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = prev;
@@ -93,7 +96,9 @@ export function Navbar() {
               Sign in
             </Button>
           ) : (
-            <span className={styles.userMeta}>…</span>
+            <span className={styles.userMeta} aria-hidden>
+              …
+            </span>
           )}
 
           <button
@@ -111,18 +116,21 @@ export function Navbar() {
         </div>
       </div>
 
+      {/* Keep mounted so open/close can interpolate (no display:none / hidden) */}
       <div
         id={panelId}
         className={[styles.mobile, open ? styles.mobileOpen : ""].join(" ")}
-        hidden={!open}
+        aria-hidden={!open}
       >
         <nav className={styles.mobileNav} aria-label="Mobile">
-          {visibleLinks.map((link) => {
+          {visibleLinks.map((link, i) => {
             const active = pathname === link.href || pathname?.startsWith(`${link.href}/`);
             return (
               <Link
                 key={link.href}
+                ref={i === 0 ? firstLinkRef : undefined}
                 href={link.href}
+                tabIndex={open ? 0 : -1}
                 className={[styles.mobileLink, active ? styles.active : ""].join(" ")}
                 aria-current={active ? "page" : undefined}
               >
@@ -130,19 +138,25 @@ export function Navbar() {
               </Link>
             );
           })}
-          <Link href="/events" className={styles.mobileCta}>
+          <Link href="/events" className={styles.mobileCta} tabIndex={open ? 0 : -1}>
             Explore Events
           </Link>
           {!loading && !isAuthenticated ? (
             <Link
               href={`/login?next=${encodeURIComponent(pathname || "/")}`}
               className={styles.mobileLink}
+              tabIndex={open ? 0 : -1}
             >
               Sign in
             </Link>
           ) : null}
           {!loading && isAuthenticated ? (
-            <button type="button" className={styles.mobileLink} onClick={() => signOut()}>
+            <button
+              type="button"
+              className={styles.mobileLink}
+              tabIndex={open ? 0 : -1}
+              onClick={() => signOut()}
+            >
               Log out
             </button>
           ) : null}

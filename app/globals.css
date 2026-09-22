@@ -107,12 +107,30 @@ html {
     scroll-behavior: auto;
   }
 
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+  /* Keep opacity/color feedback; strip movement-based transforms */
+  .btn:active,
+  .menuBtn:active,
+  .mobileCta:active,
+  .mobileLink:active,
+  .typeBtn:active,
+  .tab:active,
+  .cat:active,
+  .interactive:active,
+  .interactive:hover {
+    transform: none !important;
+  }
+
+  .mobile {
+    transition: opacity 120ms ease !important;
+    transform: none !important;
+  }
+
+  .panel {
+    animation: none !important;
+  }
+
+  .skeleton {
+    animation: none !important;
   }
 }
 

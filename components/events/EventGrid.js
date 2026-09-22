@@ -1,6 +1,7 @@
 import { EventCard } from "./EventCard";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { EventCardSkeleton } from "@/components/ui/Skeleton";
+import { StaggerItem } from "@/components/motion/Reveal";
 import styles from "./EventGrid.module.css";
 
 export function EventGrid({ events, registrationsByEventId = {}, loading }) {
@@ -28,12 +29,10 @@ export function EventGrid({ events, registrationsByEventId = {}, loading }) {
 
   return (
     <div className={styles.grid}>
-      {events.map((event) => (
-        <EventCard
-          key={event.id}
-          event={event}
-          registration={registrationsByEventId[event.id]}
-        />
+      {events.map((event, index) => (
+        <StaggerItem key={event.id} index={index} className={styles.item}>
+          <EventCard event={event} registration={registrationsByEventId[event.id]} />
+        </StaggerItem>
       ))}
     </div>
   );

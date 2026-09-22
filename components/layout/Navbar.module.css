@@ -127,28 +127,28 @@
 .mobile {
   position: fixed;
   inset: var(--nav-h) 0 0 0;
+  z-index: calc(var(--z-nav) - 1);
   background: rgba(5, 5, 6, 0.96);
   padding: var(--space-5) var(--page-pad) var(--space-8);
   transform: translateY(-8px);
   opacity: 0;
   pointer-events: none;
+  visibility: hidden;
   transition:
     opacity var(--duration-ui) var(--ease-out),
-    transform var(--duration-ui) var(--ease-out);
+    transform var(--duration-ui) var(--ease-out),
+    visibility 0s linear var(--duration-ui);
 }
 
 .mobileOpen {
   opacity: 1;
   transform: translateY(0);
   pointer-events: auto;
-}
-
-.mobile[hidden] {
-  display: none;
-}
-
-.mobileOpen[hidden] {
-  display: block;
+  visibility: visible;
+  transition:
+    opacity var(--duration-ui) var(--ease-out),
+    transform var(--duration-ui) var(--ease-out),
+    visibility 0s linear 0s;
 }
 
 .mobileNav {
@@ -170,6 +170,13 @@
   color: var(--text);
   font-size: var(--text-lg);
   font-weight: 600;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    transform var(--duration-press) var(--ease-out);
+}
+
+.mobileLink:active {
+  transform: scale(0.98);
 }
 
 .mobileLink.active {
@@ -187,6 +194,7 @@
   background: linear-gradient(180deg, var(--brand-bright), var(--brand));
   color: #fff;
   font-weight: 700;
+  transition: transform var(--duration-press) var(--ease-out);
 }
 
 .mobileCta:active {

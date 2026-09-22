@@ -6,11 +6,11 @@ import { PageShell } from "@/components/layout/PageShell";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { EventGrid } from "@/components/events/EventGrid";
+import { GlareHover } from "@/components/effects/GlareHover";
 import { Reveal } from "@/components/motion/Reveal";
 import { useEvents } from "@/hooks/useEvents";
 import { useMyRegistrations } from "@/hooks/useMyRegistrations";
 import { EVENT_CATEGORIES, CATEGORY_LABELS } from "@/lib/events/categories";
-import { findMyRegistrationForEvent } from "@/lib/events/utils";
 import styles from "./landing.module.css";
 
 export default function HomePage() {
@@ -36,10 +36,12 @@ export default function HomePage() {
   return (
     <PageShell wide>
       <section className={styles.hero}>
-        <div className={styles.heroVisual} aria-hidden>
-          <Image src="/lion-mark.png" alt="" width={280} height={280} className={styles.lion} priority />
-        </div>
-        <div className={styles.heroCopy}>
+        <Reveal className={styles.heroVisual} y={16}>
+          <div aria-hidden>
+            <Image src="/lion-mark.png" alt="" width={280} height={280} className={styles.lion} priority />
+          </div>
+        </Reveal>
+        <Reveal className={styles.heroCopy} delay={0.05} y={12}>
           <Image
             src="/kratos26.png"
             alt="KRATOS'26"
@@ -52,14 +54,16 @@ export default function HomePage() {
             Discover events. Register in minutes. Manage your team and ticket in one place.
           </p>
           <div className={styles.ctas}>
-            <Button href="/events" size="lg">
-              Explore Events
-            </Button>
+            <GlareHover>
+              <Button href="/events" size="lg">
+                Explore Events
+              </Button>
+            </GlareHover>
             <Button href="/registrations" size="lg" variant="secondary">
               My Registrations
             </Button>
           </div>
-        </div>
+        </Reveal>
       </section>
 
       <Reveal>

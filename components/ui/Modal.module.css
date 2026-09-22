@@ -7,6 +7,8 @@
   padding: var(--space-4);
   background: rgba(0, 0, 0, 0.62);
   backdrop-filter: blur(4px);
+  opacity: 1;
+  transition: opacity var(--duration-modal) var(--ease-out);
 }
 
 @media (min-width: 640px) {
@@ -23,31 +25,45 @@
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-xl) var(--radius-xl) var(--radius-lg) var(--radius-lg);
   box-shadow: var(--shadow-md);
-  transform-origin: center bottom;
-  animation: modalIn var(--duration-modal) var(--ease-out);
+  /* Modals stay centered — position-based origin is for popovers */
+  transform-origin: center center;
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition:
+    opacity var(--duration-modal) var(--ease-out),
+    transform var(--duration-modal) var(--ease-out);
 }
 
 @media (min-width: 640px) {
   .panel {
     border-radius: var(--radius-xl);
-    transform-origin: center center;
   }
 }
 
-@keyframes modalIn {
-  from {
+/* Enter without keyed restart — interruptible if remounted carefully */
+@starting-style {
+  .panel {
     opacity: 0;
     transform: translateY(12px) scale(0.98);
   }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
+
+  .backdrop {
+    opacity: 0;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .panel {
-    animation: none;
+  .panel,
+  .backdrop {
+    transition: opacity 120ms ease;
+    transform: none;
+  }
+
+  @starting-style {
+    .panel {
+      opacity: 0;
+      transform: none;
+    }
   }
 }
 

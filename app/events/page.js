@@ -1,7 +1,7 @@
 "use client";
 
-import { Suspense, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { Suspense, useCallback, useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { PageShell } from "@/components/layout/PageShell";
 import { EventFilters } from "@/components/events/EventFilters";
 import { EventGrid } from "@/components/events/EventGrid";
@@ -14,6 +14,8 @@ import { EVENT_CATEGORIES } from "@/lib/events/categories";
 
 function EventsExplorer() {
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
   const initialCategory = searchParams.get("category");
   const validInitial =
     initialCategory && EVENT_CATEGORIES.includes(initialCategory) ? initialCategory : "ALL";
@@ -23,6 +25,18 @@ function EventsExplorer() {
 
   const { events, loading, error, errorMessage, refresh } = useEvents();
   const { registrations } = useMyRegistrations();
+
+  const onCategoryChange = useCallback(
+    (next) => {
+      setCategory(next);
+      const params = new URLSearchParams(searchParams.toString());
+      if (!next || next === "ALL") params.delete("category");
+      else params.set("category", next);
+      const qs = params.toString();
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    },
+    [pathname, router, searchParams]
+  );
 
   const counts = useMemo(() => {
     const c = { ALL: events.length };
@@ -52,6 +66,8 @@ function EventsExplorer() {
     return map;
   }, [registrations]);
 
+  const gridKey = `${category}::${query.trim().toLowerCase()}`;
+
   return (
     <PageTransition>
       <header className="stack" style={{ marginBottom: "var(--space-5)" }}>
@@ -61,7 +77,7 @@ function EventsExplorer() {
 
       <EventFilters
         category={category}
-        onCategoryChange={setCategory}
+        onCategoryChange={onCategoryChange}
         query={query}
         onQueryChange={setQuery}
         counts={counts}
@@ -71,7 +87,12 @@ function EventsExplorer() {
         {error ? (
           <ErrorState title="Couldn’t load events" description={errorMessage} onRetry={refresh} />
         ) : (
-          <EventGrid events={filtered} registrationsByEventId={registrationsByEventId} loading={loading} />
+          <EventGrid
+            key={gridKey}
+            events={filtered}
+            registrationsByEventId={registrationsByEventId}
+            loading={loading}
+          />
         )}
       </div>
     </PageTransition>
