@@ -16,6 +16,7 @@ import {
   findMyRegistrationForEvent,
   formatDateRange,
   formatFee,
+  registrationAvailabilityLabel,
   registrationModeLabel,
 } from "@/lib/events/utils";
 import styles from "./detail.module.css";
@@ -76,7 +77,9 @@ export default function EventDetailPage() {
           <div className={styles.main}>
             <div className={styles.kicker}>
               <Badge tone="brand">{formatCategory(event.category)}</Badge>
-              {event.registration_open ? <Badge tone="ok">Registration open</Badge> : <Badge tone="muted">Registration closed</Badge>}
+              <Badge tone={event.registration_availability === "OPEN" ? "ok" : "muted"}>
+                {registrationAvailabilityLabel(event.registration_availability)}
+              </Badge>
             </div>
             <h1 className="page-title">{event.name}</h1>
             {event.tagline ? <p className={styles.tagline}>{event.tagline}</p> : null}

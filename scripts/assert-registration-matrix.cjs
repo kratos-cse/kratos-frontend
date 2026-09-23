@@ -62,23 +62,41 @@ function deriveEventUiState(event, myRegistration, opts = {}) {
     return { code: "REGISTERED", label: "Registered", tone: "ok", cta: "view", role };
   }
 
+  const availability = String(event?.registration_availability || "").toUpperCase();
+  if (availability) {
+    if (availability === "OPEN") return { code: "OPEN", label: "Open", tone: "ok", cta: "register" };
+    if (availability === "FULL") return { code: "FULL", label: "Full", tone: "err", cta: "none" };
+    if (availability === "NOT_YET_OPEN") return { code: "COMING_SOON", label: "Coming soon", tone: "warn", cta: "none" };
+    if (availability === "WINDOW_CLOSED") return { code: "REGISTRATION_CLOSED", label: "Registration closed", tone: "muted", cta: "none" };
+    if (availability === "EVENT_CLOSED") return { code: "CLOSED", label: "Closed", tone: "muted", cta: "none" };
+  }
+
   if (eventStatus === "CLOSED" || eventStatus === "CANCELLED" || eventStatus === "COMPLETED") {
     return { code: "CLOSED", label: "Closed", tone: "muted", cta: "none" };
-  }
-  if (event?.registration_open === false) {
-    return { code: "REGISTRATION_CLOSED", label: "Registration closed", tone: "muted", cta: "none" };
-  }
-  if (event?.spots_remaining === 0) {
-    return { code: "FULL", label: "Full", tone: "err", cta: "none" };
   }
   if (event?.registration_open === true) {
     return { code: "OPEN", label: "Open", tone: "ok", cta: "register" };
   }
-  return { code: "UNKNOWN", label: formatCategory(event?.category), tone: "default", cta: "register" };
+  if (event?.registration_open === false) {
+    return { code: "UNKNOWN", label: "Status unavailable", tone: "default", cta: "none" };
+  }
+  return { code: "UNKNOWN", label: formatCategory(event?.category), tone: "default", cta: "none" };
 }
 
-const openEvent = { status: "OPEN", registration_open: true, fee: 100, spots_remaining: 5 };
-const freeEvent = { status: "OPEN", registration_open: true, fee: 0, spots_remaining: 5 };
+const openEvent = {
+  status: "OPEN",
+  registration_availability: "OPEN",
+  registration_open: true,
+  fee: 100,
+  spots_remaining: 5,
+};
+const freeEvent = {
+  status: "OPEN",
+  registration_availability: "OPEN",
+  registration_open: true,
+  fee: 0,
+  spots_remaining: 5,
+};
 
 const cases = [
   { name: "open → register", event: openEvent, reg: null, expect: { code: "OPEN", cta: "register" } },
@@ -89,16 +107,34 @@ const cases = [
     expect: { code: "CLOSED", cta: "none" },
   },
   {
-    name: "registration_open false",
-    event: { status: "OPEN", registration_open: false, fee: 100 },
+    name: "window closed via availability",
+    event: { status: "OPEN", registration_availability: "WINDOW_CLOSED", registration_open: false, fee: 100 },
     reg: null,
     expect: { code: "REGISTRATION_CLOSED", cta: "none" },
   },
   {
-    name: "full",
-    event: { status: "OPEN", registration_open: true, fee: 100, spots_remaining: 0 },
+    name: "coming soon via availability",
+    event: { status: "OPEN", registration_availability: "NOT_YET_OPEN", registration_open: false, fee: 100 },
+    reg: null,
+    expect: { code: "COMING_SOON", cta: "none" },
+  },
+  {
+    name: "event closed via availability",
+    event: { status: "OPEN", registration_availability: "EVENT_CLOSED", registration_open: false, fee: 100 },
+    reg: null,
+    expect: { code: "CLOSED", cta: "none" },
+  },
+  {
+    name: "full via availability",
+    event: { status: "OPEN", registration_availability: "FULL", registration_open: false, fee: 100 },
     reg: null,
     expect: { code: "FULL", cta: "none" },
+  },
+  {
+    name: "legacy registration_open false without availability",
+    event: { status: "OPEN", registration_open: false, fee: 100 },
+    reg: null,
+    expect: { code: "UNKNOWN", cta: "none" },
   },
   {
     name: "cancelled → register again",

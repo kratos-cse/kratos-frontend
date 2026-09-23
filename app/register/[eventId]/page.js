@@ -17,7 +17,13 @@ import { useEvent } from "@/hooks/useEvents";
 import { createRegistration, getRegistration, listMyRegistrations } from "@/lib/api/registrations";
 import { createOrder, verifyPayment, syncPayment } from "@/lib/api/payments";
 import { toUserMessage, canRetryPayment, isRegistrationConfirmed } from "@/lib/errors/userMessages";
-import { isProfileComplete, formatFee, findMyRegistrationForEvent } from "@/lib/events/utils";
+import {
+  canRegisterForEvent,
+  isProfileComplete,
+  formatFee,
+  findMyRegistrationForEvent,
+  registrationAvailabilityLabel,
+} from "@/lib/events/utils";
 import { allowedRegistrationTypes } from "@/lib/events/registrationTypes";
 import styles from "./register.module.css";
 
@@ -190,11 +196,11 @@ function RegisterWizard() {
     );
   }
 
-  if (!event.registration_open) {
+  if (!canRegisterForEvent(event)) {
     return (
       <ErrorState
-        title="Registration closed"
-        description="This event is not accepting registrations right now."
+        title="Registration unavailable"
+        description={registrationAvailabilityLabel(event.registration_availability)}
         secondaryLabel="View event"
         secondaryHref={`/events/${eventId}`}
       />
