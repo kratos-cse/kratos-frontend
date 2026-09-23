@@ -12,7 +12,10 @@ import { ErrorState } from "@/components/ui/ErrorState";
 import { RegistrationSkeleton } from "@/components/ui/Skeleton";
 import { useMyRegistrations } from "@/hooks/useMyRegistrations";
 import { useEvents } from "@/hooks/useEvents";
+import { ShareInviteButton } from "@/components/registration/ShareInviteButton";
+import { deriveRegistrationJourneyState } from "@/lib/events/registrationUiState";
 import { formatWhen } from "@/lib/events/utils";
+import { useAuth } from "@/context/AuthProvider";
 import styles from "./registrations.module.css";
 
 function nextAction(reg) {
@@ -29,6 +32,7 @@ function nextAction(reg) {
 }
 
 function RegistrationsInner() {
+  const { profile } = useAuth();
   const { registrations, loading, error, errorMessage, refresh } = useMyRegistrations();
   const { events, loading: eventsLoading } = useEvents();
 
@@ -74,6 +78,7 @@ function RegistrationsInner() {
     <div className={styles.list}>
       {sorted.map((reg) => {
         const event = eventMap[reg.event_id];
+        const journey = deriveRegistrationJourneyState(reg, event, { profileId: profile?.id });
         const action = nextAction(reg);
         const status = String(reg.status || "").toUpperCase();
         const pay = String(reg.payment?.status || "").toUpperCase();
@@ -97,15 +102,14 @@ function RegistrationsInner() {
                 {reg.team ? <Badge tone="info">TEAM</Badge> : <Badge tone="muted">SOLO</Badge>}
               </div>
             </div>
+            {journey.rosterLine ? <p className="meta">{journey.rosterLine}</p> : null}
             <div className={styles.actions}>
+              {journey.canShareInvite && reg.team?.id ? (
+                <ShareInviteButton teamId={reg.team.id} size="sm" />
+              ) : null}
               <Button href={action.href} variant={action.variant} size="sm">
                 {action.label}
               </Button>
-              {reg.team ? (
-                <Button href={`/registrations/${reg.id}`} variant="ghost" size="sm">
-                  Manage team
-                </Button>
-              ) : null}
             </div>
           </Card>
         );

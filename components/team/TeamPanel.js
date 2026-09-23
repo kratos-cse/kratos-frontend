@@ -16,6 +16,7 @@ import {
   removeMember,
 } from "@/lib/api/teams";
 import { toUserMessage } from "@/lib/errors/userMessages";
+import CountUp from "@/components/micro/CountUp/CountUp";
 import styles from "./TeamPanel.module.css";
 
 function memberTone(status) {
@@ -145,6 +146,21 @@ export function TeamPanel({ teamId, event, onChanged }) {
     try {
       const inv = await createInvitation(team.id);
       setInviteCode(inv.code);
+      const url =
+        typeof window !== "undefined" && inv.code
+          ? `${window.location.origin}/join/${inv.code}`
+          : null;
+      if (url && navigator.share) {
+        try {
+          await navigator.share({ title: "Join my KRATOS team", url });
+        } catch (shareErr) {
+          if (String(shareErr?.name) !== "AbortError") {
+            await navigator.clipboard?.writeText(url);
+          }
+        }
+      } else if (url) {
+        await navigator.clipboard?.writeText(url);
+      }
       await refresh({ notify: true });
     } catch (err) {
       setError(toUserMessage(err));
@@ -264,10 +280,20 @@ export function TeamPanel({ teamId, event, onChanged }) {
           <h2 className={styles.title}>{team.name}</h2>
           <p className="meta">
             {rosterLine || `${members.length} on roster`}
-            {typeof required === "number"
-              ? ` · mandatory ${mandatoryFilled}/${required}`
-              : null}
-            {maxSubs > 0 ? ` · substitutes ${subsFilled}/${maxSubs}` : null}
+            {typeof required === "number" ? (
+              <>
+                {" · mandatory "}
+                <CountUp to={mandatoryFilled} duration={0.35} />
+                /{required}
+              </>
+            ) : null}
+            {maxSubs > 0 ? (
+              <>
+                {" · substitutes "}
+                <CountUp to={subsFilled} duration={0.35} />
+                /{maxSubs}
+              </>
+            ) : null}
           </p>
         </div>
         <div className={styles.headActions}>
@@ -394,7 +420,7 @@ export function TeamPanel({ teamId, event, onChanged }) {
 
         {isLeader && allowInvite && (teamStatus === "PAID" || teamStatus === "COMPLETE") ? (
           <Button type="button" loading={loadingInvite} onClick={onCreateInvite}>
-            {inviteCode ? "Refresh invite" : "Create invite"}
+            {inviteCode ? "Refresh invite" : "Share invite"}
           </Button>
         ) : null}
 

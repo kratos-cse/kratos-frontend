@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test:matrix": "node scripts/assert-registration-matrix.cjs"
+    "test:matrix": "node scripts/assert-registration-matrix.cjs && node scripts/assert-registration-types.cjs"
   },
   "dependencies": {
     "motion": "^13.4.1",

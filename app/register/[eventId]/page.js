@@ -11,28 +11,15 @@ import { Input } from "@/components/ui/Input";
 import { StatusBanner, ErrorState } from "@/components/ui/ErrorState";
 import { PageSkeleton } from "@/components/ui/Skeleton";
 import { openRazorpayCheckout } from "@/components/registration/PaymentCheckout";
+import { PaymentConfirmed } from "@/components/registration/PaymentConfirmed";
 import { useAuth } from "@/context/AuthProvider";
 import { useEvent } from "@/hooks/useEvents";
 import { createRegistration, getRegistration, listMyRegistrations } from "@/lib/api/registrations";
 import { createOrder, verifyPayment, syncPayment } from "@/lib/api/payments";
 import { toUserMessage, canRetryPayment, isRegistrationConfirmed } from "@/lib/errors/userMessages";
 import { isProfileComplete, formatFee, findMyRegistrationForEvent } from "@/lib/events/utils";
+import { allowedRegistrationTypes } from "@/lib/events/registrationTypes";
 import styles from "./register.module.css";
-
-function allowedTypes(event) {
-  const mode = String(event?.registration_mode || "").toUpperCase();
-  const types = [];
-  if (mode === "INDIVIDUAL_ONLY") types.push("SOLO");
-  else if (mode === "TEAM_ONLY") types.push("TEAM");
-  else if (mode === "TEAM_OR_INDIVIDUAL") {
-    types.push("SOLO", "TEAM");
-  } else {
-    if (event?.allow_individual !== false) types.push("SOLO");
-    if (event?.team_max_size || event?.team_min_size) types.push("TEAM");
-    if (!types.length) types.push("SOLO");
-  }
-  return [...new Set(types)];
-}
 
 function RegisterWizard() {
   const params = useParams();
@@ -48,7 +35,10 @@ function RegisterWizard() {
   const [error, setError] = useState(null);
   const [registration, setRegistration] = useState(null);
 
-  const types = useMemo(() => (event ? allowedTypes(event) : ["SOLO"]), [event]);
+  const { types, configError } = useMemo(
+    () => (event ? allowedRegistrationTypes(event) : { types: ["SOLO"], error: null }),
+    [event]
+  );
 
   useEffect(() => {
     if (!event) return;
@@ -93,7 +83,8 @@ function RegisterWizard() {
   async function startPayment(reg) {
     const fee = Number(event?.fee || 0);
     if (!fee) {
-      router.replace(`/registrations/${reg.id}`);
+      setStep("confirmed");
+      setRegistration(reg);
       return;
     }
     setBusy(true);
@@ -130,7 +121,7 @@ function RegisterWizard() {
           }
           const fresh = await getRegistration(reg.id);
           setRegistration(fresh);
-          router.replace(`/registrations/${reg.id}`);
+          setStep("confirmed");
         },
       });
     } catch (err) {
@@ -176,7 +167,8 @@ function RegisterWizard() {
         setStep("payment");
         await startPayment(reg);
       } else {
-        router.replace(`/registrations/${reg.id}`);
+        setRegistration(reg);
+        setStep("confirmed");
       }
     } catch (err) {
       setError(toUserMessage(err));
@@ -218,6 +210,7 @@ function RegisterWizard() {
       </header>
 
       {error ? <StatusBanner tone="err">{error}</StatusBanner> : null}
+      {configError ? <StatusBanner tone="err">{configError}</StatusBanner> : null}
 
       {step === "profile" ? (
         <Card>
@@ -230,7 +223,7 @@ function RegisterWizard() {
         </Card>
       ) : null}
 
-      {step === "setup" ? (
+      {step === "setup" && !configError ? (
         <Card className="stack">
           <h2 className={styles.h2}>Registration type</h2>
           <div className={styles.typeRow} role="radiogroup" aria-label="Registration type">
@@ -322,6 +315,14 @@ function RegisterWizard() {
             </Button>
           </div>
         </Card>
+      ) : null}
+
+      {step === "confirmed" && registration ? (
+        <PaymentConfirmed
+          title="Payment confirmed"
+          message="Continue to your registration to manage your team and share invites."
+          onContinue={() => router.push(`/registrations/${registration.id}`)}
+        />
       ) : null}
 
       {step === "payment" && registration ? (

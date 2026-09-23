@@ -12,6 +12,7 @@ import { useAuth } from "@/context/AuthProvider";
 import { getInvitation, joinInvitation } from "@/lib/api/teams";
 import { formatRosterLabel, isProfileComplete } from "@/lib/events/utils";
 import { toUserMessage } from "@/lib/errors/userMessages";
+import StatusMark from "@/components/micro/StatusMark/StatusMark";
 import styles from "./join.module.css";
 
 function JoinInner() {
@@ -23,6 +24,7 @@ function JoinInner() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [joinedRegistrationId, setJoinedRegistrationId] = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -48,9 +50,8 @@ function JoinInner() {
     try {
       const result = await joinInvitation(code);
       const regId = result?.registration_id;
-      if (regId) router.replace(`/registrations/${regId}`);
-      else if (result?.team?.id) router.replace("/registrations");
-      else router.replace("/registrations");
+      if (regId) setJoinedRegistrationId(regId);
+      else setJoinedRegistrationId("list");
     } catch (err) {
       setError(err);
     } finally {
@@ -98,6 +99,23 @@ function JoinInner() {
     invite?.required_member_count,
     invite?.team_max_size,
   );
+
+  if (joinedRegistrationId) {
+    return (
+      <Card className="stack">
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <StatusMark status="done" doneColor="#22c55e" size={28} />
+          <h1 className="page-title" style={{ margin: 0 }}>You joined the team</h1>
+        </div>
+        <p className="muted">Your registration is updated. View your pass when you are ready.</p>
+        <Button
+          href={joinedRegistrationId === "list" ? "/registrations" : `/registrations/${joinedRegistrationId}`}
+        >
+          View registration
+        </Button>
+      </Card>
+    );
+  }
 
   return (
     <div className={styles.wrap}>

@@ -11,6 +11,7 @@ import { PageTransition } from "@/components/motion/Reveal";
 import { useEvent } from "@/hooks/useEvents";
 import { useMyRegistrations } from "@/hooks/useMyRegistrations";
 import { formatCategory } from "@/lib/events/categories";
+import { formatRosterParticipantLine } from "@/lib/events/utils";
 import {
   findMyRegistrationForEvent,
   formatDateRange,
@@ -53,6 +54,12 @@ export default function EventDetailPage() {
   }
 
   const when = formatDateRange(event.starts_at, event.ends_at);
+  const rosterLine = formatRosterParticipantLine(
+    event.required_member_count,
+    event.substitute_count,
+    event.team_min_size,
+    event.team_max_size,
+  );
   const mode = registrationModeLabel(
     event.registration_mode,
     event.allow_individual,
@@ -91,6 +98,12 @@ export default function EventDetailPage() {
                 <dt>Format</dt>
                 <dd>{mode}</dd>
               </div>
+              {rosterLine ? (
+                <div>
+                  <dt>Team roster</dt>
+                  <dd>{rosterLine}</dd>
+                </div>
+              ) : null}
               {event.spots_remaining != null ? (
                 <div>
                   <dt>Spots left</dt>

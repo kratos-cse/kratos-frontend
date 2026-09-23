@@ -11,13 +11,10 @@ import { Card } from "@/components/ui/Card";
 import { ErrorState, StatusBanner } from "@/components/ui/ErrorState";
 import { PageSkeleton } from "@/components/ui/Skeleton";
 import { openRazorpayCheckout } from "@/components/registration/PaymentCheckout";
+import { PaymentConfirmed } from "@/components/registration/PaymentConfirmed";
 import { useAuth } from "@/context/AuthProvider";
 import { useEvent } from "@/hooks/useEvents";
-import {
-  cancelRegistration,
-  getRegistration,
-  getRegistrationReceipt,
-} from "@/lib/api/registrations";
+import { cancelRegistration, getRegistration } from "@/lib/api/registrations";
 import { createOrder, verifyPayment, syncPayment } from "@/lib/api/payments";
 import { getEventWhatsapp } from "@/lib/api/events";
 import {
@@ -26,7 +23,9 @@ import {
   isRegistrationConfirmed,
   needsPaymentSync,
 } from "@/lib/errors/userMessages";
+import { deriveRegistrationJourneyState } from "@/lib/events/registrationUiState";
 import { formatFee } from "@/lib/events/utils";
+import { openRegistrationReceipt } from "@/lib/receipts";
 import styles from "./detail.module.css";
 
 function RegistrationDetailInner() {
@@ -41,6 +40,9 @@ function RegistrationDetailInner() {
   const [whatsapp, setWhatsapp] = useState(null);
   const [waNote, setWaNote] = useState(null);
   const autoSynced = useRef(false);
+  // Post-payment CONTINUE is transient (in-session only). After refresh, confirmed state shows directly.
+  const [journeyExpanded, setJourneyExpanded] = useState(true);
+  const [awaitingContinue, setAwaitingContinue] = useState(false);
 
   const { event } = useEvent(registration?.event_id);
 
@@ -167,6 +169,8 @@ function RegistrationDetailInner() {
             }
           }
           await refresh();
+          setAwaitingContinue(true);
+          setJourneyExpanded(false);
         },
       });
     } catch (err) {
@@ -197,12 +201,7 @@ function RegistrationDetailInner() {
   async function onReceipt() {
     setBusy(true);
     try {
-      const receipt = await getRegistrationReceipt(registration.id);
-      if (receipt?.pdf_url) {
-        window.open(receipt.pdf_url, "_blank", "noopener,noreferrer");
-      } else if (receipt?.html_url) {
-        window.open(receipt.html_url, "_blank", "noopener,noreferrer");
-      }
+      await openRegistrationReceipt(registration.id);
     } catch (err) {
       setError(err);
     } finally {
@@ -239,6 +238,7 @@ function RegistrationDetailInner() {
   const pay = String(registration.payment?.status || "").toUpperCase();
   const confirmed = isRegistrationConfirmed(registration);
   const teamId = registration.team?.id;
+  const journey = deriveRegistrationJourneyState(registration, event, { profileId: profile?.id });
 
   return (
     <div className={styles.wrap}>
@@ -278,7 +278,18 @@ function RegistrationDetailInner() {
         </Card>
       ) : null}
 
-      {confirmed ? (
+      {awaitingContinue && confirmed ? (
+        <PaymentConfirmed
+          title="Payment confirmed"
+          message={registration.team ? "Your team registration is confirmed. Continue to manage your roster and share invites." : "Your registration is confirmed. Continue to view your QR and receipt."}
+          onContinue={() => {
+            setAwaitingContinue(false);
+            setJourneyExpanded(true);
+          }}
+        />
+      ) : null}
+
+      {confirmed && journeyExpanded && !awaitingContinue ? (
         <Card className="stack">
           <h2 className={styles.h2}>You’re registered</h2>
           <div className={styles.actions}>
@@ -310,7 +321,7 @@ function RegistrationDetailInner() {
         </div>
       ) : null}
 
-      {teamId ? (
+      {teamId && journeyExpanded && !awaitingContinue ? (
         <TeamPanel
           teamId={teamId}
           event={event}
