@@ -128,19 +128,6 @@ export default function EventDetailPage() {
               </section>
             ) : null}
 
-            {(event.registration_opens_at || event.registration_closes_at) && (
-              <section className={styles.block}>
-                <h2 className={styles.h2}>Registration window</h2>
-                <p className={styles.body}>
-                  {event.registration_opens_at
-                    ? `Opens ${new Date(event.registration_opens_at).toLocaleString("en-IN")}`
-                    : "Open"}
-                  {event.registration_closes_at
-                    ? ` · Closes ${new Date(event.registration_closes_at).toLocaleString("en-IN")}`
-                    : ""}
-                </p>
-              </section>
-            )}
           </div>
 
           <aside className={styles.aside}>

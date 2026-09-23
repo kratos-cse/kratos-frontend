@@ -29,7 +29,6 @@ function myTeamRole(registration, profileId) {
 }
 
 function deriveEventUiState(event, myRegistration, opts = {}) {
-  const eventStatus = String(event?.status || "").toUpperCase();
   const fee = Number(event?.fee);
   const hasFee = !Number.isNaN(fee) && fee > 0;
 
@@ -66,14 +65,11 @@ function deriveEventUiState(event, myRegistration, opts = {}) {
   if (availability) {
     if (availability === "OPEN") return { code: "OPEN", label: "Open", tone: "ok", cta: "register" };
     if (availability === "FULL") return { code: "FULL", label: "Full", tone: "err", cta: "none" };
-    if (availability === "NOT_YET_OPEN") return { code: "COMING_SOON", label: "Coming soon", tone: "warn", cta: "none" };
-    if (availability === "WINDOW_CLOSED") return { code: "REGISTRATION_CLOSED", label: "Registration closed", tone: "muted", cta: "none" };
-    if (availability === "EVENT_CLOSED") return { code: "CLOSED", label: "Closed", tone: "muted", cta: "none" };
+    if (availability === "CLOSED") {
+      return { code: "REGISTRATION_CLOSED", label: "Registration closed", tone: "muted", cta: "none" };
+    }
   }
 
-  if (eventStatus === "CLOSED" || eventStatus === "CANCELLED" || eventStatus === "COMPLETED") {
-    return { code: "CLOSED", label: "Closed", tone: "muted", cta: "none" };
-  }
   if (event?.registration_open === true) {
     return { code: "OPEN", label: "Open", tone: "ok", cta: "register" };
   }
@@ -84,14 +80,16 @@ function deriveEventUiState(event, myRegistration, opts = {}) {
 }
 
 const openEvent = {
-  status: "OPEN",
+  visibility: "PUBLISHED",
+  registration_status: "OPEN",
   registration_availability: "OPEN",
   registration_open: true,
   fee: 100,
   spots_remaining: 5,
 };
 const freeEvent = {
-  status: "OPEN",
+  visibility: "PUBLISHED",
+  registration_status: "OPEN",
   registration_availability: "OPEN",
   registration_open: true,
   fee: 0,
@@ -101,38 +99,32 @@ const freeEvent = {
 const cases = [
   { name: "open → register", event: openEvent, reg: null, expect: { code: "OPEN", cta: "register" } },
   {
-    name: "closed event",
-    event: { status: "CLOSED", registration_open: false, fee: 100 },
-    reg: null,
-    expect: { code: "CLOSED", cta: "none" },
-  },
-  {
-    name: "window closed via availability",
-    event: { status: "OPEN", registration_availability: "WINDOW_CLOSED", registration_open: false, fee: 100 },
+    name: "registration closed via availability",
+    event: {
+      visibility: "PUBLISHED",
+      registration_status: "CLOSED",
+      registration_availability: "CLOSED",
+      registration_open: false,
+      fee: 100,
+    },
     reg: null,
     expect: { code: "REGISTRATION_CLOSED", cta: "none" },
   },
   {
-    name: "coming soon via availability",
-    event: { status: "OPEN", registration_availability: "NOT_YET_OPEN", registration_open: false, fee: 100 },
-    reg: null,
-    expect: { code: "COMING_SOON", cta: "none" },
-  },
-  {
-    name: "event closed via availability",
-    event: { status: "OPEN", registration_availability: "EVENT_CLOSED", registration_open: false, fee: 100 },
-    reg: null,
-    expect: { code: "CLOSED", cta: "none" },
-  },
-  {
     name: "full via availability",
-    event: { status: "OPEN", registration_availability: "FULL", registration_open: false, fee: 100 },
+    event: {
+      visibility: "PUBLISHED",
+      registration_status: "OPEN",
+      registration_availability: "FULL",
+      registration_open: false,
+      fee: 100,
+    },
     reg: null,
     expect: { code: "FULL", cta: "none" },
   },
   {
     name: "legacy registration_open false without availability",
-    event: { status: "OPEN", registration_open: false, fee: 100 },
+    event: { visibility: "PUBLISHED", registration_open: false, fee: 100 },
     reg: null,
     expect: { code: "UNKNOWN", cta: "none" },
   },
@@ -169,7 +161,7 @@ const cases = [
   {
     name: "confirmed → view",
     event: openEvent,
-    reg: { status: "CONFIRMED", payment: { status: "PAID" } },
+    reg: { status: "CONFIRMED" },
     expect: { code: "COMPLETE", cta: "view" },
   },
   {
@@ -177,11 +169,7 @@ const cases = [
     event: openEvent,
     reg: {
       status: "CONFIRMED",
-      payment: { status: "PAID" },
-      team: {
-        leader_profile_id: "p1",
-        members: [{ profile_id: "p1", role: "LEADER", status: "ACTIVE" }],
-      },
+      team: { leader_profile_id: "p1", members: [{ profile_id: "p1", role: "LEADER" }] },
     },
     opts: { profileId: "p1" },
     expect: { code: "TEAM_LEADER", cta: "view" },
@@ -191,14 +179,7 @@ const cases = [
     event: openEvent,
     reg: {
       status: "CONFIRMED",
-      payment: { status: "PAID" },
-      team: {
-        leader_profile_id: "p1",
-        members: [
-          { profile_id: "p1", role: "LEADER", status: "ACTIVE" },
-          { profile_id: "p2", role: "MEMBER", status: "ACTIVE" },
-        ],
-      },
+      team: { leader_profile_id: "p1", members: [{ profile_id: "p2", role: "MEMBER" }] },
     },
     opts: { profileId: "p2" },
     expect: { code: "TEAM_MEMBER", cta: "view" },
@@ -208,8 +189,9 @@ const cases = [
 let failed = 0;
 for (const c of cases) {
   const ui = deriveEventUiState(c.event, c.reg, c.opts || {});
-  if (ui.code !== c.expect.code || ui.cta !== c.expect.cta) {
-    console.error(`FAIL ${c.name}: got code=${ui.code} cta=${ui.cta}`);
+  const ok = ui.code === c.expect.code && ui.cta === c.expect.cta;
+  if (!ok) {
+    console.error(`FAIL ${c.name}: got ${ui.code}/${ui.cta}, expected ${c.expect.code}/${c.expect.cta}`);
     failed += 1;
   } else {
     console.log(`ok ${c.name}`);
@@ -217,7 +199,8 @@ for (const c of cases) {
 }
 
 if (failed) {
-  console.error(`\n${failed} case(s) failed`);
+  console.error(`\n${failed} registration state matrix case(s) failed.`);
   process.exit(1);
 }
+
 console.log(`\nAll ${cases.length} registration state matrix cases passed.`);

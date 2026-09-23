@@ -17,10 +17,7 @@ export default function HomePage() {
   const { events, loading } = useEvents();
   const { registrations } = useMyRegistrations();
 
-  const featured = [...events]
-    .filter((e) => e.registration_availability === "OPEN" || (!e.registration_availability && e.registration_open))
-    .slice(0, 6);
-  const preview = featured.length ? featured : events.slice(0, 6);
+  const preview = events.slice(0, 6);
 
   const registrationsByEventId = {};
   for (const r of registrations) {
