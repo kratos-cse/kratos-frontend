@@ -6,7 +6,7 @@ import { PageShell } from "@/components/layout/PageShell";
 import { RegistrationCTA } from "@/components/events/RegistrationCTA";
 import { Badge } from "@/components/ui/Badge";
 import { ErrorState } from "@/components/ui/ErrorState";
-import { PageSkeleton } from "@/components/ui/Skeleton";
+import { EventDetailSkeleton } from "@/components/events/EventDetailSkeleton";
 import { PageTransition } from "@/components/motion/Reveal";
 import { useEvent } from "@/hooks/useEvents";
 import { useMyRegistrations } from "@/hooks/useMyRegistrations";
@@ -25,17 +25,17 @@ export default function EventDetailPage() {
   const params = useParams();
   const eventId = params?.eventId;
   const { event, loading, error, errorMessage, refresh } = useEvent(eventId);
-  const { registrations, loading: regsLoading } = useMyRegistrations();
+  const { registrations } = useMyRegistrations();
 
   const registration = useMemo(
     () => findMyRegistrationForEvent(registrations, eventId),
     [registrations, eventId]
   );
 
-  if (loading || regsLoading) {
+  if (loading && !event) {
     return (
       <PageShell>
-        <PageSkeleton />
+        <EventDetailSkeleton />
       </PageShell>
     );
   }

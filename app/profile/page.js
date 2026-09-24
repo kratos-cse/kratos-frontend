@@ -5,11 +5,16 @@ import { RequireAuth } from "@/components/layout/RequireAuth";
 import { ProfileForm } from "@/components/profile/ProfileForm";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { ProfileSkeleton } from "@/components/ui/Skeleton";
 import { useAuth } from "@/context/AuthProvider";
 import styles from "./profile.module.css";
 
 function ProfileInner() {
-  const { user, signOut } = useAuth();
+  const { user, signOut, loading } = useAuth();
+
+  if (loading) {
+    return <ProfileSkeleton />;
+  }
 
   return (
     <div className={styles.wrap}>

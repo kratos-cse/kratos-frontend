@@ -10,7 +10,7 @@
     "test:matrix": "node scripts/assert-registration-matrix.cjs && node scripts/assert-registration-types.cjs"
   },
   "dependencies": {
-    "motion": "^13.4.1",
+    "motion": "^13.4.2",
     "next": "14.2.35",
     "qrcode.react": "^4.2.0",
     "react": "^18.3.1",

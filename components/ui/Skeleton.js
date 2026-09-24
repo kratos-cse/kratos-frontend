@@ -47,3 +47,40 @@ export function TeamSkeleton() {
     </div>
   );
 }
+
+export function ProfileSkeleton() {
+  return (
+    <div className={styles.profile} aria-busy="true" aria-live="polite">
+      <span className="sr-only">Loading profile</span>
+      <Skeleton className={styles.profileTitle} />
+      <Skeleton className={styles.profileLead} />
+      <div className={styles.card}>
+        <Skeleton className={styles.chip} />
+        <Skeleton className={styles.line} />
+        <Skeleton className={styles.line} />
+        <Skeleton className={styles.lineShort} />
+        <Skeleton className={styles.cta} />
+      </div>
+    </div>
+  );
+}
+
+export function RegistrationDetailSkeleton() {
+  return (
+    <div className={styles.regDetail} aria-busy="true" aria-live="polite">
+      <span className="sr-only">Loading registration</span>
+      <Skeleton className={styles.profileTitle} />
+      <div className={styles.badgeRow}>
+        <Skeleton className={styles.badge} />
+        <Skeleton className={styles.badge} />
+      </div>
+      <Skeleton className={styles.lineShort} />
+      <div className={styles.card}>
+        <Skeleton className={styles.cardTitle} />
+        <Skeleton className={styles.line} />
+        <Skeleton className={styles.cta} />
+      </div>
+      <TeamSkeleton />
+    </div>
+  );
+}

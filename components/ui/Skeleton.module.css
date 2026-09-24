@@ -104,3 +104,36 @@
   width: 100%;
   border-radius: var(--radius);
 }
+
+.profile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.profileTitle {
+  height: 2.25rem;
+  width: min(12rem, 50%);
+}
+
+.profileLead {
+  height: 1rem;
+  width: min(22rem, 85%);
+}
+
+.regDetail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.badgeRow {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.badge {
+  height: 1.35rem;
+  width: 5rem;
+  border-radius: 999px;
+}

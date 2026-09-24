@@ -34,7 +34,7 @@ function nextAction(reg) {
 function RegistrationsInner() {
   const { profile } = useAuth();
   const { registrations, loading, error, errorMessage, refresh } = useMyRegistrations();
-  const { events, loading: eventsLoading } = useEvents();
+  const { events } = useEvents();
 
   const eventMap = useMemo(() => {
     const map = {};
@@ -50,7 +50,7 @@ function RegistrationsInner() {
     });
   }, [registrations]);
 
-  if (loading || eventsLoading) {
+  if (loading) {
     return (
       <div className={styles.list}>
         <RegistrationSkeleton />

@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { ErrorState, StatusBanner } from "@/components/ui/ErrorState";
-import { PageSkeleton } from "@/components/ui/Skeleton";
+import { RegistrationDetailSkeleton } from "@/components/ui/Skeleton";
 import { openRazorpayCheckout } from "@/components/registration/PaymentCheckout";
 import { PaymentConfirmed } from "@/components/registration/PaymentConfirmed";
 import { useAuth } from "@/context/AuthProvider";
@@ -221,7 +221,7 @@ function RegistrationDetailInner() {
     }
   }
 
-  if (loading && !registration) return <PageSkeleton />;
+  if (loading && !registration) return <RegistrationDetailSkeleton />;
   if (error && !registration) {
     return (
       <ErrorState

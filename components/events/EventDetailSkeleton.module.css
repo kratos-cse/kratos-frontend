@@ -1,0 +1,70 @@
+.badge {
+  height: 1.5rem;
+  width: 5.5rem;
+  border-radius: 999px;
+}
+
+.title {
+  height: 2.5rem;
+  width: min(24rem, 90%);
+  border-radius: var(--radius-sm);
+}
+
+.tagline {
+  height: 1.25rem;
+  width: min(20rem, 75%);
+}
+
+.factLabel {
+  height: 0.7rem;
+  width: 3.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.factValue {
+  height: 1rem;
+  width: 80%;
+}
+
+.h2 {
+  height: 1.35rem;
+  width: 6rem;
+  margin-bottom: var(--space-3);
+}
+
+.line {
+  height: 0.9rem;
+  width: 100%;
+}
+
+.lineShort {
+  height: 0.9rem;
+  width: 72%;
+  margin-top: var(--space-2);
+}
+
+.ctaCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.ctaTitle {
+  height: 1.1rem;
+  width: 60%;
+}
+
+.ctaFee {
+  height: 1.75rem;
+  width: 40%;
+}
+
+.ctaBtn {
+  height: 2.75rem;
+  width: 100%;
+  border-radius: var(--radius);
+}
