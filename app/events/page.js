@@ -91,7 +91,7 @@ function EventsExplorer() {
             key={gridKey}
             events={filtered}
             registrationsByEventId={registrationsByEventId}
-            loading={loading}
+            loading={loading && !events.length}
           />
         )}
       </div>

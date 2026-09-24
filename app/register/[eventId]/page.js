@@ -12,6 +12,8 @@ import { StatusBanner, ErrorState } from "@/components/ui/ErrorState";
 import { PageSkeleton } from "@/components/ui/Skeleton";
 import { openRazorpayCheckout } from "@/components/registration/PaymentCheckout";
 import { PaymentConfirmed } from "@/components/registration/PaymentConfirmed";
+import { TeamMateChoice } from "@/components/registration/TeamMateChoice";
+import { TeamRosterWizard } from "@/components/registration/TeamRosterWizard";
 import { useAuth } from "@/context/AuthProvider";
 import { useEvent } from "@/hooks/useEvents";
 import { createRegistration, getRegistration, listMyRegistrations } from "@/lib/api/registrations";
@@ -25,6 +27,11 @@ import {
   registrationAvailabilityLabel,
 } from "@/lib/events/utils";
 import { allowedRegistrationTypes } from "@/lib/events/registrationTypes";
+import {
+  canLeaderEnterMembers,
+  canInviteTeammatesLater,
+  showTeammateChoice,
+} from "@/lib/events/rosterPlan";
 import styles from "./register.module.css";
 
 function RegisterWizard() {
@@ -56,9 +63,13 @@ function RegisterWizard() {
     else setStep("profile");
   }, [profile]);
 
-  const recoverExisting = useCallback(async () => {
+  const findExistingRegistration = useCallback(async () => {
     const list = await listMyRegistrations();
-    const existing = findMyRegistrationForEvent(list, eventId);
+    return findMyRegistrationForEvent(list, eventId);
+  }, [eventId]);
+
+  const recoverExisting = useCallback(async () => {
+    const existing = await findExistingRegistration();
     if (existing) {
       setRegistration(existing);
       if (isRegistrationConfirmed(existing)) {
@@ -69,7 +80,7 @@ function RegisterWizard() {
       return existing;
     }
     return null;
-  }, [eventId, router]);
+  }, [findExistingRegistration, router]);
 
   useEffect(() => {
     let cancelled = false;
@@ -143,13 +154,115 @@ function RegisterWizard() {
     }
   }
 
+  async function goToPayment(reg) {
+    setRegistration(reg);
+    const fee = Number(event?.fee || 0);
+    if (!fee) {
+      setStep("confirmed");
+      return;
+    }
+    setStep("payment");
+    await startPayment(reg);
+  }
+
+  async function ensureTeamRegistration() {
+    const existing = await findExistingRegistration();
+    if (existing) {
+      setRegistration(existing);
+      return existing;
+    }
+    const reg = await createRegistration(eventId, {
+      registration_type: "TEAM",
+      team_name: teamName.trim(),
+    });
+    setRegistration(reg);
+    return reg;
+  }
+
+  async function onSetupContinue() {
+    if (regType === "SOLO") {
+      setStep("review");
+      return;
+    }
+
+    if (!teamName.trim()) {
+      setError("Enter a team name.");
+      return;
+    }
+
+    setBusy(true);
+    setError(null);
+    try {
+      const existing = await findExistingRegistration();
+      if (existing) {
+        if (isRegistrationConfirmed(existing)) {
+          router.replace(`/registrations/${existing.id}`);
+          return;
+        }
+        setRegistration(existing);
+        setStep("payment");
+        return;
+      }
+
+      const reg = await ensureTeamRegistration();
+
+      if (!showTeammateChoice(event)) {
+        if (canLeaderEnterMembers(event)) {
+          setStep("roster");
+        } else {
+          await goToPayment(reg);
+        }
+        return;
+      }
+
+      setStep("teammate-choice");
+    } catch (err) {
+      setError(toUserMessage(err));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function onChooseAddNow() {
+    setBusy(true);
+    setError(null);
+    try {
+      const reg = registration || (await ensureTeamRegistration());
+      setRegistration(reg);
+      setStep("roster");
+    } catch (err) {
+      setError(toUserMessage(err));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function onChooseInviteLater() {
+    setBusy(true);
+    setError(null);
+    try {
+      const reg = registration || (await ensureTeamRegistration());
+      await goToPayment(reg);
+    } catch (err) {
+      setError(toUserMessage(err));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function createAndContinue() {
     setBusy(true);
     setError(null);
     try {
-      const existing = await recoverExisting();
+      const existing = await findExistingRegistration();
       if (existing) {
-        if (!isRegistrationConfirmed(existing) && Number(event.fee) > 0 && canRetryPayment(existing)) {
+        setRegistration(existing);
+        if (isRegistrationConfirmed(existing)) {
+          router.replace(`/registrations/${existing.id}`);
+          return;
+        }
+        if (Number(event.fee) > 0 && canRetryPayment(existing)) {
+          setStep("payment");
           await startPayment(existing);
         } else {
           router.replace(`/registrations/${existing.id}`);
@@ -157,23 +270,12 @@ function RegisterWizard() {
         return;
       }
 
-      const payload = {
-        registration_type: regType,
-        ...(regType === "TEAM" ? { team_name: teamName.trim() } : {}),
-      };
-      if (regType === "TEAM" && !teamName.trim()) {
-        setError("Enter a team name.");
-        setBusy(false);
-        return;
-      }
-
-      const reg = await createRegistration(eventId, payload);
+      const reg = await createRegistration(eventId, { registration_type: "SOLO" });
       setRegistration(reg);
       if (Number(event.fee) > 0) {
         setStep("payment");
         await startPayment(reg);
       } else {
-        setRegistration(reg);
         setStep("confirmed");
       }
     } catch (err) {
@@ -182,6 +284,8 @@ function RegisterWizard() {
       setBusy(false);
     }
   }
+
+  const teamId = registration?.team?.id;
 
   if (eventLoading) return <PageSkeleton />;
   if (eventError || !event) {
@@ -207,6 +311,15 @@ function RegisterWizard() {
     );
   }
 
+  const rosterHint = (() => {
+    const req = Number(event.required_member_count ?? event.team_min_size ?? 1);
+    const subs = Number(
+      event.substitute_count ?? Math.max(0, Number(event.team_max_size ?? req) - req)
+    );
+    if (subs > 0) return `Roster: ${req} members + up to ${subs} substitutes`;
+    return `Team of ${req}`;
+  })();
+
   return (
     <div className={styles.wrap}>
       <header className={styles.head}>
@@ -222,10 +335,7 @@ function RegisterWizard() {
         <Card>
           <h2 className={styles.h2}>Your profile</h2>
           <p className="muted">Complete your profile before registering.</p>
-          <ProfileForm
-            submitLabel="Continue"
-            onSaved={() => setStep("setup")}
-          />
+          <ProfileForm submitLabel="Continue" onSaved={() => setStep("setup")} />
         </Card>
       ) : null}
 
@@ -253,39 +363,53 @@ function RegisterWizard() {
                 required
                 value={teamName}
                 onChange={(e) => setTeamName(e.target.value)}
-                hint={
-                  event.required_member_count != null || event.team_min_size != null
-                    ? (() => {
-                        const req = Number(event.required_member_count ?? event.team_min_size ?? 1);
-                        const subs = Number(
-                          event.substitute_count ??
-                            Math.max(0, Number(event.team_max_size ?? req) - req),
-                        );
-                        if (subs > 0) {
-                          return `Roster: ${req} members + up to ${subs} substitutes (managed after payment)`;
-                        }
-                        return `Team of ${req} (managed after payment)`;
-                      })()
-                    : undefined
-                }
+                hint={rosterHint}
               />
-              <StatusBanner tone="info">
-                You&apos;ll be the team leader. Members can join with your invite after payment succeeds.
-              </StatusBanner>
+              {canInviteTeammatesLater(event) ? (
+                <StatusBanner tone="info">
+                  You&apos;ll be the team leader. After payment you can invite teammates to complete their
+                  own details.
+                </StatusBanner>
+              ) : null}
             </>
           ) : null}
           <div className={styles.actions}>
             <Button type="button" variant="ghost" href={`/events/${eventId}`}>
               Back
             </Button>
-            <Button type="button" onClick={() => setStep("review")} disabled={regType === "TEAM" && !teamName.trim()}>
-              Review
+            <Button
+              type="button"
+              loading={busy}
+              onClick={onSetupContinue}
+              disabled={regType === "TEAM" && !teamName.trim()}
+            >
+              {regType === "TEAM" ? "Next" : "Review"}
             </Button>
           </div>
         </Card>
       ) : null}
 
-      {step === "review" ? (
+      {step === "teammate-choice" && regType === "TEAM" ? (
+        <TeamMateChoice
+          event={event}
+          busy={busy}
+          onAddNow={onChooseAddNow}
+          onInviteLater={onChooseInviteLater}
+          onBack={() => setStep("setup")}
+        />
+      ) : null}
+
+      {step === "roster" && regType === "TEAM" && teamId ? (
+        <TeamRosterWizard
+          teamId={teamId}
+          event={event}
+          busy={busy}
+          onBack={() => setStep(showTeammateChoice(event) ? "teammate-choice" : "setup")}
+          onContinuePayment={() => goToPayment(registration)}
+        />
+      ) : null}
+
+      {step === "review" && regType === "SOLO" ? (
         <Card className="stack">
           <h2 className={styles.h2}>Review</h2>
           <dl className={styles.review}>
@@ -295,14 +419,8 @@ function RegisterWizard() {
             </div>
             <div>
               <dt>Type</dt>
-              <dd>{regType === "TEAM" ? "Team" : "Individual"}</dd>
+              <dd>Individual</dd>
             </div>
-            {regType === "TEAM" ? (
-              <div>
-                <dt>Team</dt>
-                <dd>{teamName}</dd>
-              </div>
-            ) : null}
             <div>
               <dt>Fee</dt>
               <dd>{formatFee(event.fee)}</dd>
@@ -335,7 +453,8 @@ function RegisterWizard() {
         <Card className="stack">
           <h2 className={styles.h2}>Payment</h2>
           <StatusBanner tone="warn">
-            Complete payment to confirm your registration. Don&apos;t refresh mid-checkout — you can retry safely.
+            Complete payment to confirm your registration. Don&apos;t refresh mid-checkout — you can retry
+            safely.
           </StatusBanner>
           <div className={styles.actions}>
             <Button

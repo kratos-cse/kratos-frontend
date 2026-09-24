@@ -41,7 +41,7 @@ export function useMyRegistrations() {
 
   return {
     registrations,
-    loading: authLoading || loading,
+    loading: isAuthenticated ? authLoading || loading : false,
     error,
     errorMessage: error ? toUserMessage(error) : null,
     refresh,

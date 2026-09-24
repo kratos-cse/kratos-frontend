@@ -1,39 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { listEvents, getEvent } from "@/lib/api/events";
+import { getEvent } from "@/lib/api/events";
+import { useEventsContext } from "@/context/EventsProvider";
 import { toUserMessage } from "@/lib/errors/userMessages";
 
 export function useEvents() {
-  const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  const refresh = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await listEvents();
-      setEvents(Array.isArray(data) ? data : []);
-    } catch (err) {
-      setError(err);
-      setEvents([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    refresh();
-  }, [refresh]);
-
-  return {
-    events,
-    loading,
-    error,
-    errorMessage: error ? toUserMessage(error) : null,
-    refresh,
-  };
+  return useEventsContext();
 }
 
 export function useEvent(eventId) {

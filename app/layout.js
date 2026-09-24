@@ -1,6 +1,7 @@
 import { IBM_Plex_Sans, Sora } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthProvider";
+import { EventsProvider } from "@/context/EventsProvider";
 
 const sora = Sora({
   subsets: ["latin"],
@@ -28,7 +29,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${sora.variable} ${ibmPlex.variable}`}>
       <body>
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <EventsProvider>{children}</EventsProvider>
+        </AuthProvider>
       </body>
     </html>
   );
