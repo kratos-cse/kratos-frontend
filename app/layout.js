@@ -1,37 +1,107 @@
-import { IBM_Plex_Sans, Sora } from "next/font/google";
 import "./globals.css";
-import { AuthProvider } from "@/context/AuthProvider";
-import { EventsProvider } from "@/context/EventsProvider";
-
-const sora = Sora({
-  subsets: ["latin"],
-  variable: "--font-sora",
-  display: "swap",
-  weight: ["500", "600", "700"],
-});
-
-const ibmPlex = IBM_Plex_Sans({
-  subsets: ["latin"],
-  variable: "--font-ibm-plex",
-  display: "swap",
-  weight: ["400", "500", "600", "700"],
-});
 
 export const metadata = {
-  title: {
-    default: "KRATOS'26",
-    template: "%s · KRATOS'26",
-  },
-  description: "Discover events, register, and manage your KRATOS'26 experience.",
+  title: "Hack the Future 2.0 | Kratos'26",
+  description:
+    "A 24-hour hackathon by Kratos'26 at Easwari Engineering College.",
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${sora.variable} ${ibmPlex.variable}`}>
+    <html lang="en">
       <body>
-        <AuthProvider>
-          <EventsProvider>{children}</EventsProvider>
-        </AuthProvider>
+        {/* Video background with sound */}
+        <div className="video-bg">
+          <video autoPlay loop playsInline>
+            <source src="/bg-video.mp4" type="video/mp4" />
+          </video>
+        </div>
+
+        <div className="video-overlay" />
+
+        {/* ================= NAVBAR ================= */}
+        <nav className="navbar">
+          <div className="nav-inner">
+
+            <div className="nav-left">
+              <img
+                src="/easwari-logo.png"
+                alt="Easwari Engineering College"
+              />
+
+              <img
+                src="/iet-purple.png"
+                alt="The Institution of Engineering and Technology"
+                className="iet-logo"
+              />
+            </div>
+
+            <div className="nav-links">
+              <a href="#hero">Home</a>
+              <a href="#domains">Domains</a>
+              <a href="#timeline">Timeline</a>
+              <a href="#prizes">Prizes</a>
+              <a href="#rules">Rules</a>
+              <a href="#venue">Venue</a>
+
+              <a
+                href="#register"
+                className="btn-neon"
+                style={{
+                  padding: "8px 20px",
+                  fontSize: "11px",
+                }}
+              >
+                Register
+              </a>
+            </div>
+
+            <div className="nav-right">
+              <img src="/ace-logo.png" alt="ACE" />
+              <img src="/srm-logo.png" alt="SRM" />
+            </div>
+
+          </div>
+        </nav>
+
+        {children}
+
+        {/* ================= FOOTER ================= */}
+        <footer>
+          <div className="container">
+
+            <div className="foot-logos">
+              <img
+                src="/easwari-logo.png"
+                alt="Easwari Engineering College"
+              />
+
+              <img
+                src="/iet-purple.png"
+                alt="The Institution of Engineering and Technology"
+                className="iet-footer-logo"
+              />
+
+              <img src="/ace-logo.png" alt="ACE" />
+              <img src="/srm-logo.png" alt="SRM" />
+            </div>
+
+            <p>
+              Hack the Future 2.0 &mdash; Kratos&apos;26 &middot; Dept. of CSE,
+              Easwari Engineering College.
+            </p>
+
+            <p
+              style={{
+                marginTop: 6,
+                opacity: 0.6,
+              }}
+            >
+              &copy; 2026 Kratos&apos;26. All rights reserved.
+            </p>
+
+          </div>
+        </footer>
       </body>
     </html>
   );
