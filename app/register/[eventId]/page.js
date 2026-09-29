@@ -14,6 +14,8 @@ import { openRazorpayCheckout } from "@/components/registration/PaymentCheckout"
 import { PaymentConfirmed } from "@/components/registration/PaymentConfirmed";
 import { TeamMateChoice } from "@/components/registration/TeamMateChoice";
 import { TeamRosterWizard } from "@/components/registration/TeamRosterWizard";
+import { DynamicFieldForm, toFieldResponses } from "@/components/registration/DynamicFieldForm";
+import { getRegistrationForm } from "@/lib/api/registrationForm";
 import { useAuth } from "@/context/AuthProvider";
 import { useEvent } from "@/hooks/useEvents";
 import { createRegistration, getRegistration, listMyRegistrations } from "@/lib/api/registrations";
@@ -47,6 +49,8 @@ function RegisterWizard() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   const [registration, setRegistration] = useState(null);
+  const [formConfig, setFormConfig] = useState({ registration_fields: [], team_member_fields: [] });
+  const [fieldValues, setFieldValues] = useState({});
 
   const { types, configError } = useMemo(
     () => (event ? allowedRegistrationTypes(event) : { types: ["SOLO"], error: null }),
@@ -57,6 +61,22 @@ function RegisterWizard() {
     if (!event) return;
     setRegType(types[0] || "SOLO");
   }, [event, types]);
+
+  useEffect(() => {
+    if (!eventId) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const form = await getRegistrationForm(eventId);
+        if (!cancelled) setFormConfig(form);
+      } catch {
+        /* optional — events without custom fields */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [eventId]);
 
   useEffect(() => {
     if (isProfileComplete(profile)) setStep("setup");
@@ -174,6 +194,7 @@ function RegisterWizard() {
     const reg = await createRegistration(eventId, {
       registration_type: "TEAM",
       team_name: teamName.trim(),
+      field_responses: toFieldResponses(fieldValues),
     });
     setRegistration(reg);
     return reg;
@@ -270,7 +291,10 @@ function RegisterWizard() {
         return;
       }
 
-      const reg = await createRegistration(eventId, { registration_type: "SOLO" });
+      const reg = await createRegistration(eventId, {
+        registration_type: "SOLO",
+        field_responses: toFieldResponses(fieldValues),
+      });
       setRegistration(reg);
       if (Number(event.fee) > 0) {
         setStep("payment");
@@ -373,6 +397,14 @@ function RegisterWizard() {
               ) : null}
             </>
           ) : null}
+          {formConfig.registration_fields?.length ? (
+            <DynamicFieldForm
+              fields={formConfig.registration_fields}
+              values={fieldValues}
+              onChange={setFieldValues}
+              disabled={busy}
+            />
+          ) : null}
           <div className={styles.actions}>
             <Button type="button" variant="ghost" href={`/events/${eventId}`}>
               Back
@@ -403,6 +435,7 @@ function RegisterWizard() {
         <TeamRosterWizard
           teamId={teamId}
           event={event}
+          memberFields={formConfig.team_member_fields}
           busy={busy}
           onBack={() => setStep(showTeammateChoice(event) ? "teammate-choice" : "setup")}
           onContinuePayment={() => goToPayment(registration)}

@@ -8,6 +8,7 @@ import { StatusBanner } from "@/components/ui/ErrorState";
 import { TeamSkeleton } from "@/components/ui/Skeleton";
 import { ProgressBar } from "@/components/registration/ProgressBar";
 import { addRosterMember, getTeam } from "@/lib/api/teams";
+import { DynamicFieldForm, toFieldResponses } from "@/components/registration/DynamicFieldForm";
 import { toUserMessage } from "@/lib/errors/userMessages";
 import {
   countMandatory,
@@ -21,12 +22,13 @@ import styles from "./TeamRosterWizard.module.css";
 const YEARS = ["1", "2", "3", "4", "PG", "Other"];
 const EMPTY_FORM = { full_name: "", phone: "", contact_email: "", college_name: "", year_of_study: "" };
 
-export function TeamRosterWizard({ teamId, event, onContinuePayment, onBack, busy: parentBusy }) {
+export function TeamRosterWizard({ teamId, event, memberFields = [], onContinuePayment, onBack, busy: parentBusy }) {
   const [team, setTeam] = useState(null);
   const [loading, setLoading] = useState(Boolean(teamId));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
+  const [fieldValues, setFieldValues] = useState({});
 
   const refresh = useCallback(async () => {
     if (!teamId) return null;
@@ -73,8 +75,10 @@ export function TeamRosterWizard({ teamId, event, onContinuePayment, onBack, bus
         contact_email: form.contact_email.trim() || undefined,
         college_name: form.college_name.trim() || undefined,
         year_of_study: form.year_of_study.trim() || undefined,
+        field_responses: toFieldResponses(fieldValues),
       });
       setForm(EMPTY_FORM);
+      setFieldValues({});
       await refresh();
     } catch (err) {
       setError(toUserMessage(err));
@@ -158,6 +162,12 @@ export function TeamRosterWizard({ teamId, event, onContinuePayment, onBack, bus
               </option>
             ))}
           </Select>
+          <DynamicFieldForm
+            fields={memberFields}
+            values={fieldValues}
+            onChange={setFieldValues}
+            disabled={isBusy}
+          />
           <div className={styles.actions}>
             <Button type="submit" loading={isBusy}>
               Save &amp; Next

@@ -4,6 +4,8 @@ import { useMemo } from "react";
 import { useParams } from "next/navigation";
 import { PageShell } from "@/components/layout/PageShell";
 import { RegistrationCTA } from "@/components/events/RegistrationCTA";
+import { EventContentSections } from "@/components/events/EventContentSections";
+import { EventCoordinators } from "@/components/events/EventCoordinators";
 import { Badge } from "@/components/ui/Badge";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { EventDetailSkeleton } from "@/components/events/EventDetailSkeleton";
@@ -107,12 +109,6 @@ export default function EventDetailPage() {
                   <dd>{rosterLine}</dd>
                 </div>
               ) : null}
-              {event.spots_remaining != null ? (
-                <div>
-                  <dt>Spots left</dt>
-                  <dd>{event.spots_remaining}</dd>
-                </div>
-              ) : null}
               {event.whatsapp_group_available ? (
                 <div>
                   <dt>WhatsApp</dt>
@@ -128,6 +124,8 @@ export default function EventDetailPage() {
               </section>
             ) : null}
 
+            <EventContentSections sections={event.content_sections} />
+            <EventCoordinators coordinators={event.coordinators} />
           </div>
 
           <aside className={styles.aside}>
