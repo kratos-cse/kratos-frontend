@@ -16,7 +16,8 @@ import { useAuth } from "@/context/AuthProvider";
 import { useEvent } from "@/hooks/useEvents";
 import { cancelRegistration, getRegistration } from "@/lib/api/registrations";
 import { createOrder, verifyPayment, syncPayment } from "@/lib/api/payments";
-import { getEventWhatsapp } from "@/lib/api/events";
+import { getEventWhatsapp, getRegistrationForm } from "@/lib/api/events";
+import { visibleFields } from "@/lib/registration/fieldUtils";
 import {
   toUserMessage,
   canRetryPayment,
@@ -43,6 +44,7 @@ function RegistrationDetailInner() {
   // Post-payment CONTINUE is transient (in-session only). After refresh, confirmed state shows directly.
   const [journeyExpanded, setJourneyExpanded] = useState(true);
   const [awaitingContinue, setAwaitingContinue] = useState(false);
+  const [teamMemberFields, setTeamMemberFields] = useState([]);
 
   const { event } = useEvent(registration?.event_id);
 
@@ -67,6 +69,22 @@ function RegistrationDetailInner() {
     autoSynced.current = false;
     refresh();
   }, [refresh]);
+
+  useEffect(() => {
+    if (!registration?.event_id) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const form = await getRegistrationForm(registration.event_id);
+        if (!cancelled) setTeamMemberFields(visibleFields(form?.team_member_fields));
+      } catch {
+        if (!cancelled) setTeamMemberFields([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [registration?.event_id]);
 
   // Explicit reconcile: if payment still CREATED after load, call sync once.
   useEffect(() => {
@@ -325,6 +343,7 @@ function RegistrationDetailInner() {
         <TeamPanel
           teamId={teamId}
           event={event}
+          teamMemberFields={teamMemberFields}
           onChanged={async () => {
             try {
               const data = await getRegistration(id);

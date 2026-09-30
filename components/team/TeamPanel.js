@@ -15,7 +15,12 @@ import {
   leaveTeam,
   removeMember,
 } from "@/lib/api/teams";
+import { DynamicRegistrationForm } from "@/components/registration/DynamicRegistrationForm";
 import { toUserMessage } from "@/lib/errors/userMessages";
+import {
+  buildFieldResponses,
+  validateRequiredFields,
+} from "@/lib/registration/fieldUtils";
 import CountUp from "@/components/micro/CountUp/CountUp";
 import styles from "./TeamPanel.module.css";
 
@@ -46,7 +51,7 @@ const EMPTY_FORM = { full_name: "", phone: "", contact_email: "", college_name: 
  * Authoritative team UI — loads GET /teams/{id}.
  * Shows mandatory vs substitute sections from backend roster fields.
  */
-export function TeamPanel({ teamId, event, onChanged }) {
+export function TeamPanel({ teamId, event, teamMemberFields = [], onChanged }) {
   const { profile } = useAuth();
   const [team, setTeam] = useState(null);
   const [loading, setLoading] = useState(Boolean(teamId));
@@ -56,6 +61,7 @@ export function TeamPanel({ teamId, event, onChanged }) {
   const [loadingInvite, setLoadingInvite] = useState(false);
   const [addRole, setAddRole] = useState(null); // MEMBER | SUBSTITUTE | null
   const [form, setForm] = useState(EMPTY_FORM);
+  const [fieldValues, setFieldValues] = useState({});
 
   const refresh = useCallback(async ({ notify = false } = {}) => {
     if (!teamId) {
@@ -200,6 +206,11 @@ export function TeamPanel({ teamId, event, onChanged }) {
   async function onAddRoster(e) {
     e.preventDefault();
     if (!team?.id || !addRole) return;
+    const missing = validateRequiredFields(teamMemberFields, fieldValues);
+    if (missing.length) {
+      setError(`Please complete: ${missing.join(", ")}`);
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
@@ -210,8 +221,10 @@ export function TeamPanel({ teamId, event, onChanged }) {
         contact_email: form.contact_email.trim() || undefined,
         college_name: form.college_name.trim() || undefined,
         year_of_study: form.year_of_study.trim() || undefined,
+        field_responses: buildFieldResponses(teamMemberFields, fieldValues),
       });
       setForm(EMPTY_FORM);
+      setFieldValues({});
       setAddRole(null);
       await refresh({ notify: true });
     } catch (err) {
@@ -406,6 +419,12 @@ export function TeamPanel({ teamId, event, onChanged }) {
               label="Year of study"
               value={form.year_of_study}
               onChange={(e) => setForm((f) => ({ ...f, year_of_study: e.target.value }))}
+            />
+            <DynamicRegistrationForm
+              fields={teamMemberFields}
+              values={fieldValues}
+              disabled={busy}
+              onChange={(fieldId, value) => setFieldValues((prev) => ({ ...prev, [fieldId]: value }))}
             />
             <div className={styles.addFormActions}>
               <Button type="button" variant="ghost" size="sm" onClick={() => setAddRole(null)}>

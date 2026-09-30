@@ -9,10 +9,17 @@ import { Button } from "@/components/ui/Button";
 import styles from "./Navbar.module.css";
 
 const LINKS = [
+  { href: "/", label: "Home" },
   { href: "/events", label: "Events" },
+  { href: "/about", label: "About" },
   { href: "/registrations", label: "My Registrations", auth: true },
   { href: "/profile", label: "Profile", auth: true },
 ];
+
+function isActive(pathname, href) {
+  if (href === "/") return pathname === "/";
+  return pathname === href || pathname?.startsWith(`${href}/`);
+}
 
 export function Navbar() {
   const pathname = usePathname();
@@ -67,7 +74,7 @@ export function Navbar() {
 
         <nav className={styles.desktop} aria-label="Primary">
           {visibleLinks.map((link) => {
-            const active = pathname === link.href || pathname?.startsWith(`${link.href}/`);
+            const active = isActive(pathname, link.href);
             return (
               <Link
                 key={link.href}
@@ -124,7 +131,7 @@ export function Navbar() {
       >
         <nav className={styles.mobileNav} aria-label="Mobile">
           {visibleLinks.map((link, i) => {
-            const active = pathname === link.href || pathname?.startsWith(`${link.href}/`);
+            const active = isActive(pathname, link.href);
             return (
               <Link
                 key={link.href}

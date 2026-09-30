@@ -198,11 +198,13 @@ button {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;   /* prevent any full-bleed section from causing horizontal scroll */
 }
 
 .app-main {
   flex: 1;
   width: 100%;
+  padding-top: var(--nav-h);
 }
 
 .container {
@@ -217,6 +219,33 @@ button {
 
 .page {
   padding-block: var(--space-6) var(--space-8);
+}
+
+/* Navbar is absolutely positioned; push page content below it (+ .page top padding) */
+.events-page-content {
+  position: relative;
+  z-index: 1;
+}
+
+.lion-watermark {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: clamp(300px, 55vw, 650px);
+  height: auto;
+  opacity: 0.04;
+  pointer-events: none;
+  z-index: 0;
+  filter: grayscale(30%);
+}
+
+/* Solid content box used for page headers / panels */
+.panel-box {
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
 }
 
 .page-title {
@@ -269,4 +298,10 @@ button {
 
 .visually-busy[aria-busy="true"] {
   pointer-events: none;
+}
+
+/* SunCursor draws its own flame tip — hide the native pointer while it is active */
+html.sun-cursor,
+html.sun-cursor * {
+  cursor: none !important;
 }

@@ -3,6 +3,8 @@
 import { useMemo } from "react";
 import { useParams } from "next/navigation";
 import { PageShell } from "@/components/layout/PageShell";
+import { EventContentSections } from "@/components/events/EventContentSections";
+import { EventCoordinatorList } from "@/components/events/EventCoordinatorList";
 import { RegistrationCTA } from "@/components/events/RegistrationCTA";
 import { Badge } from "@/components/ui/Badge";
 import { ErrorState } from "@/components/ui/ErrorState";
@@ -128,6 +130,8 @@ export default function EventDetailPage() {
               </section>
             ) : null}
 
+            <EventContentSections sections={event.content_sections} />
+            <EventCoordinatorList coordinators={event.coordinators} />
           </div>
 
           <aside className={styles.aside}>

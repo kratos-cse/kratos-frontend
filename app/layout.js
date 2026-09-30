@@ -2,6 +2,7 @@ import { IBM_Plex_Sans, Sora } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthProvider";
 import { EventsProvider } from "@/context/EventsProvider";
+import SiteCursor from "@/components/effects/SiteCursor";
 
 const sora = Sora({
   subsets: ["latin"],
@@ -30,6 +31,7 @@ export default function RootLayout({ children }) {
     <html lang="en" className={`${sora.variable} ${ibmPlex.variable}`}>
       <body>
         <AuthProvider>
+          <SiteCursor />
           <EventsProvider>{children}</EventsProvider>
         </AuthProvider>
       </body>

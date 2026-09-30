@@ -70,9 +70,11 @@ function EventsExplorer() {
 
   return (
     <PageTransition>
-      <header className="stack" style={{ marginBottom: "var(--space-5)" }}>
+      <header className="panel-box" style={{ marginBottom: "var(--space-4)" }}>
         <h1 className="page-title">Events</h1>
-        <p className="page-lead">Browse every KRATOS&apos;26 event. Filter by category and register when ready.</p>
+        <p className="page-lead" style={{ marginBottom: 0 }}>
+          Browse every KRATOS&apos;26 event. Filter by category and register when ready.
+        </p>
       </header>
 
       <EventFilters
@@ -102,9 +104,11 @@ function EventsExplorer() {
 export default function EventsPage() {
   return (
     <PageShell>
-      <Suspense fallback={<PageSkeleton />}>
-        <EventsExplorer />
-      </Suspense>
+      <div className="events-page-content">
+        <Suspense fallback={<PageSkeleton />}>
+          <EventsExplorer />
+        </Suspense>
+      </div>
     </PageShell>
   );
 }

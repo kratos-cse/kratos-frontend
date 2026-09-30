@@ -1,0 +1,351 @@
+.hero {
+  position: relative;
+  overflow: hidden;
+  background: #07050a;
+}
+
+/* ── Starfield ── */
+.stars {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.stars span {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: #f4e3b8;
+  animation: twinkle 4s ease-in-out infinite;
+}
+
+@keyframes twinkle {
+
+  0%,
+  100% {
+    opacity: 0.15;
+  }
+
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 900px 600px at 50% 46%, rgba(140, 30, 30, 0.22), transparent 60%),
+    radial-gradient(ellipse 1400px 900px at 50% 50%, rgba(20, 8, 10, 0.4), #07050a 78%);
+}
+
+/* ── Orbit ── */
+.orbitWrap {
+  position: relative;
+  z-index: 2;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  min-height: 680px;
+}
+
+@keyframes spin {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+.ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(78vw, 880px);
+  height: min(52vw, 560px);
+  border: 1px dashed rgba(230, 180, 90, 0.18);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: spin 60s linear infinite;
+}
+
+.ringInner {
+  width: min(60vw, 660px);
+  height: min(38vw, 410px);
+  opacity: 0.6;
+  animation-duration: 45s;
+  animation-direction: reverse;
+}
+
+/* ── Lion ── */
+.lionZone {
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  transform: translate(-50%, -50%);
+  width: 420px;
+  max-width: 80vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  z-index: 4;
+}
+
+.lionSlot {
+  width: 230px;
+  height: 230px;
+  flex-shrink: 0;
+}
+
+.lionGlow {
+  position: absolute;
+  left: 50%;
+  top: 24%;
+  transform: translate(-50%, -50%);
+  width: 340px;
+  height: 340px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(160, 30, 30, 0.35), transparent 68%);
+  pointer-events: none;
+  animation: pulse 4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 0.75;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.08);
+  }
+}
+
+.lion {
+  position: relative;
+  width: 230px;
+  height: 230px;
+  object-fit: contain;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  filter: drop-shadow(0 0 30px rgba(210, 60, 40, 0.55)) drop-shadow(0 0 60px rgba(230, 150, 40, 0.18));
+  transition: filter 0.25s ease;
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.lionDragging {
+  cursor: grabbing;
+  animation: none !important;
+  filter: drop-shadow(0 0 46px rgba(230, 90, 40, 0.85)) drop-shadow(0 0 90px rgba(230, 150, 40, 0.35));
+}
+
+.eyebrow {
+  margin: 14px 0 0;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  color: var(--accent-gold);
+}
+
+.subtext {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: #9a8e93;
+}
+
+.headline {
+  margin: 14px 0 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(28px, 4vw, 46px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+/* ── Arena nodes (symmetric around the orbit) ── */
+.nodeGrid {
+  display: contents;
+}
+
+.node {
+  position: absolute;
+  z-index: 5;
+  width: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.iconWrap {
+  width: 120px;
+  height: 112px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.35s ease, filter 0.35s ease;
+}
+
+.iconWrap img {
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.65));
+}
+
+.meta {
+  margin-top: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--brand-bright);
+}
+
+.label {
+  margin-top: 2px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  transition: color 0.25s ease;
+}
+
+.node:hover .iconWrap,
+.node:focus-visible .iconWrap,
+.hot .iconWrap {
+  transform: scale(1.1);
+  filter: drop-shadow(0 0 26px rgba(230, 150, 40, 0.6));
+}
+
+.node:hover .label,
+.node:focus-visible .label,
+.hot .label {
+  color: var(--accent-gold);
+}
+
+.n_technical {
+  left: 5%;
+  top: 12%;
+}
+
+.n_spark {
+  right: 5%;
+  top: 12%;
+}
+
+.n_playground {
+  left: 3%;
+  top: 56%;
+}
+
+.n_online {
+  right: 3%;
+  top: 56%;
+}
+
+.n_hackathon {
+  left: 50%;
+  bottom: 3%;
+  transform: translateX(-50%);
+}
+
+/* ── Mobile: stack lion above a 2-col grid ── */
+@media (max-width: 760px) {
+  .orbitWrap {
+    min-height: auto;
+    padding: 28px 16px 36px;
+  }
+
+  .ring {
+    display: none;
+  }
+
+  .lionZone {
+    position: relative;
+    left: auto;
+    top: auto;
+    transform: none;
+    margin: 0 auto 24px;
+  }
+
+  .lionSlot {
+    width: 170px;
+    height: 170px;
+  }
+
+  .lion {
+    width: 170px;
+    height: 170px;
+  }
+
+  .lionGlow {
+    width: 260px;
+    height: 260px;
+    top: 85px;
+  }
+
+  .nodeGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 26px 10px;
+  }
+
+  .node {
+    position: relative;
+    inset: auto;
+    transform: none;
+    width: auto;
+  }
+
+  .n_hackathon {
+    grid-column: 1 / -1;
+    justify-self: center;
+    left: auto;
+    bottom: auto;
+    transform: none;
+  }
+
+  .iconWrap {
+    width: 88px;
+    height: 80px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .ring,
+  .lion,
+  .lionGlow,
+  .stars span {
+    animation: none;
+  }
+}

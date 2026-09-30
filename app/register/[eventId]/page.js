@@ -14,8 +14,10 @@ import { openRazorpayCheckout } from "@/components/registration/PaymentCheckout"
 import { PaymentConfirmed } from "@/components/registration/PaymentConfirmed";
 import { TeamMateChoice } from "@/components/registration/TeamMateChoice";
 import { TeamRosterWizard } from "@/components/registration/TeamRosterWizard";
+import { DynamicRegistrationForm } from "@/components/registration/DynamicRegistrationForm";
 import { useAuth } from "@/context/AuthProvider";
 import { useEvent } from "@/hooks/useEvents";
+import { getRegistrationForm } from "@/lib/api/events";
 import { createRegistration, getRegistration, listMyRegistrations } from "@/lib/api/registrations";
 import { createOrder, verifyPayment, syncPayment } from "@/lib/api/payments";
 import { toUserMessage, canRetryPayment, isRegistrationConfirmed } from "@/lib/errors/userMessages";
@@ -32,6 +34,11 @@ import {
   canInviteTeammatesLater,
   showTeammateChoice,
 } from "@/lib/events/rosterPlan";
+import {
+  buildFieldResponses,
+  validateRequiredFields,
+  visibleFields,
+} from "@/lib/registration/fieldUtils";
 import styles from "./register.module.css";
 
 function RegisterWizard() {
@@ -47,10 +54,25 @@ function RegisterWizard() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   const [registration, setRegistration] = useState(null);
+  const [checkingExisting, setCheckingExisting] = useState(true);
+  const [alreadyRegistered, setAlreadyRegistered] = useState(null);
+  const [registrationForm, setRegistrationForm] = useState({ registration_fields: [], team_member_fields: [] });
+  const [fieldValues, setFieldValues] = useState({});
 
   const { types, configError } = useMemo(
     () => (event ? allowedRegistrationTypes(event) : { types: ["SOLO"], error: null }),
     [event]
+  );
+
+  const hasFee = Number(event?.fee || 0) > 0;
+
+  const registrationFields = useMemo(
+    () => visibleFields(registrationForm.registration_fields),
+    [registrationForm.registration_fields]
+  );
+  const teamMemberFields = useMemo(
+    () => visibleFields(registrationForm.team_member_fields),
+    [registrationForm.team_member_fields]
   );
 
   useEffect(() => {
@@ -63,6 +85,22 @@ function RegisterWizard() {
     else setStep("profile");
   }, [profile]);
 
+  useEffect(() => {
+    if (!eventId) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const form = await getRegistrationForm(eventId);
+        if (!cancelled) setRegistrationForm(form || { registration_fields: [], team_member_fields: [] });
+      } catch {
+        if (!cancelled) setRegistrationForm({ registration_fields: [], team_member_fields: [] });
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [eventId]);
+
   const findExistingRegistration = useCallback(async () => {
     const list = await listMyRegistrations();
     return findMyRegistrationForEvent(list, eventId);
@@ -72,30 +110,32 @@ function RegisterWizard() {
     const existing = await findExistingRegistration();
     if (existing) {
       setRegistration(existing);
-      if (isRegistrationConfirmed(existing)) {
-        router.replace(`/registrations/${existing.id}`);
+      if (isRegistrationConfirmed(existing) || !hasFee) {
+        setAlreadyRegistered(existing);
         return existing;
       }
       setStep("payment");
       return existing;
     }
     return null;
-  }, [findExistingRegistration, router]);
+  }, [findExistingRegistration, hasFee]);
 
   useEffect(() => {
+    if (!event) return undefined;
     let cancelled = false;
     (async () => {
       try {
-        const existing = await recoverExisting();
-        if (!cancelled && existing) setRegistration(existing);
+        await recoverExisting();
       } catch {
         /* ignore — user may not have regs yet */
+      } finally {
+        if (!cancelled) setCheckingExisting(false);
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [recoverExisting]);
+  }, [event, recoverExisting]);
 
   async function startPayment(reg) {
     const fee = Number(event?.fee || 0);
@@ -174,17 +214,13 @@ function RegisterWizard() {
     const reg = await createRegistration(eventId, {
       registration_type: "TEAM",
       team_name: teamName.trim(),
+      field_responses: buildFieldResponses(registrationFields, fieldValues),
     });
     setRegistration(reg);
     return reg;
   }
 
-  async function onSetupContinue() {
-    if (regType === "SOLO") {
-      setStep("review");
-      return;
-    }
-
+  async function continueTeamSetup() {
     if (!teamName.trim()) {
       setError("Enter a team name.");
       return;
@@ -196,7 +232,7 @@ function RegisterWizard() {
       const existing = await findExistingRegistration();
       if (existing) {
         if (isRegistrationConfirmed(existing)) {
-          router.replace(`/registrations/${existing.id}`);
+          setAlreadyRegistered(existing);
           return;
         }
         setRegistration(existing);
@@ -221,6 +257,20 @@ function RegisterWizard() {
     } finally {
       setBusy(false);
     }
+  }
+
+  async function onSetupContinue() {
+    if (regType === "SOLO") {
+      setStep(registrationFields.length ? "custom-fields" : "review");
+      return;
+    }
+
+    if (registrationFields.length) {
+      setStep("custom-fields");
+      return;
+    }
+
+    await continueTeamSetup();
   }
 
   async function onChooseAddNow() {
@@ -258,19 +308,22 @@ function RegisterWizard() {
       if (existing) {
         setRegistration(existing);
         if (isRegistrationConfirmed(existing)) {
-          router.replace(`/registrations/${existing.id}`);
+          setAlreadyRegistered(existing);
           return;
         }
         if (Number(event.fee) > 0 && canRetryPayment(existing)) {
           setStep("payment");
           await startPayment(existing);
         } else {
-          router.replace(`/registrations/${existing.id}`);
+          setAlreadyRegistered(existing);
         }
         return;
       }
 
-      const reg = await createRegistration(eventId, { registration_type: "SOLO" });
+      const reg = await createRegistration(eventId, {
+        registration_type: "SOLO",
+        field_responses: buildFieldResponses(registrationFields, fieldValues),
+      });
       setRegistration(reg);
       if (Number(event.fee) > 0) {
         setStep("payment");
@@ -287,7 +340,7 @@ function RegisterWizard() {
 
   const teamId = registration?.team?.id;
 
-  if (eventLoading) return <PageSkeleton />;
+  if (eventLoading || (event && checkingExisting)) return <PageSkeleton />;
   if (eventError || !event) {
     return (
       <ErrorState
@@ -297,6 +350,32 @@ function RegisterWizard() {
         secondaryLabel="Back to events"
         secondaryHref="/events"
       />
+    );
+  }
+
+  if (alreadyRegistered) {
+    return (
+      <div className={styles.wrap}>
+        <header className={styles.head}>
+          <p className="meta">Register</p>
+          <h1 className="page-title">{event.name}</h1>
+        </header>
+        <Card className="stack">
+          <StatusBanner tone="ok">You have already registered for this event.</StatusBanner>
+          <p className="muted">
+            Each participant can register for an event only once. Open your registration to see its
+            details{alreadyRegistered.team ? " and manage your team" : ""}.
+          </p>
+          <div className={styles.actions}>
+            <Button type="button" variant="ghost" href="/events">
+              Browse other events
+            </Button>
+            <Button type="button" href={`/registrations/${alreadyRegistered.id}`}>
+              View registration
+            </Button>
+          </div>
+        </Card>
+      </div>
     );
   }
 
@@ -328,6 +407,11 @@ function RegisterWizard() {
         <p className="muted">Fee: {formatFee(event.fee)}</p>
       </header>
 
+      {step === "payment" && registration ? (
+        <StatusBanner tone="info">
+          You have already started registering for this event — complete payment to confirm it.
+        </StatusBanner>
+      ) : null}
       {error ? <StatusBanner tone="err">{error}</StatusBanner> : null}
       {configError ? <StatusBanner tone="err">{configError}</StatusBanner> : null}
 
@@ -383,7 +467,7 @@ function RegisterWizard() {
               onClick={onSetupContinue}
               disabled={regType === "TEAM" && !teamName.trim()}
             >
-              {regType === "TEAM" ? "Next" : "Review"}
+              {regType === "TEAM" ? "Next" : registrationFields.length ? "Continue" : "Review"}
             </Button>
           </div>
         </Card>
@@ -403,10 +487,44 @@ function RegisterWizard() {
         <TeamRosterWizard
           teamId={teamId}
           event={event}
+          teamMemberFields={teamMemberFields}
           busy={busy}
           onBack={() => setStep(showTeammateChoice(event) ? "teammate-choice" : "setup")}
           onContinuePayment={() => goToPayment(registration)}
         />
+      ) : null}
+
+      {step === "custom-fields" ? (
+        <Card className="stack">
+          <h2 className={styles.h2}>Additional details</h2>
+          <DynamicRegistrationForm
+            fields={registrationFields}
+            values={fieldValues}
+            disabled={busy}
+            onChange={(fieldId, value) => setFieldValues((prev) => ({ ...prev, [fieldId]: value }))}
+          />
+          <div className={styles.actions}>
+            <Button type="button" variant="ghost" onClick={() => setStep("setup")}>
+              Back
+            </Button>
+            <Button
+              type="button"
+              loading={busy && regType === "TEAM"}
+              onClick={() => {
+                const missing = validateRequiredFields(registrationFields, fieldValues);
+                if (missing.length) {
+                  setError(`Please complete: ${missing.join(", ")}`);
+                  return;
+                }
+                setError(null);
+                if (regType === "SOLO") setStep("review");
+                else continueTeamSetup();
+              }}
+            >
+              Continue
+            </Button>
+          </div>
+        </Card>
       ) : null}
 
       {step === "review" && regType === "SOLO" ? (
@@ -431,7 +549,11 @@ function RegisterWizard() {
             </div>
           </dl>
           <div className={styles.actions}>
-            <Button type="button" variant="ghost" onClick={() => setStep("setup")}>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setStep(registrationFields.length ? "custom-fields" : "setup")}
+            >
               Back
             </Button>
             <Button type="button" loading={busy} onClick={createAndContinue}>
