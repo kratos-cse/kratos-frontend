@@ -139,7 +139,7 @@
   touch-action: none;
   user-select: none;
   filter: drop-shadow(0 0 30px rgba(210, 60, 40, 0.55)) drop-shadow(0 0 60px rgba(230, 150, 40, 0.18));
-  transition: filter 0.25s ease;
+  transition: filter var(--duration-fast) var(--ease-out);
   animation: float 6s ease-in-out infinite;
 }
 
@@ -207,15 +207,28 @@
 }
 
 .iconWrap {
+  position: relative;
   width: 120px;
   height: 112px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.35s ease, filter 0.35s ease;
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.iconWrap::before {
+  content: "";
+  position: absolute;
+  inset: -12%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(230, 150, 40, 0.45) 0%, rgba(230, 150, 40, 0) 70%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-fast) var(--ease-out);
 }
 
 .iconWrap img {
+  position: relative;
   height: 100%;
   width: auto;
   max-width: 100%;
@@ -236,17 +249,33 @@
   font-size: 15px;
   font-weight: 700;
   letter-spacing: 1.5px;
-  transition: color 0.25s ease;
+  transition: color var(--duration-fast) ease;
 }
 
-.node:hover .iconWrap,
+@media (hover: hover) and (pointer: fine) {
+  .node:hover .iconWrap {
+    transform: scale(1.1);
+  }
+
+  .node:hover .iconWrap::before {
+    opacity: 1;
+  }
+
+  .node:hover .label {
+    color: var(--accent-gold);
+  }
+}
+
 .node:focus-visible .iconWrap,
 .hot .iconWrap {
   transform: scale(1.1);
-  filter: drop-shadow(0 0 26px rgba(230, 150, 40, 0.6));
 }
 
-.node:hover .label,
+.node:focus-visible .iconWrap::before,
+.hot .iconWrap::before {
+  opacity: 1;
+}
+
 .node:focus-visible .label,
 .hot .label {
   color: var(--accent-gold);
@@ -257,7 +286,7 @@
   top: 12%;
 }
 
-.n_spark {
+.n_title {
   right: 5%;
   top: 12%;
 }
@@ -272,7 +301,7 @@
   top: 56%;
 }
 
-.n_hackathon {
+.n_spark {
   left: 50%;
   bottom: 3%;
   transform: translateX(-50%);
@@ -326,7 +355,7 @@
     width: auto;
   }
 
-  .n_hackathon {
+  .n_spark {
     grid-column: 1 / -1;
     justify-self: center;
     left: auto;
@@ -347,5 +376,11 @@
   .lionGlow,
   .stars span {
     animation: none;
+  }
+
+  .node:hover .iconWrap,
+  .node:focus-visible .iconWrap,
+  .hot .iconWrap {
+    transform: none;
   }
 }

@@ -7,7 +7,7 @@
   justify-content: center;
   background: #07050a;
   overflow: hidden;
-  animation: fadeIn 350ms ease-out both;
+  animation: fadeIn 250ms var(--ease-out) both;
 }
 
 /* Crimson/gold burst expanding from the centre */
@@ -19,8 +19,8 @@
   height: 40vmax;
   border-radius: 50%;
   background: radial-gradient(circle, rgba(229, 57, 53, 0.55), rgba(228, 184, 74, 0.15) 45%, transparent 70%);
-  transform: translate(-50%, -50%) scale(0);
-  animation: burst 1200ms cubic-bezier(0.23, 1, 0.32, 1) 100ms both;
+  transform: translate(-50%, -50%) scale(0.2);
+  animation: burst 800ms var(--ease-out) 60ms both;
 }
 
 .content {
@@ -30,14 +30,14 @@
   align-items: center;
   text-align: center;
   padding: 0 16px;
-  animation: rise 600ms cubic-bezier(0.23, 1, 0.32, 1) 150ms both;
+  animation: rise 400ms var(--ease-out) 80ms both;
 }
 
 .art {
   width: clamp(160px, 30vw, 220px);
   height: auto;
   filter: drop-shadow(0 0 36px rgba(230, 90, 40, 0.6));
-  animation: zoom 1400ms cubic-bezier(0.77, 0, 0.175, 1) both;
+  animation: zoom 900ms var(--ease-in-out) both;
 }
 
 .kicker {

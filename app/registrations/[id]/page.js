@@ -8,6 +8,7 @@ import { TeamPanel } from "@/components/team/TeamPanel";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { HoldButton } from "@/components/ui/HoldButton";
 import { ErrorState, StatusBanner } from "@/components/ui/ErrorState";
 import { RegistrationDetailSkeleton } from "@/components/ui/Skeleton";
 import { openRazorpayCheckout } from "@/components/registration/PaymentCheckout";
@@ -333,9 +334,9 @@ function RegistrationDetailInner() {
 
       {status === "PENDING" && (!registration.payment || pay === "FAILED" || pay === "CREATED") ? (
         <div className={styles.actions}>
-          <Button variant="danger" loading={busy} onClick={onCancel}>
-            Cancel registration
-          </Button>
+          <HoldButton loading={busy} onConfirm={onCancel}>
+            Hold to cancel registration
+          </HoldButton>
         </div>
       ) : null}
 

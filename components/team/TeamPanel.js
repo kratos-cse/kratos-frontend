@@ -5,6 +5,7 @@ import { useAuth } from "@/context/AuthProvider";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { HoldButton } from "@/components/ui/HoldButton";
 import { Input } from "@/components/ui/Input";
 import { StatusBanner } from "@/components/ui/ErrorState";
 import { TeamSkeleton } from "@/components/ui/Skeleton";
@@ -278,9 +279,9 @@ export function TeamPanel({ teamId, event, teamMemberFields = [], onChanged }) {
           </div>
         </div>
         {isLeader && !you && role !== "LEADER" ? (
-          <Button size="sm" variant="danger" disabled={busy} onClick={() => onRemove(m.id)}>
-            Remove
-          </Button>
+          <HoldButton size="sm" disabled={busy} onConfirm={() => onRemove(m.id)}>
+            Hold to remove
+          </HoldButton>
         ) : null}
       </li>
     );
@@ -444,9 +445,9 @@ export function TeamPanel({ teamId, event, teamMemberFields = [], onChanged }) {
         ) : null}
 
         {!isLeader && myMember ? (
-          <Button type="button" variant="ghost" loading={busy} onClick={onLeave}>
-            Leave team
-          </Button>
+          <HoldButton loading={busy} onConfirm={onLeave}>
+            Hold to leave team
+          </HoldButton>
         ) : null}
       </div>
 

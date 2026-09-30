@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { PageShell } from "@/components/layout/PageShell";
+import { PageTransition } from "@/components/motion/Reveal";
 import { RequireAuth } from "@/components/layout/RequireAuth";
 import { ProfileForm } from "@/components/profile/ProfileForm";
 import { Button } from "@/components/ui/Button";
@@ -415,6 +416,7 @@ function RegisterWizard() {
       {error ? <StatusBanner tone="err">{error}</StatusBanner> : null}
       {configError ? <StatusBanner tone="err">{configError}</StatusBanner> : null}
 
+      <PageTransition key={step}>
       {step === "profile" ? (
         <Card>
           <h2 className={styles.h2}>Your profile</h2>
@@ -563,14 +565,6 @@ function RegisterWizard() {
         </Card>
       ) : null}
 
-      {step === "confirmed" && registration ? (
-        <PaymentConfirmed
-          title="Payment confirmed"
-          message="Continue to your registration to manage your team and share invites."
-          onContinue={() => router.push(`/registrations/${registration.id}`)}
-        />
-      ) : null}
-
       {step === "payment" && registration ? (
         <Card className="stack">
           <h2 className={styles.h2}>Payment</h2>
@@ -592,6 +586,15 @@ function RegisterWizard() {
             </Button>
           </div>
         </Card>
+      ) : null}
+      </PageTransition>
+
+      {step === "confirmed" && registration ? (
+        <PaymentConfirmed
+          title="Payment confirmed"
+          message="Continue to your registration to manage your team and share invites."
+          onContinue={() => router.push(`/registrations/${registration.id}`)}
+        />
       ) : null}
     </div>
   );
