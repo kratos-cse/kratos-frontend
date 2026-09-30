@@ -161,21 +161,6 @@
   filter: drop-shadow(0 0 46px rgba(230, 90, 40, 0.85)) drop-shadow(0 0 90px rgba(230, 150, 40, 0.35));
 }
 
-.eyebrow {
-  margin: 14px 0 0;
-  font-family: var(--font-display);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 4px;
-  color: var(--accent-gold);
-}
-
-.subtext {
-  margin: 8px 0 0;
-  font-size: 13px;
-  color: #9a8e93;
-}
-
 .headline {
   margin: 14px 0 0;
   font-family: var(--font-display);
@@ -236,16 +221,8 @@
   filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.65));
 }
 
-.meta {
-  margin-top: 8px;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  color: var(--brand-bright);
-}
-
 .label {
-  margin-top: 2px;
+  margin-top: 8px;
   font-size: 15px;
   font-weight: 700;
   letter-spacing: 1.5px;

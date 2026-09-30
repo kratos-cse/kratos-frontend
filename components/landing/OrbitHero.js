@@ -93,8 +93,6 @@ export function OrbitHero({ arenas }) {
               />
             </motion.div>
           </div>
-          <p className={styles.eyebrow}>FIVE REALMS. ONE LEGEND.</p>
-          <p className={styles.subtext}>Tap an arena or drag the lion toward it.</p>
           <h1 className={styles.headline}>
             Choose your
             <br />
@@ -116,9 +114,6 @@ export function OrbitHero({ arenas }) {
             >
               <span className={styles.iconWrap}>
                 <Image src={arena.icon} alt="" width={120} height={112} />
-              </span>
-              <span className={styles.meta}>
-                {arena.num} / {arena.verb.toUpperCase()}
               </span>
               <span className={styles.label}>{arena.title.toUpperCase()}</span>
             </button>

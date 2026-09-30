@@ -109,12 +109,6 @@ export default function EventDetailPage() {
                   <dd>{rosterLine}</dd>
                 </div>
               ) : null}
-              {event.spots_remaining != null ? (
-                <div>
-                  <dt>Spots left</dt>
-                  <dd>{event.spots_remaining}</dd>
-                </div>
-              ) : null}
               {event.whatsapp_group_available ? (
                 <div>
                   <dt>WhatsApp</dt>
