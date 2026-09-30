@@ -1,0 +1,120 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #07050a;
+  overflow: hidden;
+  animation: fadeIn 350ms ease-out both;
+}
+
+/* Crimson/gold burst expanding from the centre */
+.burst {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 40vmax;
+  height: 40vmax;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(229, 57, 53, 0.55), rgba(228, 184, 74, 0.15) 45%, transparent 70%);
+  transform: translate(-50%, -50%) scale(0);
+  animation: burst 1200ms cubic-bezier(0.23, 1, 0.32, 1) 100ms both;
+}
+
+.content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 0 16px;
+  animation: rise 600ms cubic-bezier(0.23, 1, 0.32, 1) 150ms both;
+}
+
+.art {
+  width: clamp(160px, 30vw, 220px);
+  height: auto;
+  filter: drop-shadow(0 0 36px rgba(230, 90, 40, 0.6));
+  animation: zoom 1400ms cubic-bezier(0.77, 0, 0.175, 1) both;
+}
+
+.kicker {
+  margin: 18px 0 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--brand-bright);
+}
+
+.title {
+  margin: 8px 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(26px, 5vw, 40px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.sub {
+  margin: 8px 0 0;
+  color: var(--accent-gold);
+  font-weight: 600;
+}
+
+.bar {
+  margin-top: 22px;
+  width: min(260px, 70vw);
+  height: 3px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.bar span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--brand-bright), var(--accent-gold));
+  transform-origin: left;
+  animation: fill linear both;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes burst {
+  to { transform: translate(-50%, -50%) scale(3); opacity: 0.9; }
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes zoom {
+  0% { transform: scale(0.85); }
+  60% { transform: scale(1); }
+  100% { transform: scale(1.12); }
+}
+
+@keyframes fill {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay,
+  .burst,
+  .content,
+  .art,
+  .bar span {
+    animation: none;
+  }
+
+  .burst {
+    display: none;
+  }
+}

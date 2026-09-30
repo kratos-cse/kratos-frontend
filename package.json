@@ -1,0 +1,24 @@
+{
+  "name": "kratos2026-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test:matrix": "node scripts/assert-registration-matrix.cjs && node scripts/assert-registration-types.cjs"
+  },
+  "dependencies": {
+    "motion": "^13.4.2",
+    "next": "14.2.35",
+    "ogl": "^1.0.11",
+    "qrcode.react": "^4.2.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^14.2.35"
+  }
+}

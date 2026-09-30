@@ -1,0 +1,49 @@
+.wrap {
+  position: relative;
+}
+
+/* Lion 1. Positioned by scroll progress (vertical translate3d only). Click-through: Lion 2 beneath is the interactive one. */
+.lion {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 240px;
+  height: 240px;
+  z-index: 20; /* above both heroes, below the navbar (--z-nav: 40) */
+  transform-origin: 50% 50%;
+  will-change: transform, filter;
+  pointer-events: none;
+}
+
+.img {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+  touch-action: none;
+  transition: filter 0.25s ease;
+}
+
+/* Screen 1's lion is perfectly still; it only floats once parked on Lion 2. */
+.float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .float {
+    animation: none;
+  }
+}

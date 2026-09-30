@@ -1,0 +1,229 @@
+.header {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  z-index: var(--z-nav);
+  height: var(--nav-h);
+  background: transparent;
+  border-bottom: none;
+}
+
+.inner {
+  height: var(--nav-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.mark {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.wordmark {
+  width: auto;
+  height: 28px;
+  object-fit: contain;
+}
+
+@media (min-width: 480px) {
+  .wordmark {
+    height: 32px;
+  }
+}
+
+.desktop {
+  display: none;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+@media (min-width: 900px) {
+  .desktop {
+    display: flex;
+  }
+
+  .menuBtn {
+    display: none !important;
+  }
+}
+
+.link {
+  padding: 9px 20px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--text-secondary);
+  position: relative;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+/* Glass pill with red glowing edge on hover / active */
+.link.active {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  border-color: rgba(255, 50, 50, 0.35);
+  color: #ffd166;
+  box-shadow:
+    0 0 12px rgba(255, 50, 50, 0.25),
+    0 0 24px rgba(255, 50, 50, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 4px 16px rgba(0, 0, 0, 0.25);
+  text-shadow: 0 0 10px rgba(255, 50, 50, 0.4);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .link:hover {
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(12px) saturate(140%);
+    -webkit-backdrop-filter: blur(12px) saturate(140%);
+    border-color: rgba(255, 50, 50, 0.35);
+    color: #ffd166;
+    box-shadow:
+      0 0 12px rgba(255, 50, 50, 0.25),
+      0 0 24px rgba(255, 50, 50, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 4px 16px rgba(0, 0, 0, 0.25);
+    text-shadow: 0 0 10px rgba(255, 50, 50, 0.4);
+  }
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.userMeta {
+  display: none;
+  max-width: 9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+@media (min-width: 900px) {
+  .userMeta {
+    display: inline;
+  }
+}
+
+.menuBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.menuBtn:active {
+  transform: scale(0.97);
+}
+
+.menuIcon {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.mobile {
+  position: fixed;
+  inset: var(--nav-h) 0 0 0;
+  z-index: calc(var(--z-nav) - 1);
+  background: rgba(5, 5, 6, 0.96);
+  padding: var(--space-5) var(--page-pad) var(--space-8);
+  transform: translateY(-8px);
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition:
+    opacity var(--duration-ui) var(--ease-out),
+    transform var(--duration-ui) var(--ease-out),
+    visibility 0s linear var(--duration-ui);
+}
+
+.mobileOpen {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+  visibility: visible;
+  transition:
+    opacity var(--duration-ui) var(--ease-out),
+    transform var(--duration-ui) var(--ease-out),
+    visibility 0s linear 0s;
+}
+
+.mobileNav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-width: 28rem;
+  margin-inline: auto;
+}
+
+.mobileLink {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.95rem 1rem;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text);
+  font-size: var(--text-lg);
+  font-weight: 600;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    transform var(--duration-press) var(--ease-out);
+}
+
+.mobileLink:active {
+  transform: scale(0.98);
+}
+
+.mobileLink.active {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+.mobileCta {
+  margin-top: var(--space-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3rem;
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, var(--brand-bright), var(--brand));
+  color: #fff;
+  font-weight: 700;
+  transition: transform var(--duration-press) var(--ease-out);
+}
+
+.mobileCta:active {
+  transform: scale(0.97);
+}
+
+@media (min-width: 900px) {
+  .mobile {
+    display: none !important;
+  }
+}

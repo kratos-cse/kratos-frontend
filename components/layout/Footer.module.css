@@ -1,0 +1,83 @@
+.footer {
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+  background: var(--bg-elevated);
+  padding: var(--space-7) 0 var(--space-6);
+}
+
+.inner {
+  display: grid;
+  gap: var(--space-6);
+}
+
+@media (min-width: 900px) {
+  .inner {
+    grid-template-columns: 1.2fr 0.8fr 1.2fr;
+    align-items: start;
+  }
+}
+
+.brandBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.wordmark {
+  width: auto;
+  height: 36px;
+  object-fit: contain;
+}
+
+.tag {
+  margin: 0;
+  color: var(--text-secondary);
+  max-width: 28rem;
+  font-size: var(--text-sm);
+}
+
+.links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  font-weight: 600;
+  font-size: var(--text-sm);
+}
+
+.links a {
+  color: var(--text-secondary);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .links a:hover {
+    color: var(--text);
+  }
+}
+
+.institutions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.inst {
+  width: auto;
+  height: 48px;
+  object-fit: contain;
+}
+
+.ace {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+}
+
+.cse {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  /* Asset is dark-on-light; invert for dark footer */
+  filter: invert(1);
+  opacity: 0.92;
+}

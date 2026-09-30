@@ -1,0 +1,32 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-6);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+}
+
+.icon {
+  font-size: 1.5rem;
+  opacity: 0.7;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 650;
+}
+
+.desc {
+  margin: 0;
+  color: var(--text-secondary);
+  max-width: 36rem;
+}
+
+.actions {
+  margin-top: var(--space-2);
+}

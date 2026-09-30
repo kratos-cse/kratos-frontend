@@ -1,0 +1,46 @@
+.wrap {
+  position: relative;
+  display: inline-flex;
+  overflow: hidden;
+  border-radius: var(--radius);
+  isolation: isolate;
+}
+
+.wrap::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    -45deg,
+    transparent 40%,
+    var(--glare-color, rgba(255, 255, 255, 0.35)) 50%,
+    transparent 60%
+  );
+  background-size: 220% 220%;
+  background-repeat: no-repeat;
+  background-position: 120% 120%;
+  opacity: 0;
+  transition:
+    background-position var(--glare-duration, 550ms) var(--ease-out),
+    opacity var(--duration-fast) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .wrap:hover::before {
+    opacity: 1;
+    background-position: -20% -20%;
+  }
+}
+
+.wrap > * {
+  position: relative;
+  z-index: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wrap::before {
+    display: none;
+  }
+}
