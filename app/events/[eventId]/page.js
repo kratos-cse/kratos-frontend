@@ -62,6 +62,7 @@ export default function EventDetailPage() {
     event.substitute_count,
     event.team_min_size,
     event.team_max_size,
+    event.roster_style,
   );
   const mode = registrationModeLabel(
     event.registration_mode,
@@ -69,7 +70,8 @@ export default function EventDetailPage() {
     event.team_min_size,
     event.team_max_size,
     event.required_member_count,
-    event.substitute_count
+    event.substitute_count,
+    event.roster_style,
   );
 
   return (

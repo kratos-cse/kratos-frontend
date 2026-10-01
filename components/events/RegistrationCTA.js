@@ -56,7 +56,10 @@ export function RegistrationCTA({ event, registration, sticky = false }) {
         {ui.label}
       </Button>
     );
-    note = "Registration isn’t available for this event right now.";
+    note =
+      ui.code === "COMING_SOON"
+        ? "Registration opens soon — check back later."
+        : "Registration isn’t available for this event right now.";
   }
 
   return (

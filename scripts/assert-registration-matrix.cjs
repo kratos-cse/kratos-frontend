@@ -68,6 +68,9 @@ function deriveEventUiState(event, myRegistration, opts = {}) {
     if (availability === "CLOSED") {
       return { code: "REGISTRATION_CLOSED", label: "Registration closed", tone: "muted", cta: "none" };
     }
+    if (availability === "COMING_SOON") {
+      return { code: "COMING_SOON", label: "Coming soon", tone: "warn", cta: "none" };
+    }
   }
 
   if (event?.registration_open === true) {
@@ -109,6 +112,18 @@ const cases = [
     },
     reg: null,
     expect: { code: "REGISTRATION_CLOSED", cta: "none" },
+  },
+  {
+    name: "coming soon via availability",
+    event: {
+      visibility: "PUBLISHED",
+      registration_status: "COMING_SOON",
+      registration_availability: "COMING_SOON",
+      registration_open: false,
+      fee: 100,
+    },
+    reg: null,
+    expect: { code: "COMING_SOON", cta: "none" },
   },
   {
     name: "full via availability",
