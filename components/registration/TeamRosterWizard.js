@@ -113,8 +113,8 @@ export function TeamRosterWizard({
       <header className={styles.head}>
         <h2 className={styles.title}>Team members</h2>
         <p className="meta">
-          {limits.substitutes > 0
-            ? `${limits.required} required · up to ${limits.substitutes} substitutes`
+          {limits.teamMax > limits.required
+            ? `${limits.required}–${limits.teamMax} members (minimum ${limits.required})`
             : `${limits.required} members required`}
         </p>
       </header>

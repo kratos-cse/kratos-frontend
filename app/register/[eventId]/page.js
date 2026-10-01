@@ -392,12 +392,10 @@ function RegisterWizard() {
   }
 
   const rosterHint = (() => {
-    const req = Number(event.required_member_count ?? event.team_min_size ?? 1);
-    const subs = Number(
-      event.substitute_count ?? Math.max(0, Number(event.team_max_size ?? req) - req)
-    );
-    if (subs > 0) return `Roster: ${req} members + up to ${subs} substitutes`;
-    return `Team of ${req}`;
+    const min = Number(event.team_min_size ?? event.required_member_count ?? 1);
+    const max = Number(event.team_max_size ?? min);
+    if (max > min) return `Team: ${min}–${max} members (minimum ${min})`;
+    return `Team of ${min}`;
   })();
 
   return (
