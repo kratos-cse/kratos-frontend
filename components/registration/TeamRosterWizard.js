@@ -143,7 +143,12 @@ export function TeamRosterWizard({
       {slot ? (
         <form className={styles.form} onSubmit={onSave}>
           <p className={styles.stepMeta}>
-            {slot.phase === "mandatory" ? "Required member" : "Substitute"} · {slot.label}
+            {slot.phase === "mandatory"
+              ? "Required member"
+              : slot.phase === "optional"
+                ? "Optional member"
+                : "Substitute"}{" "}
+            · {slot.label}
           </p>
           <Input
             label="Full name"
