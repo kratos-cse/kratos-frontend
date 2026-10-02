@@ -210,7 +210,10 @@ export default function Home() {
           <h2 className="section-title">Registration <span>Fee</span></h2>
           <div className="fee-box">
             <div>
-              <div className="fee-amount">₹500 <small>/ team of up to 4</small></div>
+              <div className="fee-amount">₹1000 <small>/ team of up to 4</small></div>
+              <p style={{ color: "var(--text-dim)", marginTop: 8, maxWidth: 460 }}>
+                Applicable only to shortlisted teams selected through the online PPT screening.
+              </p>
               <p style={{ color: "var(--text-dim)", marginTop: 8, maxWidth: 460 }}>
                 Includes kit, meals, mentorship, and certificate for every team member.
               </p>
