@@ -1,4 +1,6 @@
 import "./globals.css";
+import { AuthProvider } from "@/context/AuthProvider";
+import { EventsProvider } from "@/context/EventsProvider";
 
 export const metadata = {
   title: "Hack the Future 2.0 | Kratos'26",
@@ -23,25 +25,24 @@ export default function RootLayout({ children }) {
         <nav className="navbar">
           <div className="nav-inner">
 
+            {/* LEFT — SRM + KRATOS LION */}
             <div className="nav-left">
-              <img
-                src="/easwari-logo.png"
-                alt="Easwari Engineering College"
-              />
-
-              <img
-                src="/iet-purple.png"
-                alt="The Institution of Engineering and Technology"
-                className="iet-logo"
-              />
+              <img src="/srm-logo.png" alt="SRM" />
+            <img
+                src ="/lion-logo.png"
+                alt="Kratos Lion"
+                className="lion-logo"
+            />
             </div>
 
+            {/* CENTER — NAVIGATION */}
             <div className="nav-links">
               <a href="#hero">Home</a>
               <a href="#domains">Domains</a>
               <a href="#timeline">Timeline</a>
               <a href="#prizes">Prizes</a>
               <a href="#rules">Rules</a>
+              <a href="#faq">FAQ</a>
               <a href="#venue">Venue</a>
 
               <a
@@ -56,15 +57,31 @@ export default function RootLayout({ children }) {
               </a>
             </div>
 
+            
+            {/* RIGHT — ACE + EASWARI + CSI */}
             <div className="nav-right">
               <img src="/ace-logo.png" alt="ACE" />
-              <img src="/srm-logo.png" alt="SRM" />
+
+              <img
+                src="/easwari-logo.png"
+                alt="Easwari Engineering College"
+              />
+
+              <img
+                src="/csi-logo.png"
+                alt="CSI"
+                className="csi-logo"
+              />
             </div>
 
           </div>
         </nav>
 
-        {children}
+        <AuthProvider>
+          <EventsProvider>
+            {children}
+          </EventsProvider>
+        </AuthProvider>
 
         {/* ================= FOOTER ================= */}
         <footer>
@@ -76,11 +93,7 @@ export default function RootLayout({ children }) {
                 alt="Easwari Engineering College"
               />
 
-              <img
-                src="/iet-purple.png"
-                alt="The Institution of Engineering and Technology"
-                className="iet-footer-logo"
-              />
+              
 
               <img src="/ace-logo.png" alt="ACE" />
               <img src="/srm-logo.png" alt="SRM" />

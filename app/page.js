@@ -1,5 +1,3 @@
-import Splash from "./components/Splash";
-import TiltLion from "./components/TiltLion";
 import StackedCardStack from "./components/StackedCardStack";
 import DomainCard from "./components/DomainCard";
 import Timeline from "./components/Timeline";
@@ -9,19 +7,9 @@ const UNSTOP_LINK = "https://unstop.com/YOUR-EVENT-LINK-HERE";
 export default function Home() {
   return (
     <main>
-      <Splash />
-
       {/* ========== HERO DASHBOARD ========== */}
       <section className="hero-dashboard" id="hero">
         <div className="hero-center">
-
-          {/* Kratos brand — lion + text, centered */}
-          <div className="kratos-brand-row">
-            <TiltLion />
-            <div className="kratos-img">
-              <img src="/kratos-text.png" alt="Kratos'26" />
-            </div>
-          </div>
 
           {/* HTF title — centered below */}
           <div className="htf-title">
@@ -33,9 +21,9 @@ export default function Home() {
           </div>
 
           <div className="hero-date">
-            <span>9 OCT</span>
+            <span>14 OCT</span>
             <span className="sep">—</span>
-            <span>10 OCT 2026</span>
+            <span>15 OCT 2026</span>
             <span className="sep">|</span>
             <span>24 HRS</span>
           </div>
@@ -255,6 +243,43 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ========== FAQ ========== */}
+      <section id="faq">
+        <div className="container">
+          <h2 className="section-title">FAQs</h2>
+          <div className="faq-grid">
+            <details className="faq-item" open>
+              <summary>1. Can we participate as a team?</summary>
+              <p>Yes, a team can have 2-4 members.</p>
+            </details>
+            <details className="faq-item">
+              <summary>2. Are Inter College teams allowed?</summary>
+              <p>Yes, Inter College teams are allowed and encouraged.</p>
+            </details>
+            <details className="faq-item">
+              <summary>3. Who can participate?</summary>
+              <p>Any student pursuing UG in Engineering is eligible to apply.</p>
+            </details>
+            <details className="faq-item">
+              <summary>4. How long is the Hackathon?</summary>
+              <p>Hack to the Future is a 24-hour hackathon, live on October 14th, 8am to October 15th, 8am.</p>
+            </details>
+            <details className="faq-item">
+              <summary>5. Is this an online hackathon?</summary>
+              <p>No, only the ppt shortlisting will be done via online. The finals will be held offline.</p>
+            </details>
+            <details className="faq-item">
+              <summary>6. Where will the finals be conducted?</summary>
+              <p>The finals will be conducted offline at SRM Easwari Engineering College Chennai on October 14th, 8am to October 15th 8am.</p>
+            </details>
+            <details className="faq-item">
+              <summary>7. Will accommodation be provided?</summary>
+              <p>Yes, accommodation will be provided. Food and refreshments will be provided for participants who are required to pay a minimal fee.</p>
+            </details>
+          </div>
+        </div>
+      </section>
+
       {/* ========== VENUE & MAP ========== */}
       <section id="venue">
         <div className="container">
@@ -268,7 +293,7 @@ export default function Home() {
               <h3>Easwari Engineering College</h3>
               <p>Bharathi Salai, Ramapuram, Chennai, TN 600089</p>
               <p style={{ marginTop: 14 }}>
-                <b style={{ color: "#fff" }}>Dates:</b> 9 – 10 Oct 2026<br />
+                <b style={{ color: "#fff" }}>Dates:</b> 14 – 15 Oct 2026<br />
                 <b style={{ color: "#fff" }}>Duration:</b> 24 Hours<br />
                 <b style={{ color: "#fff" }}>Reporting:</b> 8:00 AM, Day 1
               </p>
