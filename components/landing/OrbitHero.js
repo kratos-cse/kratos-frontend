@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { useUnstopTransition } from "./UnstopTransition";
-import { useFloatSyncDelay } from "./LionJourney";
+import { useFloatSyncDelay, useLionArrival } from "./LionJourney";
 import styles from "./OrbitHero.module.css";
 
 const HIT_RADIUS = 80;
@@ -18,6 +18,8 @@ export function OrbitHero({ arenas }) {
   const [hot, setHot] = useState(null);
   const nodeRefs = useRef({});
   const floatDelay = useFloatSyncDelay();
+  // Handoff from the travelling lion: hidden and inert until Lion 1 has landed on this slot.
+  const arrival = useLionArrival();
 
   // Random positions are generated client-side only to avoid hydration mismatch.
   useEffect(() => {
@@ -63,7 +65,7 @@ export function OrbitHero({ arenas }) {
         <div className={`${styles.ring} ${styles.ringInner}`} aria-hidden />
 
         <div className={styles.lionZone}>
-          {/* Lion 2: fixed in place. Lion 1 (LionJourney) scrolls straight down onto it. */}
+          {/* Lion 2: fixed in place. Lion 1 (LionJourney) scrolls straight down onto it, then this one takes over. */}
           <span className={styles.lionGlow} aria-hidden />
           <div className={styles.lionSlot} data-lion-anchor="end">
             <motion.div
@@ -80,7 +82,11 @@ export function OrbitHero({ arenas }) {
                 if (hit) goTo(hit);
               }}
               className={[styles.lion, dragging ? styles.lionDragging : ""].join(" ")}
-              style={floatDelay ? { animationDelay: floatDelay } : { animation: "none" }}
+              style={{
+                ...(floatDelay ? { animationDelay: floatDelay } : { animation: "none" }),
+                opacity: arrival?.opacity ?? 1,
+                pointerEvents: arrival?.pointerEvents ?? "auto",
+              }}
               whileDrag={{ zIndex: 50 }}
             >
               <Image

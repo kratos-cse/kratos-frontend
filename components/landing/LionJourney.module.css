@@ -2,16 +2,27 @@
   position: relative;
 }
 
-/* Lion 1. Positioned by scroll progress (vertical translate3d only). Click-through: Lion 2 beneath is the interactive one. */
+/*
+ * Lion 1 — a scene-transition visual, not a foreground element. Click-through.
+ *
+ * Layering inside the landing (no ancestor here creates a stacking context, so these
+ * z-indexes are compared directly with each other):
+ *   0 / auto  hero backgrounds, starfields, vignettes
+ *   1         Lion 1 (this)
+ *   2         MainHero .content (logo, description, CTAs) and OrbitHero .orbitWrap
+ *             (rings, arena nodes, Lion 2)
+ * So Lion 1 always travels above the backgrounds and beneath everything readable or
+ * interactive, and lands underneath Lion 2.
+ */
 .lion {
   position: absolute;
   left: 0;
   top: 0;
   width: 240px;
   height: 240px;
-  z-index: 20; /* above both heroes, below the navbar (--z-nav: 40) */
+  z-index: 1;
   transform-origin: 50% 50%;
-  will-change: transform, filter;
+  will-change: transform, filter, opacity;
   pointer-events: none;
 }
 
@@ -26,7 +37,7 @@
   transition: filter 0.25s ease;
 }
 
-/* Screen 1's lion is perfectly still; it only floats once parked on Lion 2. */
+/* --lion-float (0 → 1, set by LionJourney) scales the bob: still in the hero, Lion 2's float on arrival. */
 .float {
   animation: float 6s ease-in-out infinite;
 }
@@ -38,7 +49,7 @@
   }
 
   50% {
-    transform: translateY(-8px);
+    transform: translateY(calc(-8px * var(--lion-float, 0)));
   }
 }
 

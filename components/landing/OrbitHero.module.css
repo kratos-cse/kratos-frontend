@@ -44,7 +44,7 @@
 /* ── Orbit ── */
 .orbitWrap {
   position: relative;
-  z-index: 2;
+  z-index: 2; /* above the travelling lion (LionJourney .lion, z-index 1), which lands under Lion 2 */
   max-width: 1180px;
   margin: 0 auto;
   padding: 40px 20px;

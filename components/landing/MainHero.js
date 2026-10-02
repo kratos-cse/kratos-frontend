@@ -29,7 +29,7 @@ export function MainHero() {
       <div className={styles.vignette} aria-hidden />
 
       <div className={styles.content}>
-        {/* Slot only — the single persistent lion (LionJourney) sits here at 0% scroll */}
+        {/* Slot only — the travelling lion (LionJourney) sits here at 0% scroll */}
         <div className={styles.lionSlot} data-lion-anchor="start" aria-hidden />
         <Image
           src="/kratos26.png"
