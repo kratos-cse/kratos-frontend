@@ -8,6 +8,7 @@ import { EventCoordinatorList } from "@/components/events/EventCoordinatorList";
 import { RegistrationCTA } from "@/components/events/RegistrationCTA";
 import { Badge } from "@/components/ui/Badge";
 import { ErrorState } from "@/components/ui/ErrorState";
+import { EventDetailBack } from "@/components/events/EventDetailBack";
 import { EventDetailSkeleton } from "@/components/events/EventDetailSkeleton";
 import { PageTransition } from "@/components/motion/Reveal";
 import { useEvent } from "@/hooks/useEvents";
@@ -16,7 +17,6 @@ import { formatCategory } from "@/lib/events/categories";
 import { formatRosterParticipantLine } from "@/lib/events/utils";
 import {
   findMyRegistrationForEvent,
-  formatDateRange,
   formatFee,
   registrationAvailabilityLabel,
   registrationModeLabel,
@@ -56,7 +56,6 @@ export default function EventDetailPage() {
     );
   }
 
-  const when = formatDateRange(event.starts_at, event.ends_at);
   const rosterLine = formatRosterParticipantLine(
     event.required_member_count,
     event.substitute_count,
@@ -79,6 +78,7 @@ export default function EventDetailPage() {
       <PageTransition>
         <article className={styles.layout}>
           <div className={styles.main}>
+            <EventDetailBack />
             <div className={styles.kicker}>
               <Badge tone="brand">{formatCategory(event.category)}</Badge>
               <Badge tone={event.registration_availability === "OPEN" ? "ok" : "muted"}>
@@ -92,10 +92,6 @@ export default function EventDetailPage() {
               <div>
                 <dt>Fee</dt>
                 <dd>{formatFee(event.fee)}</dd>
-              </div>
-              <div>
-                <dt>When</dt>
-                <dd>{when || event.slot?.replace?.(/_/g, " ") || "TBA"}</dd>
               </div>
               <div>
                 <dt>Venue</dt>
