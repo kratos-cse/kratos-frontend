@@ -8,15 +8,18 @@ import { TeamPanel } from "@/components/team/TeamPanel";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { HoldButton } from "@/components/ui/HoldButton";
 import { ErrorState, StatusBanner } from "@/components/ui/ErrorState";
 import { RegistrationDetailSkeleton } from "@/components/ui/Skeleton";
-import { openRazorpayCheckout } from "@/components/registration/PaymentCheckout";
+import { PaymentStatus } from "@/components/registration/PaymentStatus";
+import { executePaidCheckout } from "@/lib/payments/checkoutFlow";
 import { PaymentConfirmed } from "@/components/registration/PaymentConfirmed";
 import { useAuth } from "@/context/AuthProvider";
 import { useEvent } from "@/hooks/useEvents";
 import { cancelRegistration, getRegistration } from "@/lib/api/registrations";
-import { createOrder, verifyPayment, syncPayment } from "@/lib/api/payments";
-import { getEventWhatsapp } from "@/lib/api/events";
+import { syncPayment } from "@/lib/api/payments";
+import { getEventWhatsapp, getRegistrationForm } from "@/lib/api/events";
+import { visibleFields } from "@/lib/registration/fieldUtils";
 import {
   toUserMessage,
   canRetryPayment,
@@ -37,12 +40,14 @@ function RegistrationDetailInner() {
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  const [paymentStage, setPaymentStage] = useState(null);
   const [whatsapp, setWhatsapp] = useState(null);
   const [waNote, setWaNote] = useState(null);
   const autoSynced = useRef(false);
   // Post-payment CONTINUE is transient (in-session only). After refresh, confirmed state shows directly.
   const [journeyExpanded, setJourneyExpanded] = useState(true);
   const [awaitingContinue, setAwaitingContinue] = useState(false);
+  const [teamMemberFields, setTeamMemberFields] = useState([]);
 
   const { event } = useEvent(registration?.event_id);
 
@@ -67,6 +72,22 @@ function RegistrationDetailInner() {
     autoSynced.current = false;
     refresh();
   }, [refresh]);
+
+  useEffect(() => {
+    if (!registration?.event_id) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const form = await getRegistrationForm(registration.event_id);
+        if (!cancelled) setTeamMemberFields(visibleFields(form?.team_member_fields));
+      } catch {
+        if (!cancelled) setTeamMemberFields([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [registration?.event_id]);
 
   // Explicit reconcile: if payment still CREATED after load, call sync once.
   useEffect(() => {
@@ -139,35 +160,22 @@ function RegistrationDetailInner() {
         }
       }
 
-      const order = await createOrder({
-        eventId: registration.event_id,
-        paymentType: registration.team ? "TEAM_REGISTRATION" : "SOLO_REGISTRATION",
-        registrationId: registration.id,
-      });
-      await openRazorpayCheckout({
-        keyId: order.razorpayKeyId,
-        orderId: order.razorpayOrderId,
-        amountPaise: order.amountPaise,
-        currency: order.currency,
-        description: event.name,
-        prefill: {
-          name: profile?.full_name || "",
-          email: user?.email || "",
-          contact: profile?.phone || "",
+      await executePaidCheckout({
+        orderParams: {
+          eventId: registration.event_id,
+          paymentType: registration.team ? "TEAM_REGISTRATION" : "SOLO_REGISTRATION",
+          registrationId: registration.id,
         },
-        onSuccess: async (response) => {
-          await verifyPayment({
-            razorpayOrderId: response.razorpay_order_id,
-            razorpayPaymentId: response.razorpay_payment_id,
-            razorpaySignature: response.razorpay_signature,
-          });
-          if (order.paymentId) {
-            try {
-              await syncPayment(order.paymentId);
-            } catch {
-              /* verify already applied */
-            }
-          }
+        razorpayOptions: {
+          description: event.name,
+          prefill: {
+            name: profile?.full_name || "",
+            email: user?.email || "",
+            contact: profile?.phone || "",
+          },
+        },
+        onStage: setPaymentStage,
+        onAfterVerify: async () => {
           await refresh();
           setAwaitingContinue(true);
           setJourneyExpanded(false);
@@ -181,6 +189,7 @@ function RegistrationDetailInner() {
       }
     } finally {
       setBusy(false);
+      setPaymentStage(null);
     }
   }
 
@@ -265,6 +274,7 @@ function RegistrationDetailInner() {
             Status comes from the backend. If you already paid, use Sync — don’t pay twice until Sync says
             it failed.
           </p>
+          <PaymentStatus stage={paymentStage} />
           <div className={styles.actions}>
             <Button loading={busy} disabled={!canRetryPayment(registration)} onClick={onPay}>
               Continue payment
@@ -315,9 +325,9 @@ function RegistrationDetailInner() {
 
       {status === "PENDING" && (!registration.payment || pay === "FAILED" || pay === "CREATED") ? (
         <div className={styles.actions}>
-          <Button variant="danger" loading={busy} onClick={onCancel}>
-            Cancel registration
-          </Button>
+          <HoldButton loading={busy} onConfirm={onCancel}>
+            Hold to cancel registration
+          </HoldButton>
         </div>
       ) : null}
 
@@ -325,6 +335,7 @@ function RegistrationDetailInner() {
         <TeamPanel
           teamId={teamId}
           event={event}
+          teamMemberFields={teamMemberFields}
           onChanged={async () => {
             try {
               const data = await getRegistration(id);

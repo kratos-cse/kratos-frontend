@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import styles from "./UnstopTransition.module.css";
 
-const DURATION_MS = 1400;
+const DURATION_MS = 900;
 const REDUCED_DURATION_MS = 300;
 
 /**

@@ -84,7 +84,8 @@
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
-  --nav-h: 64px;
+  --nav-h: 76px;
+  --page-top: calc(var(--nav-h) + var(--space-7));
   --z-nav: 40;
   --z-modal: 60;
   --z-toast: 70;
@@ -105,32 +106,6 @@ html {
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
-  }
-
-  /* Keep opacity/color feedback; strip movement-based transforms */
-  .btn:active,
-  .menuBtn:active,
-  .mobileCta:active,
-  .mobileLink:active,
-  .typeBtn:active,
-  .tab:active,
-  .cat:active,
-  .interactive:active,
-  .interactive:hover {
-    transform: none !important;
-  }
-
-  .mobile {
-    transition: opacity 120ms ease !important;
-    transform: none !important;
-  }
-
-  .panel {
-    animation: none !important;
-  }
-
-  .skeleton {
-    animation: none !important;
   }
 }
 
@@ -217,11 +192,12 @@ button {
   margin-inline: auto;
 }
 
+/* Navbar is absolutely positioned; --page-top clears it and adds breathing room. */
 .page {
-  padding-block: var(--space-6) var(--space-8);
+  padding-top: var(--page-top);
+  padding-bottom: var(--space-8);
 }
 
-/* Navbar is absolutely positioned; push page content below it (+ .page top padding) */
 .events-page-content {
   position: relative;
   z-index: 1;
@@ -304,4 +280,8 @@ button {
 html.sun-cursor,
 html.sun-cursor * {
   cursor: none !important;
+}
+
+html.sun-cursor :is(input, textarea, select, [contenteditable="true"]) {
+  cursor: text !important;
 }

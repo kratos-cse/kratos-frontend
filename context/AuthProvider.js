@@ -62,10 +62,17 @@ export function AuthProvider({ children }) {
   const signInWithGoogleCredential = useCallback(
     async (idToken) => {
       setError(null);
-      const data = await loginWithGoogle(idToken);
-      applySession(data, data.access_token);
-      setLoading(false);
-      return data;
+      setLoading(true);
+      try {
+        const data = await loginWithGoogle(idToken);
+        applySession(data, data.access_token);
+        return data;
+      } catch (err) {
+        setError(err);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
     },
     [applySession]
   );

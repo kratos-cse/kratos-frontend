@@ -1,0 +1,11 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+  min-height: 2.75rem;
+}
+
+.buttonHost {
+  transition: opacity var(--duration-fast) var(--ease-out);
+}

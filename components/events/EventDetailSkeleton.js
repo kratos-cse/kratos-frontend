@@ -15,7 +15,7 @@ export function EventDetailSkeleton() {
         <Skeleton className={skel.title} />
         <Skeleton className={skel.tagline} />
         <div className={styles.facts}>
-          {Array.from({ length: 6 }).map((_, i) => (
+          {Array.from({ length: 5 }).map((_, i) => (
             <div key={i}>
               <Skeleton className={skel.factLabel} />
               <Skeleton className={skel.factValue} />
