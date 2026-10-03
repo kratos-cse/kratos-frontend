@@ -6,14 +6,10 @@ import { Card } from "@/components/ui/Card";
 import { Input, Select } from "@/components/ui/Input";
 import { StatusBanner } from "@/components/ui/ErrorState";
 import { TeamSkeleton } from "@/components/ui/Skeleton";
-import { DynamicRegistrationForm } from "@/components/registration/DynamicRegistrationForm";
 import { ProgressBar } from "@/components/registration/ProgressBar";
 import { addRosterMember, getTeam } from "@/lib/api/teams";
+import { DynamicFieldForm, toFieldResponses } from "@/components/registration/DynamicFieldForm";
 import { toUserMessage } from "@/lib/errors/userMessages";
-import {
-  buildFieldResponses,
-  validateRequiredFields,
-} from "@/lib/registration/fieldUtils";
 import {
   countMandatory,
   countSubstitutes,
@@ -26,14 +22,7 @@ import styles from "./TeamRosterWizard.module.css";
 const YEARS = ["1", "2", "3", "4", "PG", "Other"];
 const EMPTY_FORM = { full_name: "", phone: "", contact_email: "", college_name: "", year_of_study: "" };
 
-export function TeamRosterWizard({
-  teamId,
-  event,
-  teamMemberFields = [],
-  onContinuePayment,
-  onBack,
-  busy: parentBusy,
-}) {
+export function TeamRosterWizard({ teamId, event, memberFields = [], onContinuePayment, onBack, busy: parentBusy }) {
   const [team, setTeam] = useState(null);
   const [loading, setLoading] = useState(Boolean(teamId));
   const [busy, setBusy] = useState(false);
@@ -76,11 +65,6 @@ export function TeamRosterWizard({
       setError("Full name and phone are required.");
       return;
     }
-    const missing = validateRequiredFields(teamMemberFields, fieldValues);
-    if (missing.length) {
-      setError(`Please complete: ${missing.join(", ")}`);
-      return;
-    }
     setBusy(true);
     setError(null);
     try {
@@ -91,7 +75,7 @@ export function TeamRosterWizard({
         contact_email: form.contact_email.trim() || undefined,
         college_name: form.college_name.trim() || undefined,
         year_of_study: form.year_of_study.trim() || undefined,
-        field_responses: buildFieldResponses(teamMemberFields, fieldValues),
+        field_responses: toFieldResponses(fieldValues),
       });
       setForm(EMPTY_FORM);
       setFieldValues({});
@@ -113,11 +97,9 @@ export function TeamRosterWizard({
       <header className={styles.head}>
         <h2 className={styles.title}>Team members</h2>
         <p className="meta">
-          {limits.style === "MEMBERS_SUBSTITUTES"
+          {limits.substitutes > 0
             ? `${limits.required} required · up to ${limits.substitutes} substitutes`
-            : limits.teamMax > limits.required
-              ? `${limits.required}–${limits.teamMax} members (minimum ${limits.required})`
-              : `${limits.required} members required`}
+            : `${limits.required} members required`}
         </p>
       </header>
 
@@ -143,12 +125,7 @@ export function TeamRosterWizard({
       {slot ? (
         <form className={styles.form} onSubmit={onSave}>
           <p className={styles.stepMeta}>
-            {slot.phase === "mandatory"
-              ? "Required member"
-              : slot.phase === "optional"
-                ? "Optional member"
-                : "Substitute"}{" "}
-            · {slot.label}
+            {slot.phase === "mandatory" ? "Required member" : "Substitute"} · {slot.label}
           </p>
           <Input
             label="Full name"
@@ -185,11 +162,11 @@ export function TeamRosterWizard({
               </option>
             ))}
           </Select>
-          <DynamicRegistrationForm
-            fields={teamMemberFields}
+          <DynamicFieldForm
+            fields={memberFields}
             values={fieldValues}
+            onChange={setFieldValues}
             disabled={isBusy}
-            onChange={(fieldId, value) => setFieldValues((prev) => ({ ...prev, [fieldId]: value }))}
           />
           <div className={styles.actions}>
             <Button type="submit" loading={isBusy}>

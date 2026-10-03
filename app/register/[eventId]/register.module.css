@@ -69,9 +69,3 @@
   margin: 0.2rem 0 0;
   font-weight: 600;
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .typeBtn:active {
-    transform: none;
-  }
-}
