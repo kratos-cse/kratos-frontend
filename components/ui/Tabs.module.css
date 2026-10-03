@@ -46,9 +46,3 @@
 .active .count {
   color: var(--accent-gold);
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .tab:active {
-    transform: none;
-  }
-}

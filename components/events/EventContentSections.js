@@ -2,28 +2,34 @@
 
 import styles from "./EventContentSections.module.css";
 
-function sectionTitle(section) {
-  if (section.title?.trim()) return section.title;
-  const type = String(section.section_type || "").replace(/_/g, " ");
-  return type.charAt(0) + type.slice(1).toLowerCase();
-}
+const TYPE_LABELS = {
+  REQUIREMENTS: "Requirements",
+  RULES: "Rules",
+  ELIGIBILITY: "Eligibility",
+  PRIZES: "Prizes",
+  INSTRUCTIONS: "Instructions",
+  WHAT_TO_BRING: "What to bring",
+  FORMAT: "Format",
+  JUDGING_CRITERIA: "Judging criteria",
+  CUSTOM: null,
+};
 
-export function EventContentSections({ sections }) {
-  const items = (sections || [])
-    .filter((s) => s.is_visible !== false)
-    .slice()
-    .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
-
-  if (!items.length) return null;
+export function EventContentSections({ sections = [] }) {
+  const visible = sections.filter((s) => s.is_visible && (s.title || s.content));
+  if (!visible.length) return null;
 
   return (
     <div className={styles.wrap}>
-      {items.map((section) => (
-        <section key={section.id} className={styles.section}>
-          <h2 className={styles.title}>{sectionTitle(section)}</h2>
-          <div className={styles.body}>{section.content}</div>
-        </section>
-      ))}
+      {visible.map((section) => {
+        const typeLabel = TYPE_LABELS[section.section_type];
+        const heading = section.title || typeLabel || "Details";
+        return (
+          <section key={section.id} className={styles.block}>
+            <h2 className={styles.h2}>{heading}</h2>
+            {section.content ? <p className={styles.body}>{section.content}</p> : null}
+          </section>
+        );
+      })}
     </div>
   );
 }

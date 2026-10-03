@@ -49,7 +49,7 @@ export function ProfileForm({ onSaved, submitLabel = "Save profile" }) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="stack" aria-busy={saving || undefined}>
+    <form onSubmit={onSubmit} className="stack">
       <Input
         label="Full name"
         name="full_name"

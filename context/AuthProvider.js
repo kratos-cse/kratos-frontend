@@ -5,6 +5,27 @@ import { fetchMe, loginWithGoogle, logout as apiLogout } from "@/lib/api/auth";
 import { getStoredToken, setStoredToken } from "@/lib/api/client";
 
 const AuthContext = createContext(null);
+const DEMO_SESSION_KEY = "kratos_frontend_demo_session";
+
+function getDemoSession() {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(DEMO_SESSION_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function setDemoSession(session) {
+  if (typeof window === "undefined") return;
+  try {
+    if (session) window.localStorage.setItem(DEMO_SESSION_KEY, JSON.stringify(session));
+    else window.localStorage.removeItem(DEMO_SESSION_KEY);
+  } catch {
+    /* private mode */
+  }
+}
 
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(null);
@@ -26,6 +47,7 @@ export function AuthProvider({ children }) {
 
   const clearSession = useCallback(() => {
     setStoredToken(null);
+    setDemoSession(null);
     setToken(null);
     setUser(null);
     setProfile(null);
@@ -33,6 +55,16 @@ export function AuthProvider({ children }) {
   }, []);
 
   const refresh = useCallback(async () => {
+    const demo = getDemoSession();
+    if (demo?.user) {
+      setToken(`demo:${demo.user.email}`);
+      setUser(demo.user);
+      setProfile(demo.profile ?? null);
+      setIsAdmin(false);
+      setLoading(false);
+      return demo;
+    }
+
     const stored = getStoredToken();
     if (!stored) {
       clearSession();
@@ -59,30 +91,54 @@ export function AuthProvider({ children }) {
     refresh();
   }, [refresh]);
 
+  const startDemoSession = useCallback((email) => {
+    const normalizedEmail = email.trim().toLowerCase();
+    const existing = getDemoSession();
+    const session = {
+      user: {
+        id: existing?.user?.id || `demo-${normalizedEmail}`,
+        email: normalizedEmail,
+      },
+      profile: existing?.profile ?? null,
+    };
+    setDemoSession(session);
+    setToken(`demo:${normalizedEmail}`);
+    setUser(session.user);
+    setProfile(session.profile);
+    setIsAdmin(false);
+    setError(null);
+    setLoading(false);
+    return session;
+  }, []);
+
+  const saveDemoProfile = useCallback((nextProfile) => {
+    const demo = getDemoSession();
+    if (!demo?.user) return;
+    const next = { ...demo, profile: nextProfile };
+    setDemoSession(next);
+    setProfile(nextProfile);
+  }, []);
+
   const signInWithGoogleCredential = useCallback(
     async (idToken) => {
       setError(null);
-      setLoading(true);
-      try {
-        const data = await loginWithGoogle(idToken);
-        applySession(data, data.access_token);
-        return data;
-      } catch (err) {
-        setError(err);
-        throw err;
-      } finally {
-        setLoading(false);
-      }
+      const data = await loginWithGoogle(idToken);
+      applySession(data, data.access_token);
+      setLoading(false);
+      return data;
     },
     [applySession]
   );
 
   const signOut = useCallback(async () => {
     setError(null);
-    try {
-      await apiLogout();
-    } catch {
-      /* still clear local session */
+    const demo = getDemoSession();
+    if (!demo) {
+      try {
+        await apiLogout();
+      } catch {
+        /* still clear local session */
+      }
     }
     clearSession();
   }, [clearSession]);
@@ -93,15 +149,29 @@ export function AuthProvider({ children }) {
       user,
       profile,
       setProfile,
+      saveDemoProfile,
       isAdmin,
       loading,
       error,
       isAuthenticated: Boolean(token && user),
       refresh,
+      startDemoSession,
       signInWithGoogleCredential,
       signOut,
     }),
-    [token, user, profile, isAdmin, loading, error, refresh, signInWithGoogleCredential, signOut]
+    [
+      token,
+      user,
+      profile,
+      saveDemoProfile,
+      isAdmin,
+      loading,
+      error,
+      refresh,
+      startDemoSession,
+      signInWithGoogleCredential,
+      signOut,
+    ]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

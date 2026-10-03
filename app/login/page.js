@@ -1,77 +1,87 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
-import { PageShell } from "@/components/layout/PageShell";
-import { Card } from "@/components/ui/Card";
-import { ErrorState } from "@/components/ui/ErrorState";
-import { PageSkeleton } from "@/components/ui/Skeleton";
-import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
 import { useAuth } from "@/context/AuthProvider";
-import { toUserMessage } from "@/lib/errors/userMessages";
 import styles from "./login.module.css";
 
 function LoginInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const next = searchParams.get("next") || "/events";
-  const safeNext = next.startsWith("/") ? next : "/events";
-  const { signInWithGoogleCredential, isAuthenticated, loading, error } = useAuth();
-  const [authenticating, setAuthenticating] = useState(false);
-  const authenticatingRef = useRef(false);
+  const next = searchParams.get("next");
+  const { isAuthenticated, loading, startDemoSession } = useAuth();
+  const [mode, setMode] = useState(searchParams.get("mode") === "register" ? "register" : "login");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!loading && isAuthenticated) {
-      router.replace(safeNext);
+    if (!loading && isAuthenticated) router.replace("/profile");
+  }, [loading, isAuthenticated, router]);
+
+  function submit(e) {
+    e.preventDefault();
+    const cleanEmail = email.trim();
+    if (!cleanEmail || !cleanEmail.includes("@")) {
+      setError("Enter a valid email address.");
+      return;
     }
-  }, [loading, isAuthenticated, router, safeNext]);
-
-  const onCredential = useCallback(
-    async (idToken) => {
-      if (authenticatingRef.current) return;
-      authenticatingRef.current = true;
-      setAuthenticating(true);
-      try {
-        await signInWithGoogleCredential(idToken);
-        router.replace(safeNext);
-      } catch {
-        /* AuthProvider sets error */
-      } finally {
-        authenticatingRef.current = false;
-        setAuthenticating(false);
-      }
-    },
-    [signInWithGoogleCredential, router, safeNext]
-  );
-
-  if (loading || isAuthenticated) {
-    return <PageSkeleton />;
+    if (password.trim().length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
+    startDemoSession(cleanEmail);
+    router.replace(next && next.startsWith("/") ? next : "/profile");
   }
 
   return (
-    <div className={styles.wrap}>
-      <Card className={styles.card}>
-        <Image src="/kratos26.png" alt="KRATOS'26" width={220} height={56} className={styles.logo} />
-        <h1 className={styles.title}>Sign in</h1>
-        <p className={styles.lead}>Use your Google account to register for events and manage teams.</p>
-        <GoogleSignInButton
-          onCredential={onCredential}
-          authenticating={authenticating}
-          disabled={authenticating}
-        />
-        {error ? <ErrorState title="Sign-in failed" description={toUserMessage(error)} /> : null}
-      </Card>
-    </div>
+    <main className={styles.page}>
+      <section className={styles.card} aria-labelledby="auth-title">
+        <Image src="/kratos26.png" alt="KRATOS'26" width={220} height={56} className={styles.logo} priority />
+
+        <div>
+          <p className={styles.eyebrow}>Participant Portal</p>
+          <h1 id="auth-title">{mode === "login" ? "Sign in" : "Create account"}</h1>
+          <p className={styles.lead}>
+            {mode === "login" ? "Sign in to continue to your participant profile." : "Create your participant account to get started."}
+          </p>
+        </div>
+
+        <div className={styles.tabs} role="tablist" aria-label="Authentication">
+          <button type="button" className={mode === "login" ? styles.tabActive : styles.tab} onClick={() => { setMode("login"); setError(""); }}>
+            Sign in
+          </button>
+          <button type="button" className={mode === "register" ? styles.tabActive : styles.tab} onClick={() => { setMode("register"); setError(""); }}>
+            Register
+          </button>
+        </div>
+
+        <form onSubmit={submit} className={styles.form}>
+          <label>
+            <span>Email</span>
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" required />
+          </label>
+          <label>
+            <span>Password</span>
+            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete={mode === "login" ? "current-password" : "new-password"} required />
+          </label>
+          {error ? <p className={styles.error} role="alert">{error}</p> : null}
+          <button className={styles.primaryButton} type="submit">
+            {mode === "login" ? "Sign in" : "Create account"}
+          </button>
+        </form>
+
+        <p className={styles.note}>Frontend demo mode — no backend or real account is required.</p>
+      </section>
+    </main>
   );
 }
 
 export default function LoginPage() {
   return (
-    <PageShell>
-      <Suspense fallback={<PageSkeleton />}>
-        <LoginInner />
-      </Suspense>
-    </PageShell>
+    <Suspense fallback={null}>
+      <LoginInner />
+    </Suspense>
   );
 }

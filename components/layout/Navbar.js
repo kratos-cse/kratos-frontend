@@ -9,23 +9,15 @@ import { Button } from "@/components/ui/Button";
 import styles from "./Navbar.module.css";
 
 const LINKS = [
-  { href: "/", label: "Home" },
   { href: "/events", label: "Events" },
-  { href: "/about", label: "About" },
   { href: "/registrations", label: "My Registrations", auth: true },
   { href: "/profile", label: "Profile", auth: true },
 ];
-
-function isActive(pathname, href) {
-  if (href === "/") return pathname === "/";
-  return pathname === href || pathname?.startsWith(`${href}/`);
-}
 
 export function Navbar() {
   const pathname = usePathname();
   const { isAuthenticated, loading, user, signOut } = useAuth();
   const [open, setOpen] = useState(false);
-  const [signingOut, setSigningOut] = useState(false);
   const panelId = useId();
   const firstLinkRef = useRef(null);
 
@@ -75,7 +67,7 @@ export function Navbar() {
 
         <nav className={styles.desktop} aria-label="Primary">
           {visibleLinks.map((link) => {
-            const active = isActive(pathname, link.href);
+            const active = pathname === link.href || pathname?.startsWith(`${link.href}/`);
             return (
               <Link
                 key={link.href}
@@ -95,20 +87,7 @@ export function Navbar() {
               <span className={styles.userMeta} title={user?.email || ""}>
                 {user?.email?.split("@")[0] || "Account"}
               </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                type="button"
-                loading={signingOut}
-                onClick={async () => {
-                  setSigningOut(true);
-                  try {
-                    await signOut();
-                  } finally {
-                    setSigningOut(false);
-                  }
-                }}
-              >
+              <Button variant="ghost" size="sm" type="button" onClick={() => signOut()}>
                 Log out
               </Button>
             </>
@@ -145,7 +124,7 @@ export function Navbar() {
       >
         <nav className={styles.mobileNav} aria-label="Mobile">
           {visibleLinks.map((link, i) => {
-            const active = isActive(pathname, link.href);
+            const active = pathname === link.href || pathname?.startsWith(`${link.href}/`);
             return (
               <Link
                 key={link.href}
@@ -176,18 +155,9 @@ export function Navbar() {
               type="button"
               className={styles.mobileLink}
               tabIndex={open ? 0 : -1}
-              disabled={signingOut}
-              aria-busy={signingOut || undefined}
-              onClick={async () => {
-                setSigningOut(true);
-                try {
-                  await signOut();
-                } finally {
-                  setSigningOut(false);
-                }
-              }}
+              onClick={() => signOut()}
             >
-              {signingOut ? "Signing out…" : "Log out"}
+              Log out
             </button>
           ) : null}
         </nav>

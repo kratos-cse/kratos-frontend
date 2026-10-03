@@ -1,0 +1,149 @@
+.journeyBanner {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  background: linear-gradient(135deg, rgba(122, 31, 217, 0.25), rgba(7, 2, 13, 0.85));
+  border: 1px solid rgba(225, 59, 255, 0.4);
+  border-radius: 16px;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 0 30px rgba(176, 38, 255, 0.2);
+  grid-column: 1 / -1;
+}
+
+.bannerTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.badgeGroup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.journeyTitle {
+  font-family: var(--font-space-grotesk), 'Space Grotesk', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.nextActionBox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  background: rgba(0, 229, 255, 0.08);
+  border: 1px solid rgba(0, 229, 255, 0.35);
+  border-radius: 12px;
+}
+
+.nextActionText {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nextActionIcon {
+  font-size: 24px;
+}
+
+.nextActionTitle {
+  font-family: var(--font-space-grotesk), 'Space Grotesk', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #00e5ff;
+  margin: 0 0 2px;
+}
+
+.nextActionDesc {
+  font-size: 13px;
+  color: #d1d5db;
+  margin: 0;
+}
+
+.stepperRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.stepItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.stepCircle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-dim);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.stepActive .stepCircle {
+  background: var(--neon-2);
+  color: #000;
+  border-color: #fff;
+  box-shadow: 0 0 12px var(--neon-2);
+}
+
+.stepDone .stepCircle {
+  background: #00e5ff;
+  color: #000;
+  border-color: #00e5ff;
+}
+
+.stepLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.stepActive .stepLabel {
+  color: #fff;
+}
+
+.stepDone .stepLabel {
+  color: #00e5ff;
+}
+
+.stepLine {
+  flex: 1;
+  min-width: 16px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.stepDoneLine {
+  background: #00e5ff;
+}
+
+@media (max-width: 768px) {
+  .nextActionBox {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .nextActionBox button,
+  .nextActionBox a {
+    width: 100%;
+  }
+}

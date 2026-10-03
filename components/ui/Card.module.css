@@ -24,16 +24,3 @@
 .interactive:active {
   transform: scale(0.99);
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .interactive {
-    transition:
-      border-color var(--duration-fast) var(--ease-out),
-      background-color var(--duration-fast) var(--ease-out);
-  }
-
-  .interactive:hover,
-  .interactive:active {
-    transform: none;
-  }
-}

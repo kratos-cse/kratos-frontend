@@ -1,25 +1,98 @@
+.page {
+  min-height: calc(100vh - 190px);
+  padding: 72px 24px 90px;
+}
+
 .wrap {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
-  max-width: 40rem;
+  width: min(100%, 960px);
+  margin: 0 auto;
 }
 
-.email {
-  margin: 0.25rem 0 0;
-  font-weight: 650;
-  word-break: break-all;
+.header {
+  margin-bottom: 28px;
 }
 
-.h2 {
-  margin: 0 0 var(--space-2);
-  font-family: var(--font-display);
-  font-size: var(--text-xl);
+.eyebrow {
+  margin: 0 0 8px;
+  color: var(--neon-2);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
 }
 
-.danger {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  align-items: flex-start;
+.header h1 {
+  margin: 0;
+  color: #fff;
+  font-family: var(--font-space-grotesk), 'Space Grotesk', sans-serif;
+  font-size: clamp(27px, 4vw, 38px);
+}
+
+.header p:last-child {
+  margin: 10px 0 0;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+
+.card {
+  display: grid;
+  gap: 17px;
+  padding: 30px;
+  border: 1px solid rgba(176, 38, 255, 0.28);
+  border-radius: 18px;
+  background: rgba(7, 2, 13, 0.72);
+  backdrop-filter: blur(12px);
+}
+
+.card label {
+  display: grid;
+  gap: 7px;
+  color: #d8cbea;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.card input,
+.card select {
+  width: 100%;
+  min-height: 46px;
+  padding: 11px 13px;
+  border: 1px solid rgba(176, 38, 255, 0.28);
+  border-radius: 10px;
+  outline: none;
+  background: rgba(13, 3, 24, 0.72);
+  color: #fff;
+  font: 400 14px 'Space Grotesk', sans-serif;
+}
+
+.card select { cursor: pointer; }
+.card input:focus,
+.card select:focus {
+  border-color: var(--neon-2);
+  box-shadow: 0 0 0 3px rgba(225, 59, 255, 0.12);
+}
+
+.error {
+  margin: -2px 0 0;
+  color: #ff8b9b;
+  font-size: 13px;
+}
+
+.primaryButton {
+  min-height: 48px;
+  margin-top: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--neon), var(--purple-500));
+  color: #fff;
+  font: 700 12px var(--font-space-grotesk), 'Space Grotesk', sans-serif;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 0 20px rgba(176, 38, 255, 0.42);
+}
+
+@media (max-width: 520px) {
+  .page { padding-inline: 16px; }
+  .card { padding: 24px 20px; }
 }
