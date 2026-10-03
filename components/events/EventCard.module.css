@@ -31,6 +31,10 @@
   .card:hover {
     transform: none;
   }
+
+  .titleLink:active {
+    transform: none;
+  }
 }
 
 .category {
@@ -54,6 +58,12 @@
 .titleLink {
   color: inherit;
   text-decoration: none;
+  display: inline-block;
+  transition: transform var(--duration-press) var(--ease-out);
+}
+
+.titleLink:active {
+  transform: scale(0.99);
 }
 
 .titleLink:hover {

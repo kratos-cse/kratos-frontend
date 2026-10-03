@@ -12,7 +12,13 @@
   letter-spacing: 0.02em;
   cursor: pointer;
   border-radius: var(--radius-sm);
-  transition: color var(--duration-fast) var(--ease-out);
+  transition:
+    color var(--duration-fast) var(--ease-out),
+    transform var(--duration-press) var(--ease-out);
+}
+
+.back:active {
+  transform: scale(0.97);
 }
 
 .icon {
@@ -27,4 +33,10 @@
 .back:focus-visible {
   outline: 2px solid var(--brand);
   outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .back:active {
+    transform: none;
+  }
 }

@@ -25,6 +25,7 @@ export function Navbar() {
   const pathname = usePathname();
   const { isAuthenticated, loading, user, signOut } = useAuth();
   const [open, setOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
   const panelId = useId();
   const firstLinkRef = useRef(null);
 
@@ -94,7 +95,20 @@ export function Navbar() {
               <span className={styles.userMeta} title={user?.email || ""}>
                 {user?.email?.split("@")[0] || "Account"}
               </span>
-              <Button variant="ghost" size="sm" type="button" onClick={() => signOut()}>
+              <Button
+                variant="ghost"
+                size="sm"
+                type="button"
+                loading={signingOut}
+                onClick={async () => {
+                  setSigningOut(true);
+                  try {
+                    await signOut();
+                  } finally {
+                    setSigningOut(false);
+                  }
+                }}
+              >
                 Log out
               </Button>
             </>
@@ -162,9 +176,18 @@ export function Navbar() {
               type="button"
               className={styles.mobileLink}
               tabIndex={open ? 0 : -1}
-              onClick={() => signOut()}
+              disabled={signingOut}
+              aria-busy={signingOut || undefined}
+              onClick={async () => {
+                setSigningOut(true);
+                try {
+                  await signOut();
+                } finally {
+                  setSigningOut(false);
+                }
+              }}
             >
-              Log out
+              {signingOut ? "Signing out…" : "Log out"}
             </button>
           ) : null}
         </nav>
