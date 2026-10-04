@@ -289,10 +289,10 @@ export default function PapyrusPage() {
           <section className={styles.heroSection}>
             <div className={styles.heroBackground} aria-hidden="true">
               <DarkVeil
-                colorStops={["#050506", "#1a1020", "#0c1428"]}
-                amplitude={1.1}
-                blend={0.55}
-                speed={1.0}
+                colorStops={["#1a0812", "#2a1848", "#0e1e42"]}
+                amplitude={1.45}
+                blend={0.72}
+                speed={0.85}
                 lightMode={false}
               />
             </div>

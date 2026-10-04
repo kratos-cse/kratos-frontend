@@ -23,14 +23,16 @@
 
 .heroSection {
   margin-top: calc(-1 * var(--nav-h));
-  padding: calc(var(--nav-h) + var(--space-4)) var(--page-pad) var(--space-6);
+  /* Section is pulled up by --nav-h; pad by 2× nav-h so content clears the overlay navbar */
+  padding: calc(var(--nav-h) * 2 + var(--space-5)) var(--page-pad) var(--space-6);
   position: relative;
   overflow: hidden;
   isolation: isolate;
-  min-height: clamp(520px, 85vh, 880px);
+  min-height: clamp(520px, 82vh, 860px);
   width: 100vw;
   margin-left: calc(50% - 50vw);
   margin-right: calc(50% - 50vw);
+  background-color: #06060a;
 }
 
 .heroInner {
@@ -38,7 +40,7 @@
   z-index: 2;
   width: min(100%, var(--content-wide));
   margin-inline: auto;
-  min-height: calc(85vh - var(--nav-h) - var(--space-6));
+  min-height: calc(78vh - var(--nav-h) * 2);
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
@@ -51,7 +53,7 @@
   gap: var(--space-4);
   width: 100%;
   flex-shrink: 0;
-  padding-top: var(--space-2);
+  margin-bottom: var(--space-2);
 }
 
 .heroEecBrand,
@@ -120,12 +122,39 @@
   inset: 0;
   z-index: 0;
   pointer-events: none;
+  overflow: hidden;
 }
 
+.heroBackground::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 90% 70% at 50% 35%, rgba(140, 36, 52, 0.38) 0%, transparent 58%),
+    radial-gradient(ellipse 55% 45% at 88% 18%, rgba(48, 72, 128, 0.42) 0%, transparent 52%),
+    radial-gradient(ellipse 50% 40% at 12% 22%, rgba(168, 52, 48, 0.22) 0%, transparent 50%),
+    radial-gradient(ellipse 40% 30% at 50% 78%, rgba(228, 184, 74, 0.08) 0%, transparent 55%),
+    linear-gradient(165deg, #12101c 0%, #08080e 42%, #050508 100%);
+}
+
+.heroBackground .darkveil-canvas,
 .heroBackground canvas {
+  position: relative;
+  z-index: 1;
   width: 100%;
   height: 100%;
   display: block;
+  opacity: 0.92;
+  mix-blend-mode: screen;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .heroBackground .darkveil-canvas,
+  .heroBackground canvas {
+    mix-blend-mode: normal;
+    opacity: 1;
+  }
 }
 
 /* Removed heroGrid and heroMotionBg to let DarkVeil shine */
