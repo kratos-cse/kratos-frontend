@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { PageShell } from "@/components/layout/PageShell";
-import { PageTransition } from "@/components/motion/Reveal";
+import { PageTransition, StepFade } from "@/components/motion/Reveal";
 import { RequireAuth } from "@/components/layout/RequireAuth";
 import { ProfileForm } from "@/components/profile/ProfileForm";
 import { Button } from "@/components/ui/Button";
@@ -11,7 +11,6 @@ import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { StatusBanner, ErrorState } from "@/components/ui/ErrorState";
 import { PageSkeleton } from "@/components/ui/Skeleton";
-import { openRazorpayCheckout } from "@/components/registration/PaymentCheckout";
 import { PaymentConfirmed } from "@/components/registration/PaymentConfirmed";
 import { TeamMateChoice } from "@/components/registration/TeamMateChoice";
 import { TeamRosterWizard } from "@/components/registration/TeamRosterWizard";
@@ -20,7 +19,8 @@ import { useAuth } from "@/context/AuthProvider";
 import { useEvent } from "@/hooks/useEvents";
 import { getRegistrationForm } from "@/lib/api/events";
 import { createRegistration, getRegistration, listMyRegistrations } from "@/lib/api/registrations";
-import { createOrder, verifyPayment, syncPayment } from "@/lib/api/payments";
+import { executePaidCheckout } from "@/lib/payments/checkoutFlow";
+import { PaymentStatus } from "@/components/registration/PaymentStatus";
 import { toUserMessage, canRetryPayment, isRegistrationConfirmed } from "@/lib/errors/userMessages";
 import {
   canRegisterForEvent,
@@ -53,6 +53,7 @@ function RegisterWizard() {
   const [regType, setRegType] = useState("SOLO");
   const [teamName, setTeamName] = useState("");
   const [busy, setBusy] = useState(false);
+  const [paymentStage, setPaymentStage] = useState(null);
   const [error, setError] = useState(null);
   const [registration, setRegistration] = useState(null);
   const [checkingExisting, setCheckingExisting] = useState(true);
@@ -148,35 +149,22 @@ function RegisterWizard() {
     setBusy(true);
     setError(null);
     try {
-      const order = await createOrder({
-        eventId,
-        paymentType: reg.team ? "TEAM_REGISTRATION" : "SOLO_REGISTRATION",
-        registrationId: reg.id,
-      });
-      await openRazorpayCheckout({
-        keyId: order.razorpayKeyId,
-        orderId: order.razorpayOrderId,
-        amountPaise: order.amountPaise,
-        currency: order.currency,
-        description: event?.name || "Registration",
-        prefill: {
-          name: profile?.full_name || "",
-          email: user?.email || profile?.contact_email || "",
-          contact: profile?.phone || "",
+      await executePaidCheckout({
+        orderParams: {
+          eventId,
+          paymentType: reg.team ? "TEAM_REGISTRATION" : "SOLO_REGISTRATION",
+          registrationId: reg.id,
         },
-        onSuccess: async (response) => {
-          await verifyPayment({
-            razorpayOrderId: response.razorpay_order_id,
-            razorpayPaymentId: response.razorpay_payment_id,
-            razorpaySignature: response.razorpay_signature,
-          });
-          if (order.paymentId) {
-            try {
-              await syncPayment(order.paymentId);
-            } catch {
-              /* verify already applied */
-            }
-          }
+        razorpayOptions: {
+          description: event?.name || "Registration",
+          prefill: {
+            name: profile?.full_name || "",
+            email: user?.email || profile?.contact_email || "",
+            contact: profile?.phone || "",
+          },
+        },
+        onStage: setPaymentStage,
+        onAfterVerify: async () => {
           const fresh = await getRegistration(reg.id);
           setRegistration(fresh);
           setStep("confirmed");
@@ -192,6 +180,7 @@ function RegisterWizard() {
       }
     } finally {
       setBusy(false);
+      setPaymentStage(null);
     }
   }
 
@@ -399,6 +388,7 @@ function RegisterWizard() {
   })();
 
   return (
+    <PageTransition>
     <div className={styles.wrap}>
       <header className={styles.head}>
         <p className="meta">Register</p>
@@ -414,7 +404,7 @@ function RegisterWizard() {
       {error ? <StatusBanner tone="err">{error}</StatusBanner> : null}
       {configError ? <StatusBanner tone="err">{configError}</StatusBanner> : null}
 
-      <PageTransition key={step}>
+      <StepFade stepKey={step}>
       {step === "profile" ? (
         <Card>
           <h2 className={styles.h2}>Your profile</h2>
@@ -435,6 +425,7 @@ function RegisterWizard() {
                 aria-checked={regType === t}
                 className={[styles.typeBtn, regType === t ? styles.typeActive : ""].join(" ")}
                 onClick={() => setRegType(t)}
+                disabled={busy}
               >
                 {t === "SOLO" ? "Individual" : "Team"}
               </button>
@@ -509,7 +500,7 @@ function RegisterWizard() {
             </Button>
             <Button
               type="button"
-              loading={busy && regType === "TEAM"}
+              loading={busy}
               onClick={() => {
                 const missing = validateRequiredFields(registrationFields, fieldValues);
                 if (missing.length) {
@@ -570,6 +561,7 @@ function RegisterWizard() {
             Complete payment to confirm your registration. Don&apos;t refresh mid-checkout — you can retry
             safely.
           </StatusBanner>
+          <PaymentStatus stage={paymentStage} />
           <div className={styles.actions}>
             <Button
               type="button"
@@ -585,7 +577,7 @@ function RegisterWizard() {
           </div>
         </Card>
       ) : null}
-      </PageTransition>
+      </StepFade>
 
       {step === "confirmed" && registration ? (
         <PaymentConfirmed
@@ -595,6 +587,7 @@ function RegisterWizard() {
         />
       ) : null}
     </div>
+    </PageTransition>
   );
 }
 

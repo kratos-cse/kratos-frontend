@@ -4,8 +4,13 @@
  */
 
 function rosterStyle(event) {
+  const subs = Math.max(0, Number(event?.substitute_count ?? 0));
   const s = event?.roster_style;
-  if (s === "FIXED" || s === "RANGE" || s === "MEMBERS_SUBSTITUTES") return s;
+  if (s === "FIXED" || s === "RANGE" || s === "MEMBERS_SUBSTITUTES") {
+    if ((s === "FIXED" || s === "RANGE") && subs > 0) return "MEMBERS_SUBSTITUTES";
+    return s;
+  }
+  if (subs > 0) return "MEMBERS_SUBSTITUTES";
   const teamMin = Math.max(1, Number(event?.team_min_size ?? event?.required_member_count ?? 1));
   const teamMax = Math.max(teamMin, Number(event?.team_max_size ?? teamMin));
   if (teamMin === teamMax) return "FIXED";
@@ -13,15 +18,18 @@ function rosterStyle(event) {
 }
 
 function getRosterLimits(event) {
-  const teamMin = Math.max(1, Number(event?.team_min_size ?? event?.required_member_count ?? 1));
-  const teamMax = Math.max(
-    teamMin,
-    Number(event?.team_max_size ?? event?.required_member_count ?? teamMin),
-  );
+  const required = Math.max(1, Number(event?.required_member_count ?? event?.team_min_size ?? 1));
+  const teamMin = Math.max(1, Number(event?.team_min_size ?? required));
+  const teamMax = Math.max(teamMin, Number(event?.team_max_size ?? required));
   const style = rosterStyle(event);
   const substitutes =
     style === "MEMBERS_SUBSTITUTES" ? Math.max(0, Number(event?.substitute_count ?? 0)) : 0;
-  return { required: teamMin, teamMax, substitutes, style };
+  return {
+    required,
+    teamMax: style === "MEMBERS_SUBSTITUTES" ? required + substitutes : teamMax,
+    substitutes,
+    style,
+  };
 }
 
 function activeMembers(team) {
