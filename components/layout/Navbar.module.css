@@ -8,19 +8,6 @@
   border-bottom: none;
 }
 
-.headerImmersive {
-  background: rgba(5, 5, 6, 0.42);
-  backdrop-filter: blur(10px) saturate(120%);
-  -webkit-backdrop-filter: blur(10px) saturate(120%);
-  border-bottom: 1px solid var(--border);
-}
-
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .headerImmersive {
-    background: rgba(5, 5, 6, 0.88);
-  }
-}
-
 .inner {
   height: var(--nav-h);
   display: flex;
@@ -90,7 +77,7 @@
 }
 
 /* Glass pill with red glowing edge on hover / active */
-.link.active:not(.linkPapyrus) {
+.link.active {
   background: rgba(255, 255, 255, 0.04);
   backdrop-filter: blur(12px) saturate(140%);
   -webkit-backdrop-filter: blur(12px) saturate(140%);
@@ -104,8 +91,33 @@
   text-shadow: 0 0 10px rgba(255, 50, 50, 0.4);
 }
 
+/* Event page: understated active nav (Papyrus) */
+.link.linkActiveSubtle {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(228, 184, 74, 0.22);
+  color: var(--accent-gold);
+  box-shadow: none;
+  text-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.mobileLink.mobileLinkActiveSubtle {
+  background: var(--surface);
+  border-color: rgba(228, 184, 74, 0.2);
+  color: var(--accent-gold);
+}
+
 @media (hover: hover) and (pointer: fine) {
-  .link:not(.linkPapyrus):hover {
+  .link.linkActiveSubtle:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(228, 184, 74, 0.28);
+    color: var(--accent-gold);
+    box-shadow: none;
+    text-shadow: none;
+  }
+
+  .link:hover {
     background: rgba(255, 255, 255, 0.04);
     backdrop-filter: blur(12px) saturate(140%);
     -webkit-backdrop-filter: blur(12px) saturate(140%);
@@ -118,41 +130,6 @@
       0 4px 16px rgba(0, 0, 0, 0.25);
     text-shadow: 0 0 10px rgba(255, 50, 50, 0.4);
   }
-
-  .linkPapyrus:hover,
-  .linkPapyrus.linkPapyrusActive {
-    background: rgba(255, 255, 255, 0.04);
-    backdrop-filter: blur(12px) saturate(140%);
-    -webkit-backdrop-filter: blur(12px) saturate(140%);
-    border-color: rgba(94, 184, 232, 0.45);
-    color: #d4ecfa;
-    box-shadow:
-      0 0 12px rgba(94, 184, 232, 0.28),
-      0 0 24px rgba(94, 184, 232, 0.12),
-      inset 0 1px 0 rgba(255, 255, 255, 0.06),
-      0 4px 16px rgba(0, 0, 0, 0.25);
-    text-shadow: 0 0 10px rgba(94, 184, 232, 0.45);
-  }
-}
-
-.linkPapyrus.linkPapyrusActive {
-  background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(12px) saturate(140%);
-  -webkit-backdrop-filter: blur(12px) saturate(140%);
-  border-color: rgba(94, 184, 232, 0.45);
-  color: #d4ecfa;
-  box-shadow:
-    0 0 12px rgba(94, 184, 232, 0.28),
-    0 0 24px rgba(94, 184, 232, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 4px 16px rgba(0, 0, 0, 0.25);
-  text-shadow: 0 0 10px rgba(94, 184, 232, 0.45);
-}
-
-.mobileLinkPapyrus.mobileLinkPapyrusActive {
-  background: rgba(94, 184, 232, 0.12);
-  border-color: rgba(94, 184, 232, 0.35);
-  color: #d4ecfa;
 }
 
 .actions {

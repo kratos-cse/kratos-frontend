@@ -287,25 +287,6 @@ export default function PapyrusPage() {
         <div className={styles.pageWrapper}>
           
           <section className={styles.heroSection}>
-            <div className={styles.partnerLogos} aria-label="Host and affiliate logos">
-              <Image
-                src="/eec-white.png"
-                alt="Easwari Engineering College"
-                width={320}
-                height={80}
-                className={styles.logoEec}
-                priority
-              />
-              <Image
-                src="/CSI.png"
-                alt="Computer Society of India"
-                width={128}
-                height={128}
-                className={styles.logoCsi}
-                priority
-              />
-            </div>
-
             <div className={styles.heroBackground} aria-hidden="true">
               <DarkVeil
                 colorStops={["#050506", "#1a1020", "#0c1428"]}
@@ -315,7 +296,31 @@ export default function PapyrusPage() {
                 lightMode={false}
               />
             </div>
-            
+
+            <div className={styles.heroInner}>
+              <div className={styles.heroInstitutionalRow} aria-label="Host and affiliate logos">
+                <div className={styles.heroEecBrand}>
+                  <Image
+                    src="/eec-white.png"
+                    alt="Easwari Engineering College"
+                    width={320}
+                    height={80}
+                    className={styles.logoEec}
+                    priority
+                  />
+                </div>
+                <div className={styles.heroCsiBrand}>
+                  <Image
+                    src="/CSI.png"
+                    alt="Computer Society of India"
+                    width={128}
+                    height={128}
+                    className={styles.logoCsi}
+                    priority
+                  />
+                </div>
+              </div>
+
             <div className={styles.heroContent}>
               <motion.p
                 className={styles.eyebrow}
@@ -362,6 +367,7 @@ export default function PapyrusPage() {
                   Explore Themes
                 </Button>
               </motion.div>
+            </div>
             </div>
           </section>
 

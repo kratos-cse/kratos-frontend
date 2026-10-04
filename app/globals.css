@@ -89,9 +89,6 @@
   --z-nav: 40;
   --z-modal: 60;
   --z-toast: 70;
-
-  /* PAPYRUS nav accent (conference / research) */
-  --papyrus-nav-accent: var(--accent-cyan);
 }
 
 *,

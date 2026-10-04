@@ -12,32 +12,10 @@ const LINKS = [
   { href: "/", label: "Home" },
   { href: "/events", label: "Events" },
   { href: "/about", label: "About" },
-  { href: "/papyrus", label: "Papyrus", variant: "papyrus" },
+  { href: "/papyrus", label: "Papyrus" },
   { href: "/registrations", label: "My Registrations", auth: true },
   { href: "/profile", label: "Profile", auth: true },
 ];
-
-function desktopLinkClass(link, active, styles) {
-  const parts = [styles.link];
-  if (link.variant === "papyrus") {
-    parts.push(styles.linkPapyrus);
-    if (active) parts.push(styles.linkPapyrusActive);
-  } else if (active) {
-    parts.push(styles.active);
-  }
-  return parts.filter(Boolean).join(" ");
-}
-
-function mobileLinkClass(link, active, styles) {
-  const parts = [styles.mobileLink];
-  if (link.variant === "papyrus") {
-    parts.push(styles.mobileLinkPapyrus);
-    if (active) parts.push(styles.mobileLinkPapyrusActive);
-  } else if (active) {
-    parts.push(styles.active);
-  }
-  return parts.filter(Boolean).join(" ");
-}
 
 function isActive(pathname, href) {
   if (href === "/") return pathname === "/";
@@ -73,11 +51,21 @@ export function Navbar() {
   }, [open]);
 
   const visibleLinks = LINKS.filter((link) => !link.auth || isAuthenticated);
-  const immersiveHeader =
+  const onPapyrus =
     pathname === "/papyrus" || (pathname?.startsWith("/papyrus/") ?? false);
 
+  const navLinkClass = (active) =>
+    [styles.link, active ? (onPapyrus ? styles.linkActiveSubtle : styles.active) : ""]
+      .filter(Boolean)
+      .join(" ");
+
+  const mobileNavLinkClass = (active) =>
+    [styles.mobileLink, active ? (onPapyrus ? styles.mobileLinkActiveSubtle : styles.active) : ""]
+      .filter(Boolean)
+      .join(" ");
+
   return (
-    <header className={[styles.header, immersiveHeader ? styles.headerImmersive : ""].join(" ")}>
+    <header className={styles.header}>
       <div className={`container--wide ${styles.inner}`}>
         <Link href="/" className={styles.brand} aria-label="KRATOS'26 home">
           <Image
@@ -105,7 +93,7 @@ export function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={desktopLinkClass(link, active, styles)}
+                className={navLinkClass(active)}
                 aria-current={active ? "page" : undefined}
               >
                 {link.label}
@@ -177,7 +165,7 @@ export function Navbar() {
                 ref={i === 0 ? firstLinkRef : undefined}
                 href={link.href}
                 tabIndex={open ? 0 : -1}
-                className={mobileLinkClass(link, active, styles)}
+                className={mobileNavLinkClass(active)}
                 aria-current={active ? "page" : undefined}
               >
                 {link.label}
