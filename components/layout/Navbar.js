@@ -12,7 +12,6 @@ const LINKS = [
   { href: "/", label: "Home" },
   { href: "/events", label: "Events" },
   { href: "/about", label: "About" },
-  { href: "/papyrus", label: "Papyrus" },
   { href: "/registrations", label: "My Registrations", auth: true },
   { href: "/profile", label: "Profile", auth: true },
 ];
@@ -51,18 +50,6 @@ export function Navbar() {
   }, [open]);
 
   const visibleLinks = LINKS.filter((link) => !link.auth || isAuthenticated);
-  const onPapyrus =
-    pathname === "/papyrus" || (pathname?.startsWith("/papyrus/") ?? false);
-
-  const navLinkClass = (active) =>
-    [styles.link, active ? (onPapyrus ? styles.linkActiveSubtle : styles.active) : ""]
-      .filter(Boolean)
-      .join(" ");
-
-  const mobileNavLinkClass = (active) =>
-    [styles.mobileLink, active ? (onPapyrus ? styles.mobileLinkActiveSubtle : styles.active) : ""]
-      .filter(Boolean)
-      .join(" ");
 
   return (
     <header className={styles.header}>
@@ -93,7 +80,7 @@ export function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={navLinkClass(active)}
+                className={[styles.link, active ? styles.active : ""].filter(Boolean).join(" ")}
                 aria-current={active ? "page" : undefined}
               >
                 {link.label}
@@ -165,7 +152,7 @@ export function Navbar() {
                 ref={i === 0 ? firstLinkRef : undefined}
                 href={link.href}
                 tabIndex={open ? 0 : -1}
-                className={mobileNavLinkClass(active)}
+                className={[styles.mobileLink, active ? styles.active : ""].filter(Boolean).join(" ")}
                 aria-current={active ? "page" : undefined}
               >
                 {link.label}

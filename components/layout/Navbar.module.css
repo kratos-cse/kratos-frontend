@@ -91,32 +91,7 @@
   text-shadow: 0 0 10px rgba(255, 50, 50, 0.4);
 }
 
-/* Event page: understated active nav (Papyrus) */
-.link.linkActiveSubtle {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(228, 184, 74, 0.22);
-  color: var(--accent-gold);
-  box-shadow: none;
-  text-shadow: none;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-}
-
-.mobileLink.mobileLinkActiveSubtle {
-  background: var(--surface);
-  border-color: rgba(228, 184, 74, 0.2);
-  color: var(--accent-gold);
-}
-
 @media (hover: hover) and (pointer: fine) {
-  .link.linkActiveSubtle:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(228, 184, 74, 0.28);
-    color: var(--accent-gold);
-    box-shadow: none;
-    text-shadow: none;
-  }
-
   .link:hover {
     background: rgba(255, 255, 255, 0.04);
     backdrop-filter: blur(12px) saturate(140%);
