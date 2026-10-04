@@ -89,6 +89,9 @@
   --z-nav: 40;
   --z-modal: 60;
   --z-toast: 70;
+
+  /* PAPYRUS nav accent (conference / research) */
+  --papyrus-nav-accent: var(--accent-cyan);
 }
 
 *,
@@ -180,6 +183,11 @@ button {
   flex: 1;
   width: 100%;
   padding-top: var(--nav-h);
+}
+
+.app-main--immersive {
+  padding-top: 0;
+  max-width: none;
 }
 
 .container {

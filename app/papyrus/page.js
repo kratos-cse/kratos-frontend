@@ -2,12 +2,14 @@
 
 import { useState, useRef, useEffect } from "react";
 import { PageShell } from "@/components/layout/PageShell";
-import Link from "next/link";
+import Image from "next/image";
+import { Button } from "@/components/ui/Button";
+import { PAPYRUS_REGISTRATION_URL } from "@/lib/links";
 import { Reveal } from "@/components/motion/Reveal";
 import { motion, AnimatePresence, useScroll, useTransform, useSpring } from "motion/react";
 import { DarkVeil } from "@/components/motion/DarkVeil";
 import { DepthCarousel } from "@/components/motion/DepthCarousel";
-import styles from "./ideaverse.module.css";
+import styles from "./papyrus.module.css";
 
 const THEMES = [
   "01 — AI & Generative Intelligence",
@@ -267,7 +269,7 @@ function useResponsiveCarousel() {
   return props;
 }
 
-export default function IdeaversePage() {
+export default function PapyrusPage() {
   const carouselProps = useResponsiveCarousel();
 
   const submissionItems = [
@@ -280,29 +282,56 @@ export default function IdeaversePage() {
   ];
 
   return (
-    <div className={styles.ideaverseTheme}>
-      <PageShell wide>
+    <div className={styles.papyrusTheme}>
+      <PageShell immersive>
         <div className={styles.pageWrapper}>
           
           <section className={styles.heroSection}>
+            <div className={styles.partnerLogos} aria-label="Host and affiliate logos">
+              <Image
+                src="/eec-white.png"
+                alt="Easwari Engineering College"
+                width={320}
+                height={80}
+                className={styles.logoEec}
+                priority
+              />
+              <Image
+                src="/CSI.png"
+                alt="Computer Society of India"
+                width={128}
+                height={128}
+                className={styles.logoCsi}
+                priority
+              />
+            </div>
+
             <div className={styles.heroBackground} aria-hidden="true">
               <DarkVeil
-                colorStops={['#030816', '#162040', '#0a1128']}
-                amplitude={1.2}
-                blend={0.6}
+                colorStops={["#050506", "#1a1020", "#0c1428"]}
+                amplitude={1.1}
+                blend={0.55}
                 speed={1.0}
                 lightMode={false}
               />
             </div>
             
             <div className={styles.heroContent}>
+              <motion.p
+                className={styles.eyebrow}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
+              >
+                Paper Conference · KRATOS &apos;26
+              </motion.p>
               <motion.h1 
                 className={styles.title}
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
               >
-                IDEAVERSE
+                PAPYRUS
               </motion.h1>
               
               <motion.p 
@@ -320,8 +349,18 @@ export default function IdeaversePage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
               >
-                <Link href="#submission" className={styles.btnPrimary}>Submission guidelines</Link>
-                <Link href="#themes" className={styles.btnSecondary}>Explore Themes</Link>
+                <Button
+                  href={PAPYRUS_REGISTRATION_URL}
+                  size="lg"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Register now (opens Google Form in a new tab)"
+                >
+                  Register Now
+                </Button>
+                <Button href="#themes" variant="secondary" size="lg">
+                  Explore Themes
+                </Button>
               </motion.div>
             </div>
           </section>
@@ -538,8 +577,18 @@ export default function IdeaversePage() {
               <h2 className={styles.ctaTitle}>Have an Idea Worth Sharing?</h2>
               <p className={styles.ctaDesc}>Submit your research. Present your work. Connect your ideas with the wider research community.</p>
               <div className={styles.ctaGroup}>
-                <Link href="#submission" className={styles.btnPrimary}>Submission guidelines</Link>
-                <Link href="#themes" className={styles.btnSecondary}>VIEW THEMES</Link>
+                <Button
+                  href={PAPYRUS_REGISTRATION_URL}
+                  size="lg"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Register now (opens Google Form in a new tab)"
+                >
+                  Register Now
+                </Button>
+                <Button href="#themes" variant="secondary" size="lg">
+                  Explore Themes
+                </Button>
               </div>
             </section>
           </Reveal>

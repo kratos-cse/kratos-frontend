@@ -12,9 +12,32 @@ const LINKS = [
   { href: "/", label: "Home" },
   { href: "/events", label: "Events" },
   { href: "/about", label: "About" },
+  { href: "/papyrus", label: "Papyrus", variant: "papyrus" },
   { href: "/registrations", label: "My Registrations", auth: true },
   { href: "/profile", label: "Profile", auth: true },
 ];
+
+function desktopLinkClass(link, active, styles) {
+  const parts = [styles.link];
+  if (link.variant === "papyrus") {
+    parts.push(styles.linkPapyrus);
+    if (active) parts.push(styles.linkPapyrusActive);
+  } else if (active) {
+    parts.push(styles.active);
+  }
+  return parts.filter(Boolean).join(" ");
+}
+
+function mobileLinkClass(link, active, styles) {
+  const parts = [styles.mobileLink];
+  if (link.variant === "papyrus") {
+    parts.push(styles.mobileLinkPapyrus);
+    if (active) parts.push(styles.mobileLinkPapyrusActive);
+  } else if (active) {
+    parts.push(styles.active);
+  }
+  return parts.filter(Boolean).join(" ");
+}
 
 function isActive(pathname, href) {
   if (href === "/") return pathname === "/";
@@ -50,9 +73,11 @@ export function Navbar() {
   }, [open]);
 
   const visibleLinks = LINKS.filter((link) => !link.auth || isAuthenticated);
+  const immersiveHeader =
+    pathname === "/papyrus" || (pathname?.startsWith("/papyrus/") ?? false);
 
   return (
-    <header className={styles.header}>
+    <header className={[styles.header, immersiveHeader ? styles.headerImmersive : ""].join(" ")}>
       <div className={`container--wide ${styles.inner}`}>
         <Link href="/" className={styles.brand} aria-label="KRATOS'26 home">
           <Image
@@ -80,7 +105,7 @@ export function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={[styles.link, active ? styles.active : ""].join(" ")}
+                className={desktopLinkClass(link, active, styles)}
                 aria-current={active ? "page" : undefined}
               >
                 {link.label}
@@ -152,7 +177,7 @@ export function Navbar() {
                 ref={i === 0 ? firstLinkRef : undefined}
                 href={link.href}
                 tabIndex={open ? 0 : -1}
-                className={[styles.mobileLink, active ? styles.active : ""].join(" ")}
+                className={mobileLinkClass(link, active, styles)}
                 aria-current={active ? "page" : undefined}
               >
                 {link.label}

@@ -1,35 +1,92 @@
-.ideaverseTheme {
-  --iv-bg: #030816;
-  --iv-surface: #0a1128;
-  --iv-surface-2: #101833;
-  --iv-surface-3: #162040;
-  --iv-gold: #e8c361;
-  --iv-gold-dim: rgba(232, 195, 97, 0.2);
-  --iv-text: #f4f4f5;
-  --iv-text-muted: #94a3b8;
-  --iv-border: rgba(232, 195, 97, 0.15);
+.papyrusTheme {
+  --iv-bg: var(--bg);
+  --iv-surface: var(--surface);
+  --iv-surface-2: var(--surface-2);
+  --iv-surface-3: var(--surface-3);
+  --iv-gold: var(--accent-gold);
+  --iv-gold-dim: rgba(228, 184, 74, 0.18);
+  --iv-text: var(--text);
+  --iv-text-muted: var(--text-secondary);
+  --iv-border: var(--border);
+  color: var(--iv-text);
 }
 
 .pageWrapper {
   background-color: var(--iv-bg);
-  color: var(--iv-text);
   min-height: 100vh;
-  background-image: 
-    radial-gradient(ellipse at 50% 0%, rgba(232, 195, 97, 0.05) 0%, transparent 60%),
-    linear-gradient(to bottom, transparent, var(--iv-bg));
+  overflow-x: hidden;
+  background-image:
+    radial-gradient(ellipse at 50% 0%, rgba(198, 40, 40, 0.08) 0%, transparent 45%),
+    radial-gradient(ellipse at 80% 20%, rgba(22, 32, 64, 0.35) 0%, transparent 50%),
+    linear-gradient(to bottom, var(--bg) 0%, var(--bg-elevated) 100%);
 }
 
 .heroSection {
-  padding-top: var(--space-8);
+  margin-top: calc(-1 * var(--nav-h));
+  padding-top: calc(var(--nav-h) + var(--space-6));
   padding-bottom: var(--space-8);
+  padding-inline: var(--page-pad);
   text-align: center;
   position: relative;
   overflow: hidden;
   isolation: isolate;
-  min-height: 680px;
+  min-height: min(100dvh, 920px);
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+}
+
+.partnerLogos {
+  position: absolute;
+  top: calc(var(--nav-h) + var(--space-3));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  width: min(100% - 2 * var(--page-pad), var(--content-wide));
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-4);
+  pointer-events: none;
+}
+
+.logoEec {
+  width: auto;
+  height: auto;
+  max-width: min(300px, 42vw);
+  max-height: clamp(48px, 8vw, 76px);
+  object-fit: contain;
+  object-position: left top;
+}
+
+.logoCsi {
+  width: auto;
+  height: auto;
+  max-width: clamp(96px, 18vw, 132px);
+  max-height: clamp(56px, 10vw, 96px);
+  object-fit: contain;
+  object-position: right top;
+  flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+  .heroSection {
+    min-height: min(92dvh, 720px);
+    padding-top: calc(var(--nav-h) + 4.5rem);
+  }
+
+  .logoEec {
+    max-width: min(180px, 48vw);
+    max-height: 40px;
+  }
+
+  .logoCsi {
+    max-width: 72px;
+    max-height: 72px;
+  }
 }
 
 .heroBackground {
@@ -55,15 +112,25 @@
   width: 100%;
 }
 
+.eyebrow {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-3);
+}
+
 .title {
   font-family: var(--font-display);
   font-size: var(--text-hero);
   font-weight: 700;
-  color: #ffffff;
+  color: var(--text);
   line-height: 1.1;
   letter-spacing: -0.02em;
   margin-bottom: var(--space-3);
-  text-shadow: 0 0 30px rgba(232, 195, 97, 0.2);
+  text-shadow: 0 0 40px rgba(198, 40, 40, 0.15);
 }
 
 .subtitleBlock {
@@ -76,10 +143,12 @@
 }
 
 .tagline {
-  font-size: var(--text-2xl);
-  color: var(--iv-gold);
+  font-size: var(--text-xl);
+  color: var(--accent-gold);
   margin-bottom: var(--space-5);
   font-weight: 500;
+  max-width: 36ch;
+  margin-inline: auto;
 }
 
 .eventInfo {
@@ -112,21 +181,8 @@
   flex-wrap: wrap;
 }
 
-.btnPrimary {
-  background: var(--iv-gold);
-  color: #000;
-  padding: var(--space-3) var(--space-6);
-  border-radius: var(--radius-sm);
-  font-weight: 600;
-  font-family: var(--font-display);
-  transition: all var(--duration-fast) var(--ease-out);
-  border: 1px solid var(--iv-gold);
-  display: inline-block;
-}
-
-.btnPrimary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(232, 195, 97, 0.3);
+.ctaGroup a {
+  text-decoration: none;
 }
 
 .btnSecondary {
