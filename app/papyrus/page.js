@@ -322,14 +322,6 @@ export default function PapyrusPage() {
               </div>
 
             <div className={styles.heroContent}>
-              <motion.p
-                className={styles.eyebrow}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
-              >
-                Paper Conference · KRATOS &apos;26
-              </motion.p>
               <motion.h1 
                 className={styles.title}
                 initial={{ opacity: 0, y: 15 }}

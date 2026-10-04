@@ -1,11 +1,11 @@
 export const metadata = {
-  title: "PAPYRUS — Paper Conference",
+  title: "PAPYRUS",
   description:
-    "PAPYRUS at KRATOS '26 — ideas that connect, research that inspires. Paper conference themes, eligibility, important dates, and submission guidelines for UG and PG students.",
+    "PAPYRUS — ideas that connect, research that inspires. Themes, eligibility, important dates, and submission guidelines for UG and PG students.",
   alternates: { canonical: "/papyrus" },
   openGraph: {
     url: "/papyrus",
-    title: "PAPYRUS — Paper Conference · KRATOS'26",
+    title: "PAPYRUS",
     description:
       "National symposium paper conference: 15 research themes, submission guidelines, and presentation rounds at KRATOS '26.",
   },
