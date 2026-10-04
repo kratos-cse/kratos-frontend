@@ -60,10 +60,10 @@ export function DepthCarousel({
   };
 
   useEffect(() => {
-    if (!itemsRef.current.length || reduce) return;
-    
-    // GSAP animation
-    itemsRef.current.forEach((el, i) => {
+    const elements = itemsRef.current;
+    if (!elements.length || reduce) return;
+
+    elements.forEach((el, i) => {
       if (!el) return;
       const offset = i - currentIndex;
       let diff = offset;
@@ -102,6 +102,12 @@ export function DepthCarousel({
         ease
       });
     });
+
+    return () => {
+      elements.forEach((el) => {
+        if (el) gsap.killTweensOf(el);
+      });
+    };
   }, [currentIndex, count, loop, visibleCards, spread, depth, tilt, tiltDirection, blur, falloff, duration, ease, reduce]);
 
   if (reduce) {
@@ -168,6 +174,4 @@ export function DepthCarousel({
     </div>
   );
 }
-
-// (Wait, better to use multi_replace_file_content)
 

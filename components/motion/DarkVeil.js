@@ -2,6 +2,7 @@
 
 import { Renderer, Program, Mesh, Color, Triangle } from 'ogl';
 import { useEffect, useRef } from 'react';
+import { useReducedMotion } from 'motion/react';
 
 import './DarkVeil.css';
 
@@ -127,10 +128,11 @@ export function DarkVeil(props) {
   propsRef.current = props;
 
   const ctnDom = useRef(null);
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     const ctn = ctnDom.current;
-    if (!ctn) return;
+    if (!ctn || reduceMotion) return;
 
     const renderer = new Renderer({
       alpha: true,
@@ -211,7 +213,21 @@ export function DarkVeil(props) {
       gl.getExtension('WEBGL_lose_context')?.loseContext();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [amplitude, blend, lightMode]);
+  }, [amplitude, blend, lightMode, reduceMotion]);
 
-  return <div ref={ctnDom} className="darkveil-canvas" />;
+  if (reduceMotion) {
+    const fallback = colorStops[1] ?? colorStops[0] ?? '#0a1128';
+    return (
+      <div
+        ref={ctnDom}
+        className="darkveil-canvas"
+        aria-hidden="true"
+        style={{
+          background: `linear-gradient(180deg, ${colorStops[0]}, ${fallback}, ${colorStops[2] ?? colorStops[0]})`,
+        }}
+      />
+    );
+  }
+
+  return <div ref={ctnDom} className="darkveil-canvas" aria-hidden="true" />;
 }

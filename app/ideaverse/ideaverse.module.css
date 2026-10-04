@@ -410,6 +410,24 @@
   perspective: 1000px;
   cursor: pointer;
   height: 320px;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
+}
+
+.flipCardWrapper:focus {
+  outline: none;
+}
+
+.flipCardWrapper:focus-visible {
+  outline: 2px solid var(--iv-gold);
+  outline-offset: 4px;
+  border-radius: var(--radius-lg);
 }
 
 .flipCardInner {

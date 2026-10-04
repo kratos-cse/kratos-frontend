@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { PageShell } from "@/components/layout/PageShell";
 import Link from "next/link";
-import { Reveal, PageTransition } from "@/components/motion/Reveal";
+import { Reveal } from "@/components/motion/Reveal";
 import { motion, AnimatePresence, useScroll, useTransform, useSpring } from "motion/react";
 import { DarkVeil } from "@/components/motion/DarkVeil";
 import { DepthCarousel } from "@/components/motion/DepthCarousel";
@@ -63,8 +63,9 @@ function CollapsibleSection({ title, children, isNested = false }) {
 
   return (
     <div className={`${styles.accordionContainer} ${isNested ? styles.accordionNested : ''}`}>
-      <button 
-        className={styles.accordionToggle} 
+      <button
+        type="button"
+        className={styles.accordionToggle}
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
       >
@@ -105,8 +106,9 @@ function AccordionGroup({ items }) {
         const isOpen = openIndex === idx;
         return (
           <div key={idx} className={styles.nestedAccordionContainer}>
-            <button 
-              className={styles.nestedAccordionToggle} 
+            <button
+              type="button"
+              className={styles.nestedAccordionToggle}
               onClick={() => setOpenIndex(isOpen ? null : idx)}
               aria-expanded={isOpen}
             >
@@ -192,14 +194,31 @@ function ScrollTimeline() {
 function FlipCard({ title, subtitle, backContent }) {
   const [isFlipped, setIsFlipped] = useState(false);
 
+  const toggle = () => setIsFlipped((prev) => !prev);
+
+  const onKeyDown = (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      toggle();
+    }
+  };
+
   return (
-    <div className={styles.flipCardWrapper} onClick={() => setIsFlipped(!isFlipped)}>
+    <button
+      type="button"
+      className={styles.flipCardWrapper}
+      onClick={toggle}
+      onKeyDown={onKeyDown}
+      aria-expanded={isFlipped}
+      aria-label={`${title}. ${isFlipped ? "Hide" : "Show"} round details`}
+    >
       <motion.div
         className={styles.flipCardInner}
         initial={false}
         animate={{ rotateY: isFlipped ? 180 : 0 }}
         transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
         style={{ transformStyle: "preserve-3d" }}
+        aria-hidden="true"
       >
         <div className={styles.flipCardFront}>
           <div className={styles.roundEyebrow}>{subtitle}</div>
@@ -210,7 +229,7 @@ function FlipCard({ title, subtitle, backContent }) {
           {backContent}
         </div>
       </motion.div>
-    </div>
+    </button>
   );
 }
 
@@ -301,7 +320,7 @@ export default function IdeaversePage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
               >
-                <Link href="#submit" className={styles.btnPrimary}>Submit Your Paper</Link>
+                <Link href="#submission" className={styles.btnPrimary}>Submission guidelines</Link>
                 <Link href="#themes" className={styles.btnSecondary}>Explore Themes</Link>
               </motion.div>
             </div>
@@ -519,7 +538,7 @@ export default function IdeaversePage() {
               <h2 className={styles.ctaTitle}>Have an Idea Worth Sharing?</h2>
               <p className={styles.ctaDesc}>Submit your research. Present your work. Connect your ideas with the wider research community.</p>
               <div className={styles.ctaGroup}>
-                <Link href="#submit" className={styles.btnPrimary}>SUBMIT YOUR PAPER</Link>
+                <Link href="#submission" className={styles.btnPrimary}>Submission guidelines</Link>
                 <Link href="#themes" className={styles.btnSecondary}>VIEW THEMES</Link>
               </div>
             </section>
