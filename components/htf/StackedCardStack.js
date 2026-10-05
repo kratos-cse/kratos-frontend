@@ -2,21 +2,22 @@
 
 export default function StackedCardStack({
   children,
-  topOffset = 92,
+  topOffset,
   stackGap = 18,
   cardMinHeight = "74vh",
 }) {
   const items = React.Children.toArray(children);
 
+  const stackStyle = {
+    "--stacked-card-gap": `${stackGap}px`,
+    "--stacked-card-min-height": cardMinHeight,
+  };
+  if (topOffset != null) {
+    stackStyle["--stacked-card-top-offset"] = `${topOffset}px`;
+  }
+
   return (
-    <div
-      className="stacked-card-stack"
-      style={{
-        "--stacked-card-top-offset": `${topOffset}px`,
-        "--stacked-card-gap": `${stackGap}px`,
-        "--stacked-card-min-height": cardMinHeight,
-      }}
-    >
+    <div className="stacked-card-stack" style={stackStyle}>
       {items.map((child, index) => (
         <div
           className="stacked-card-stack__slot"

@@ -1,7 +1,6 @@
 import { Space_Grotesk } from "next/font/google";
 import "@/components/htf/LiquidEther/LiquidEther.css";
 import "./htf.css";
-import { HtfChrome } from "./HtfChrome";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -23,13 +22,5 @@ export const metadata = {
 };
 
 export default function HtfLayout({ children }) {
-  return (
-    <div
-      data-htf
-      className={`htf-root ${spaceGrotesk.className}`}
-      style={{ fontFamily: "var(--font-htf-space), 'Space Grotesk', sans-serif" }}
-    >
-      <HtfChrome>{children}</HtfChrome>
-    </div>
-  );
+  return <div className={spaceGrotesk.className}>{children}</div>;
 }

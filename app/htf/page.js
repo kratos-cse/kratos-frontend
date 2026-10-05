@@ -6,10 +6,13 @@ import DomainCard from "@/components/htf/DomainCard";
 import Timeline from "@/components/htf/Timeline";
 import LiquidEther from "@/components/htf/LiquidEther/LiquidEther";
 
+import { PageShell } from "@/components/layout/PageShell";
 import { HTF_REGISTRATION_URL } from "@/lib/links";
 
 export default function HtfPage() {
   return (
+    <PageShell immersive>
+    <div className="htf-root">
     <main>
       {/* ========== HERO DASHBOARD ========== */}
       <section className="hero-dashboard" id="hero">
@@ -137,7 +140,7 @@ export default function HtfPage() {
           <p className="section-sub">Pick a track. Detailed PS released to registered teams closer to the event.</p>
         </div>
 
-        <StackedCardStack topOffset={86} stackGap={18} cardMinHeight="76vh">
+        <StackedCardStack stackGap={18} cardMinHeight="76vh">
           <DomainCard
             number="01"
             title="AI & Machine Learning"
@@ -397,5 +400,7 @@ export default function HtfPage() {
         </div>
       </section>
     </main>
+    </div>
+    </PageShell>
   );
 }
