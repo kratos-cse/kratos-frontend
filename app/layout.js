@@ -1,112 +1,132 @@
-import { IBM_Plex_Sans, Sora } from "next/font/google";
+import { Space_Grotesk } from 'next/font/google';
 import "./globals.css";
+import "@/components/LiquidEther/LiquidEther.css";
+import LiquidEther from "@/components/LiquidEther/LiquidEther";
 import { AuthProvider } from "@/context/AuthProvider";
 import { EventsProvider } from "@/context/EventsProvider";
-import SiteCursor from "@/components/effects/SiteCursor";
-import {
-  ORGANIZER,
-  OG_IMAGE,
-  SITE_DESCRIPTION,
-  SITE_KEYWORDS,
-  SITE_NAME,
-  SITE_TAGLINE,
-  SITE_URL,
-} from "@/lib/site";
 
-const sora = Sora({
-  subsets: ["latin"],
-  variable: "--font-sora",
-  display: "swap",
-  weight: ["500", "600", "700"],
-});
-
-const ibmPlex = IBM_Plex_Sans({
-  subsets: ["latin"],
-  variable: "--font-ibm-plex",
-  display: "swap",
-  weight: ["400", "500", "600", "700"],
+const spaceGrotesk = Space_Grotesk({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-space-grotesk',
 });
 
 export const metadata = {
-  metadataBase: new URL(SITE_URL),
-  title: {
-    default: `${SITE_NAME} — ${SITE_TAGLINE} | Easwari Engineering College`,
-    template: `%s · ${SITE_NAME}`,
-  },
-  description: SITE_DESCRIPTION,
-  applicationName: SITE_NAME,
-  keywords: SITE_KEYWORDS,
-  authors: [{ name: ORGANIZER }],
-  creator: ORGANIZER,
-  publisher: "Easwari Engineering College",
-  category: "education",
-  alternates: { canonical: "/" },
-  formatDetection: { email: false, address: false, telephone: false },
-  openGraph: {
-    type: "website",
-    siteName: SITE_NAME,
-    locale: "en_IN",
-    url: "/",
-    title: `${SITE_NAME} — ${SITE_TAGLINE}`,
-    description: SITE_DESCRIPTION,
-    images: [OG_IMAGE],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: `${SITE_NAME} — ${SITE_TAGLINE}`,
-    description: SITE_DESCRIPTION,
-    images: [OG_IMAGE.url],
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
-  },
-};
-
-export const viewport = {
-  width: "device-width",
-  initialScale: 1,
-  themeColor: "#050506",
-  colorScheme: "dark",
-};
-
-const structuredData = {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "WebSite",
-      "@id": `${SITE_URL}/#website`,
-      url: SITE_URL,
-      name: SITE_NAME,
-      description: SITE_DESCRIPTION,
-      inLanguage: "en-IN",
-      publisher: { "@id": `${SITE_URL}/#organization` },
-    },
-    {
-      "@type": "CollegeOrUniversity",
-      "@id": `${SITE_URL}/#organization`,
-      name: "Easwari Engineering College",
-      department: { "@type": "Organization", name: "Department of Computer Science and Engineering" },
-      url: SITE_URL,
-      logo: `${SITE_URL}/icons/icon-512.png`,
-      address: { "@type": "PostalAddress", addressLocality: "Chennai", addressCountry: "IN" },
-    },
-  ],
+  title: "Hack the Future 2.0 | Kratos'26",
+  description:
+    "A 24-hour hackathon by Kratos'26 at Easwari Engineering College.",
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${sora.variable} ${ibmPlex.variable}`}>
-      <body>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-        />
+    <html lang="en" className={spaceGrotesk.variable}>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+      </head>
+      <body style={{ fontFamily: "var(--font-space-grotesk), 'Space Grotesk', sans-serif" }}>
+       <div className="global-ether">
+        <LiquidEther />
+       </div>
+        
+
+        {/* ================= NAVBAR ================= */}
+        <nav className="navbar">
+          <div className="nav-inner">
+
+            {/* LEFT — SRM + KRATOS LION */}
+            <div className="nav-left">
+              <a href="/" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <img src="/srm-logo.png" alt="SRM" />
+                <img
+                    src ="/lion-logo.png"
+                    alt="Kratos Lion"
+                    className="lion-logo"
+                />
+              </a>
+            </div>
+
+            {/* CENTER — NAVIGATION */}
+            <div className="nav-links">
+              <a href="/#hero">Home</a>
+              <a href="/#domains">Domains</a>
+              <a href="/#timeline">Timeline</a>
+              <a href="/#prizes">Prizes</a>
+              <a href="/#rules">Rules</a>
+              <a href="/#faq">FAQ</a>
+              <a href="/#venue">Venue</a>
+
+              <a
+                href="/login?mode=register"
+                className="btn-neon"
+                style={{
+                  padding: "8px 20px",
+                  fontSize: "11px",
+                }}
+              >
+                Register
+              </a>
+            </div>
+
+            
+            {/* RIGHT — ACE + EASWARI + CSI */}
+            <div className="nav-right">
+              <img src="/ace-logo.png" alt="ACE" />
+
+              <img
+                src="/easwari-logo.png"
+                alt="Easwari Engineering College"
+              />
+
+              <img
+                src="/csi-logo.png"
+                alt="CSI"
+                className="csi-logo"
+              />
+            </div>
+
+          </div>
+        </nav>
+
         <AuthProvider>
-          <SiteCursor />
-          <EventsProvider>{children}</EventsProvider>
+          <EventsProvider>
+            {children}
+          </EventsProvider>
         </AuthProvider>
+
+        {/* ================= FOOTER ================= */}
+        <footer>
+          <div className="container">
+
+            <div className="foot-logos">
+              <img
+                src="/easwari-logo.png"
+                alt="Easwari Engineering College"
+              />
+
+              
+
+              <img src="/ace-logo.png" alt="ACE" />
+              <img src="/srm-logo.png" alt="SRM" />
+            </div>
+
+            <p>
+              Hack the Future 2.0 &mdash; Kratos&apos;26 &middot; Dept. of CSE,
+              Easwari Engineering College.
+            </p>
+
+            <p
+              style={{
+                marginTop: 6,
+                opacity: 0.6,
+              }}
+            >
+              &copy; 2026 Kratos&apos;26. All rights reserved.
+            </p>
+
+          </div>
+        </footer>
       </body>
     </html>
   );

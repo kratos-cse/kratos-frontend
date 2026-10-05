@@ -9,16 +9,9 @@ import { Card } from "@/components/ui/Card";
 import { ErrorState, StatusBanner } from "@/components/ui/ErrorState";
 import { PageSkeleton } from "@/components/ui/Skeleton";
 import { useAuth } from "@/context/AuthProvider";
-import { DynamicRegistrationForm } from "@/components/registration/DynamicRegistrationForm";
-import { getRegistrationForm } from "@/lib/api/events";
 import { getInvitation, joinInvitation } from "@/lib/api/teams";
 import { formatRosterLabel, isProfileComplete } from "@/lib/events/utils";
 import { toUserMessage } from "@/lib/errors/userMessages";
-import {
-  buildFieldResponses,
-  validateRequiredFields,
-  visibleFields,
-} from "@/lib/registration/fieldUtils";
 import StatusMark from "@/components/micro/StatusMark/StatusMark";
 import styles from "./join.module.css";
 
@@ -32,8 +25,6 @@ function JoinInner() {
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
   const [joinedRegistrationId, setJoinedRegistrationId] = useState(null);
-  const [teamMemberFields, setTeamMemberFields] = useState([]);
-  const [fieldValues, setFieldValues] = useState({});
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -53,36 +44,11 @@ function JoinInner() {
     load();
   }, [load]);
 
-  useEffect(() => {
-    if (!invite?.event_id) return;
-    let cancelled = false;
-    (async () => {
-      try {
-        const form = await getRegistrationForm(invite.event_id);
-        if (!cancelled) {
-          setTeamMemberFields(visibleFields(form?.team_member_fields));
-        }
-      } catch {
-        if (!cancelled) setTeamMemberFields([]);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [invite?.event_id]);
-
   async function onJoin() {
-    const missing = validateRequiredFields(teamMemberFields, fieldValues);
-    if (missing.length) {
-      setError(new Error(`Please complete: ${missing.join(", ")}`));
-      return;
-    }
     setBusy(true);
     setError(null);
     try {
-      const result = await joinInvitation(code, {
-        field_responses: buildFieldResponses(teamMemberFields, fieldValues),
-      });
+      const result = await joinInvitation(code);
       const regId = result?.registration_id;
       if (regId) setJoinedRegistrationId(regId);
       else setJoinedRegistrationId("list");
@@ -177,14 +143,6 @@ function JoinInner() {
           </StatusBanner>
         )}
         {error ? <StatusBanner tone="err">{toUserMessage(error)}</StatusBanner> : null}
-        {teamMemberFields.length ? (
-          <DynamicRegistrationForm
-            fields={teamMemberFields}
-            values={fieldValues}
-            disabled={busy}
-            onChange={(fieldId, value) => setFieldValues((prev) => ({ ...prev, [fieldId]: value }))}
-          />
-        ) : null}
         <div className={styles.actions}>
           <Button loading={busy} onClick={onJoin} disabled={invite?.is_full || invite?.is_active === false}>
             Accept invitation

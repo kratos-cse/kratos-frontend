@@ -1,22 +1,25 @@
 {
-  "name": "kratos2026-frontend",
-  "version": "1.0.0",
+  "name": "hack-the-future",
+  "version": "2.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "test:matrix": "node scripts/assert-registration-matrix.cjs && node scripts/assert-registration-types.cjs && node scripts/assert-roster-plan.cjs && node scripts/assert-roster-display.cjs"
+    "start": "next start"
   },
   "dependencies": {
+    "@paper-design/shaders": "^0.0.81",
+    "clsx": "^2.1.1",
+    "framer-motion": "^14.0.0",
     "gsap": "^3.15.0",
-    "motion": "^13.4.2",
-    "next": "14.2.35",
+    "lucide-react": "^1.51.0",
+    "motion": "^13.4.6",
+    "next": "^15.1.0",
     "ogl": "^1.0.11",
     "qrcode.react": "^4.2.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tailwind-merge": "^3.7.0",
     "three": "^0.186.1"
   },
   "devDependencies": {

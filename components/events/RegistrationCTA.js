@@ -27,14 +27,12 @@ export function RegistrationCTA({ event, registration, sticky = false }) {
         View registration
       </Button>
     );
-    note = "You have already registered for this event.";
   } else if (ui.cta === "pay") {
     primary = (
       <Button href={`/registrations/${registration.id}`} size="lg">
         Continue payment
       </Button>
     );
-    note = "You have already registered — complete payment to confirm your spot.";
   } else if (ui.cta === "register") {
     if (!isAuthenticated) {
       primary = (
@@ -56,10 +54,7 @@ export function RegistrationCTA({ event, registration, sticky = false }) {
         {ui.label}
       </Button>
     );
-    note =
-      ui.code === "COMING_SOON"
-        ? "Registration opens soon — check back later."
-        : "Registration isn’t available for this event right now.";
+    note = "Registration isn’t available for this event right now.";
   }
 
   return (
