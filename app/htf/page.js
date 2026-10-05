@@ -12,7 +12,7 @@ import { HTF_REGISTRATION_URL } from "@/lib/links";
 export default function HtfPage() {
   return (
     <PageShell immersive>
-    <div className="htf-root">
+    <div className="htf-root" data-htf>
     <main>
       {/* ========== HERO DASHBOARD ========== */}
       <section className="hero-dashboard" id="hero">
@@ -107,32 +107,6 @@ export default function HtfPage() {
         </div>
       </section>
 
-      {/* ========== INSTRUCTIONS ========== */}
-      <section id="instructions">
-        <div className="container">
-          <h2 className="section-title">Event <span>Instructions</span></h2>
-          <p className="section-sub">Essentials to know before you arrive.</p>
-          <div className="grid-4">
-            <div className="card">
-              <h3>What to Bring</h3>
-              <p>Laptop, charger, college ID, and your registration confirmation.</p>
-            </div>
-            <div className="card">
-              <h3>Any Stack</h3>
-              <p>Any language or framework. Pre-built boilerplate OK; core logic must be built on-site.</p>
-            </div>
-            <div className="card">
-              <h3>Overnight Stay</h3>
-              <p>Venue stays open through the night. Separate rest areas provided.</p>
-            </div>
-            <div className="card">
-              <h3>Meals Included</h3>
-              <p>Meals, snacks, and refreshments for the full 24 hours.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* ========== DOMAINS ========== */}
       <section id="domains" className="domains-stack-section">
         <div className="container">
@@ -140,7 +114,7 @@ export default function HtfPage() {
           <p className="section-sub">Pick a track. Detailed PS released to registered teams closer to the event.</p>
         </div>
 
-        <StackedCardStack stackGap={18} cardMinHeight="76vh">
+        <StackedCardStack topOffset={86} stackGap={18} cardMinHeight="76vh">
           <DomainCard
             number="01"
             title="AI & Machine Learning"
@@ -222,27 +196,6 @@ export default function HtfPage() {
               <div className="amount">Swag &amp; Surprises</div>
               <p style={{ marginTop: 10 }}>+ Certificates</p>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ========== REGISTRATION FEE ========== */}
-      <section id="register">
-        <div className="container">
-          <h2 className="section-title">Registration <span>Fee</span></h2>
-          <div className="fee-box">
-            <div>
-              <div className="fee-amount">₹1000 <small>/ team of up to 4</small></div>
-              <p style={{ color: "var(--text-dim)", marginTop: 8, maxWidth: 460 }}>
-                Applicable only to shortlisted teams selected through the online PPT screening.
-              </p>
-              <p style={{ color: "var(--text-dim)", marginTop: 8, maxWidth: 460 }}>
-                Includes kit, meals, mentorship, and certificate for every team member.
-              </p>
-            </div>
-            <a href={HTF_REGISTRATION_URL} target="_blank" rel="noopener noreferrer" className="btn-neon">
-              Register Now →
-            </a>
           </div>
         </div>
       </section>
