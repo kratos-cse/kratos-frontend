@@ -9,6 +9,8 @@ export default async function sitemap() {
     { url: `${SITE_URL}/`, changeFrequency: "weekly", priority: 1 },
     { url: `${SITE_URL}/events`, changeFrequency: "daily", priority: 0.9 },
     { url: `${SITE_URL}/about`, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${SITE_URL}/papyrus`, changeFrequency: "weekly", priority: 0.85 },
+    { url: `${SITE_URL}/htf`, changeFrequency: "weekly", priority: 0.85 },
   ].map((p) => ({ ...p, lastModified: now }));
 
   const events = await fetchPublicEvents();

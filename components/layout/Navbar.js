@@ -72,7 +72,7 @@ export function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={[styles.link, active ? styles.active : ""].join(" ")}
+                className={[styles.link, active ? styles.active : ""].filter(Boolean).join(" ")}
                 aria-current={active ? "page" : undefined}
               >
                 {link.label}
@@ -131,7 +131,7 @@ export function Navbar() {
                 ref={i === 0 ? firstLinkRef : undefined}
                 href={link.href}
                 tabIndex={open ? 0 : -1}
-                className={[styles.mobileLink, active ? styles.active : ""].join(" ")}
+                className={[styles.mobileLink, active ? styles.active : ""].filter(Boolean).join(" ")}
                 aria-current={active ? "page" : undefined}
               >
                 {link.label}

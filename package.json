@@ -11,13 +11,19 @@
     "@paper-design/shaders": "^0.0.81",
     "clsx": "^2.1.1",
     "framer-motion": "^14.0.0",
+    "gsap": "^3.15.0",
     "lucide-react": "^1.51.0",
     "motion": "^13.4.6",
     "next": "^15.1.0",
+    "ogl": "^1.0.11",
     "qrcode.react": "^4.2.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwind-merge": "^3.7.0",
     "three": "^0.186.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^14.2.35"
   }
 }
