@@ -198,19 +198,31 @@ export default function HtfPage() {
         <div className="container">
           <h2 className="section-title">Our <span>Sponsors</span></h2>
           <p className="section-sub">Powered by the community, supported by the future.</p>
-          <div className="grid-3">
-            <div className="card">
-              <h3>Title Sponsor</h3>
-              <p>Opportunity to lead the event experience and showcase your brand to the next generation of builders.</p>
-            </div>
-            <div className="card">
-              <h3>Gold Sponsor</h3>
-              <p>Visibility across the venue, workshops, jury interactions, and community engagement channels.</p>
-            </div>
-            <div className="card">
-              <h3>Community Sponsor</h3>
-              <p>Support student innovation with mentoring, resources, and access to tech talent.</p>
-            </div>
+          <div className="sponsor-grid">
+            <a
+              href="https://www.linkedin.com/company/ysquare-technology/home/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="sponsor-card"
+            >
+              <img
+                src="/Blue Y-Swoosh App Icon.png"
+                alt="YSquare Technology"
+              />
+              <span>YSquare Technology</span>
+            </a>
+            <a
+              href="https://www.linkedin.com/company/skyverse-technologies/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="sponsor-card"
+            >
+              <img
+                src="/SkyVerse Technologies Logo.png"
+                alt="SkyVerse Technologies"
+              />
+              <span>SkyVerse Technologies</span>
+            </a>
           </div>
         </div>
       </section>
