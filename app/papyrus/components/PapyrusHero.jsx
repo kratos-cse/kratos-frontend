@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef } from "react";
-import Image from "next/image";
 import { DarkVeil } from "@/components/motion/DarkVeil";
 import styles from "../papyrus.module.css";
 
@@ -22,30 +21,6 @@ export default function PapyrusHero({ taglineLines, heroDate, heroTime, heroVenu
       </div>
 
       <div className={styles.heroInner}>
-        <div className={styles.heroInstitutionalRow} aria-label="Host and affiliate logos">
-          <div className={styles.heroEecBrand}>
-            <Image
-              src="/eec-white.png"
-              alt="Easwari Engineering College"
-              width={320}
-              height={80}
-              className={styles.logoEec}
-              priority
-              sizes="(max-width: 480px) 160px, 260px"
-            />
-          </div>
-          <div className={styles.heroCsiBrand}>
-            <Image
-              src="/CSI.png"
-              alt="Computer Society of India"
-              width={128}
-              height={128}
-              className={styles.logoCsi}
-              sizes="112px"
-            />
-          </div>
-        </div>
-
         <div className={styles.heroContent}>
           <h1 className={styles.title}>PAPYRUS</h1>
           <div className={styles.heroTagline}>
