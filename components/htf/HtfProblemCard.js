@@ -1,24 +1,36 @@
 "use client";
 
-export default function HtfProblemCard({ ps, variant = 1, onView }) {
+export default function HtfProblemCard({ ps, onView }) {
+  const focusTags = ps.tagAreas.slice(0, 3);
+
   return (
-    <article className={`domain-card domain-card--${variant}`}>
-      <div className="domain-card__border" aria-hidden="true" />
-      <div className="domain-card__inner domain-card__inner--ps">
-        <div className="domain-card__number">{ps.number}</div>
-        <div className="domain-card__body">
-          <div className="domain-card__eyebrow">
-            <span className="domain-card__dot" /> PS {ps.number}
+    <article className="htf-ps-brief">
+      <div className="htf-ps-brief__border" aria-hidden="true" />
+      <div className="htf-ps-brief__inner">
+        <header className="htf-ps-brief__top">
+          <span className="htf-ps-brief__id">PS {ps.number}</span>
+          <span className="htf-ps-brief__label">Problem brief</span>
+        </header>
+
+        <h3 className="htf-ps-brief__title">{ps.title}</h3>
+        <p className="htf-ps-brief__summary">{ps.challengeSummary}</p>
+
+        <div className="htf-ps-brief__footer">
+          <div className="htf-ps-brief__focus">
+            <span className="htf-ps-brief__focus-label">Key focus</span>
+            <ul className="htf-ps-brief__tags">
+              {focusTags.map((tag) => (
+                <li key={tag}>{tag}</li>
+              ))}
+            </ul>
           </div>
-          <h3 className="domain-card__ps-title">{ps.title}</h3>
-          <p className="domain-card__desc domain-card__ps-summary">{ps.challengeSummary}</p>
-          <div className="domain-card__tags">
-            {ps.tagAreas.map((tag) => (
-              <span key={tag}>{tag}</span>
-            ))}
-          </div>
-          <button type="button" className="domain-card__view-btn" onClick={() => onView(ps)}>
-            View Problem Statement →
+          <button
+            type="button"
+            className="htf-ps-brief__cta"
+            onClick={(e) => onView(ps, e.currentTarget)}
+          >
+            <span className="htf-ps-brief__cta-line">View</span>
+            <span className="htf-ps-brief__cta-line">full problem statement →</span>
           </button>
         </div>
       </div>
