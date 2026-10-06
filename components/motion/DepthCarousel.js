@@ -19,12 +19,10 @@ export function DepthCarousel({
   blur = 4,
   duration = 650,
   ease = "power3.out",
-  autoplay = false,
   loop = true,
   showControls = true,
   showIndicators = true
 }) {
-  const containerRef = useRef(null);
   const itemsRef = useRef([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const reduce = useReducedMotion();
@@ -124,9 +122,8 @@ export function DepthCarousel({
 
   return (
     <div className={styles.wrapper} style={{ perspective: `${perspective}px` }}>
-      <div 
-        className={styles.container} 
-        ref={containerRef}
+      <div
+        className={styles.container}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
         style={{ height: cardHeight }}

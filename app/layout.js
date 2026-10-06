@@ -1,7 +1,6 @@
 import { IBM_Plex_Sans, Sora } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthProvider";
-import { EventsProvider } from "@/context/EventsProvider";
 import SiteCursor from "@/components/effects/SiteCursor";
 import {
   ORGANIZER,
@@ -105,7 +104,7 @@ export default function RootLayout({ children }) {
         />
         <AuthProvider>
           <SiteCursor />
-          <EventsProvider>{children}</EventsProvider>
+          {children}
         </AuthProvider>
       </body>
     </html>

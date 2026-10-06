@@ -1,3 +1,5 @@
+import { EventsProvider } from "@/context/EventsProvider";
+
 export const metadata = {
   title: "Events",
   description:
@@ -7,5 +9,5 @@ export const metadata = {
 };
 
 export default function EventsLayout({ children }) {
-  return children;
+  return <EventsProvider>{children}</EventsProvider>;
 }

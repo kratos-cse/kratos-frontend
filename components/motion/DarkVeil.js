@@ -6,6 +6,8 @@ import { useReducedMotion } from 'motion/react';
 
 import './DarkVeil.css';
 
+const MAX_DPR = 1.5;
+
 const VERT = `#version 300 es
 in vec2 position;
 void main() {
@@ -122,8 +124,37 @@ void main() {
 }
 `;
 
+function hexStopsToRgb(stops) {
+  return stops.map((hex) => {
+    const c = new Color(hex);
+    return [c.r, c.g, c.b];
+  });
+}
+
+function scheduleIdle(cb) {
+  if (typeof requestIdleCallback !== 'undefined') {
+    return requestIdleCallback(cb, { timeout: 1200 });
+  }
+  return setTimeout(cb, 1);
+}
+
+function cancelIdle(id) {
+  if (typeof cancelIdleCallback !== 'undefined' && typeof id === 'number' && id > 0) {
+    cancelIdleCallback(id);
+  } else {
+    clearTimeout(id);
+  }
+}
+
 export function DarkVeil(props) {
-  const { colorStops = ['#0a1128', '#101833', '#162040'], amplitude = 1.0, blend = 0.5, lightMode = false, speed = 1.0 } = props;
+  const {
+    colorStops = ['#0a1128', '#101833', '#162040'],
+    amplitude = 1.0,
+    blend = 0.5,
+    lightMode = false,
+    speed = 1.0,
+    observeRootRef,
+  } = props;
   const propsRef = useRef(props);
   propsRef.current = props;
 
@@ -134,86 +165,161 @@ export function DarkVeil(props) {
     const ctn = ctnDom.current;
     if (!ctn || reduceMotion) return;
 
-    const renderer = new Renderer({
-      alpha: true,
-      premultipliedAlpha: true,
-      antialias: true
-    });
-    const gl = renderer.gl;
-    gl.clearColor(0, 0, 0, 0);
-    gl.enable(gl.BLEND);
-    gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-    gl.canvas.style.backgroundColor = 'transparent';
-    gl.canvas.className = 'darkveil-canvas'; // Added the class here
-
+    let disposed = false;
+    let animateId = 0;
+    let idleId = null;
+    let renderer;
     let program;
+    let mesh;
+    let gl;
+    let running = false;
+    let tabVisible = true;
+    let inView = true;
+
+    const colorStopsKey = JSON.stringify(colorStops);
+    let cachedStopsKey = colorStopsKey;
+    let cachedStopsArray = hexStopsToRgb(colorStops);
+
+    function syncUniformsFromProps() {
+      if (!program) return;
+      const p = propsRef.current;
+      program.uniforms.uAmplitude.value = p.amplitude ?? amplitude;
+      program.uniforms.uBlend.value = p.blend ?? blend;
+      program.uniforms.uLightMode.value = (p.lightMode ?? lightMode) ? 1 : 0;
+      const stops = p.colorStops ?? colorStops;
+      const key = JSON.stringify(stops);
+      if (key !== cachedStopsKey) {
+        cachedStopsKey = key;
+        cachedStopsArray = hexStopsToRgb(stops);
+        program.uniforms.uColorStops.value = cachedStopsArray;
+      }
+    }
 
     function resize() {
-      if (!ctn) return;
+      if (!ctn || !renderer) return;
       const width = ctn.offsetWidth;
       const height = ctn.offsetHeight;
+      renderer.dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
       renderer.setSize(width, height);
       if (program) {
         program.uniforms.uResolution.value = [width, height];
       }
     }
-    window.addEventListener('resize', resize);
 
-    const geometry = new Triangle(gl);
-    if (geometry.attributes.uv) {
-      delete geometry.attributes.uv;
+    function renderFrame(t) {
+      if (!program || !renderer || !mesh) return;
+      const { time = t * 0.01, speed: currentSpeed = 1.0 } = propsRef.current;
+      program.uniforms.uTime.value = time * (currentSpeed ?? speed) * 0.1;
+      syncUniformsFromProps();
+      renderer.render({ scene: mesh });
     }
 
-    const colorStopsArray = colorStops.map(hex => {
-      const c = new Color(hex);
-      return [c.r, c.g, c.b];
-    });
+    function loop(t) {
+      animateId = requestAnimationFrame(loop);
+      if (!running) return;
+      renderFrame(t);
+    }
 
-    program = new Program(gl, {
-      vertex: VERT,
-      fragment: FRAG,
-      uniforms: {
-        uTime: { value: 0 },
-        uAmplitude: { value: amplitude },
-        uColorStops: { value: colorStopsArray },
-        uResolution: { value: [ctn.offsetWidth, ctn.offsetHeight] },
-        uBlend: { value: blend },
-        uLightMode: { value: lightMode ? 1 : 0 }
-      }
-    });
+    function startLoop() {
+      if (running) return;
+      running = true;
+      if (!animateId) animateId = requestAnimationFrame(loop);
+    }
 
-    const mesh = new Mesh(gl, { geometry, program });
-    ctn.appendChild(gl.canvas);
+    function stopLoop() {
+      running = false;
+    }
 
-    let animateId = 0;
-    const update = t => {
-      animateId = requestAnimationFrame(update);
-      const { time = t * 0.01, speed: currentSpeed = 1.0 } = propsRef.current;
-      program.uniforms.uTime.value = time * currentSpeed * 0.1;
-      program.uniforms.uAmplitude.value = propsRef.current.amplitude ?? 1.0;
-      program.uniforms.uBlend.value = propsRef.current.blend ?? blend;
-      program.uniforms.uLightMode.value = (propsRef.current.lightMode ?? lightMode) ? 1 : 0;
-      const stops = propsRef.current.colorStops ?? colorStops;
-      program.uniforms.uColorStops.value = stops.map(hex => {
-        const c = new Color(hex);
-        return [c.r, c.g, c.b];
+    function updateShouldRun() {
+      if (tabVisible && inView) startLoop();
+      else stopLoop();
+    }
+
+    function onVisibilityChange() {
+      tabVisible = document.visibilityState === 'visible';
+      updateShouldRun();
+      if (tabVisible && inView) renderFrame(performance.now());
+    }
+
+    function initWebGL() {
+      if (disposed) return;
+
+      renderer = new Renderer({
+        alpha: true,
+        premultipliedAlpha: true,
+        antialias: false,
+        dpr: Math.min(window.devicePixelRatio || 1, MAX_DPR),
       });
-      renderer.render({ scene: mesh });
-    };
-    animateId = requestAnimationFrame(update);
+      gl = renderer.gl;
+      gl.clearColor(0, 0, 0, 0);
+      gl.enable(gl.BLEND);
+      gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+      gl.canvas.style.backgroundColor = 'transparent';
+      gl.canvas.className = 'darkveil-canvas';
 
-    resize();
+      const geometry = new Triangle(gl);
+      if (geometry.attributes.uv) {
+        delete geometry.attributes.uv;
+      }
+
+      cachedStopsArray = hexStopsToRgb(propsRef.current.colorStops ?? colorStops);
+      cachedStopsKey = JSON.stringify(propsRef.current.colorStops ?? colorStops);
+
+      program = new Program(gl, {
+        vertex: VERT,
+        fragment: FRAG,
+        uniforms: {
+          uTime: { value: 0 },
+          uAmplitude: { value: amplitude },
+          uColorStops: { value: cachedStopsArray },
+          uResolution: { value: [ctn.offsetWidth, ctn.offsetHeight] },
+          uBlend: { value: blend },
+          uLightMode: { value: lightMode ? 1 : 0 },
+        },
+      });
+
+      mesh = new Mesh(gl, { geometry, program });
+      ctn.appendChild(gl.canvas);
+
+      window.addEventListener('resize', resize);
+      document.addEventListener('visibilitychange', onVisibilityChange);
+
+      resize();
+      animateId = requestAnimationFrame(loop);
+      updateShouldRun();
+    }
+
+    idleId = scheduleIdle(initWebGL);
+
+    const ioTarget = observeRootRef?.current ?? ctn;
+    let observer;
+    if (typeof IntersectionObserver !== 'undefined' && ioTarget) {
+      observer = new IntersectionObserver(
+        (entries) => {
+          const entry = entries[0];
+          inView = entry?.isIntersecting && (entry.intersectionRatio ?? 0) > 0.05;
+          updateShouldRun();
+        },
+        { threshold: [0, 0.05, 0.1] }
+      );
+      observer.observe(ioTarget);
+    }
 
     return () => {
+      disposed = true;
+      cancelIdle(idleId);
+      stopLoop();
       cancelAnimationFrame(animateId);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
       window.removeEventListener('resize', resize);
-      if (ctn && gl.canvas.parentNode === ctn) {
+      observer?.disconnect();
+      if (ctn && gl?.canvas?.parentNode === ctn) {
         ctn.removeChild(gl.canvas);
       }
-      gl.getExtension('WEBGL_lose_context')?.loseContext();
+      gl?.getExtension('WEBGL_lose_context')?.loseContext();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [amplitude, blend, lightMode, reduceMotion]);
+  }, [amplitude, blend, lightMode, reduceMotion, colorStops, observeRootRef]);
 
   if (reduceMotion) {
     const fallback = colorStops[1] ?? colorStops[0] ?? '#0a1128';
