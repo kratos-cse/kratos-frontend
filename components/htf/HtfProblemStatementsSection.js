@@ -30,7 +30,7 @@ export default function HtfProblemStatementsSection() {
         <p className="section-sub">Four challenges. Build something that works.</p>
       </div>
 
-      <StackedCardStack topOffset={86} stackGap={18} cardMinHeight="560px">
+      <StackedCardStack topOffset={86} stackGap={18} cardMinHeight="520px">
         {HTF_PROBLEM_STATEMENTS.map((ps) => (
           <HtfProblemCard key={ps.id} ps={ps} onView={onView} />
         ))}

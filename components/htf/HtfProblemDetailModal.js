@@ -142,7 +142,7 @@ function Ps03Body({ ps }) {
         </DetailBlock>
       )}
       {ps.safetyRules && (
-        <DetailBlock label="Safety rules (mandatory)" variant="safety">
+        <DetailBlock label="Safety Rules (Mandatory)" variant="safety">
           <BulletList items={ps.safetyRules} />
         </DetailBlock>
       )}

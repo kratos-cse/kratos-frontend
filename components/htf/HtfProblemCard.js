@@ -29,8 +29,7 @@ export default function HtfProblemCard({ ps, onView }) {
             className="htf-ps-brief__cta"
             onClick={(e) => onView(ps, e.currentTarget)}
           >
-            <span className="htf-ps-brief__cta-line">View</span>
-            <span className="htf-ps-brief__cta-line">full problem statement →</span>
+            View full problem statement →
           </button>
         </div>
       </div>
