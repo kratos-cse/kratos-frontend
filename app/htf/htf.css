@@ -959,7 +959,7 @@
   margin: 0 0 12px;
   max-width: 68ch;
 }
-.htf-ps-detail__content p:last-child {
+.htf-ps-detail__content > p:last-child {
   margin-bottom: 0;
 }
 .htf-ps-detail__list {
