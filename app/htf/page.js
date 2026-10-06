@@ -1,9 +1,9 @@
 /* eslint-disable @next/next/no-img-element -- HTF PR markup */
 'use client';
 
-import StackedCardStack from "@/components/htf/StackedCardStack";
-import DomainCard from "@/components/htf/DomainCard";
 import Timeline from "@/components/htf/Timeline";
+import HtfProblemStatementsSection from "@/components/htf/HtfProblemStatementsSection";
+import { HTF_CONTACTS } from "@/data/htfProblemStatements";
 import LiquidEther from "@/components/htf/LiquidEther/LiquidEther";
 
 import { PageShell } from "@/components/layout/PageShell";
@@ -67,8 +67,8 @@ export default function HtfPage() {
             <a href={HTF_REGISTRATION_URL} target="_blank" rel="noopener noreferrer" className="btn-neon">
               Register Now
             </a>
-            <a href="#domains" className="btn-ghost">
-              Explore Event
+            <a href="#problem-statements" className="btn-ghost">
+              Explore Problem Statements
             </a>
           </div>
 
@@ -107,70 +107,7 @@ export default function HtfPage() {
         </div>
       </section>
 
-      {/* ========== DOMAINS ========== */}
-      <section id="domains" className="domains-stack-section">
-        <div className="container">
-          <h2 className="section-title">Domains &amp; <span>Problem Statements</span></h2>
-          <p className="section-sub">Pick a track. Detailed PS released to registered teams closer to the event.</p>
-        </div>
-
-        <StackedCardStack topOffset={86} stackGap={18} cardMinHeight="76vh">
-          <DomainCard
-            number="01"
-            title="AI & Machine Learning"
-            subtitle="Intelligence that matters."
-            desc="Applied ML, generative AI, and intelligent automation for real-world problems."
-            icon=""
-            tags={["GenAI", "CV", "NLP"]}
-            variant={1}
-          />
-          <DomainCard
-            number="02"
-            title="FinTech & Payments"
-            subtitle="Build the next financial layer."
-            desc="Secure, fast, inclusive digital payment and financial technology solutions."
-            icon=""
-            tags={["Payments", "Fraud", "Open Banking"]}
-            variant={2}
-          />
-          <DomainCard
-            number="03"
-            title="Web3 & Cybersecurity"
-            subtitle="Trust the next internet."
-            desc="Build systems for security, privacy, trust, decentralization, and resilient digital infrastructure."
-            icon=""
-            tags={["Blockchain", "Security"]}
-            variant={3}
-          />
-          <DomainCard
-            number="04"
-            title="HealthTech"
-            subtitle="Technology for better care."
-            desc="Technology improving access, diagnosis, patient experience, and quality of care."
-            icon=""
-            tags={["Digital Health", "Wearables"]}
-            variant={4}
-          />
-          <DomainCard
-            number="05"
-            title="Sustainability"
-            subtitle="Build for a livable future."
-            desc="Climate-conscious solutions for energy, mobility, waste, and smarter urban living."
-            icon=""
-            tags={["CleanTech", "Smart Cities"]}
-            variant={5}
-          />
-          <DomainCard
-            number="06"
-            title="Open Innovation"
-            subtitle="No box. No limits."
-            desc="Have a wild idea that does not fit a category? Build something meaningful and make it real."
-            icon=""
-            tags={["Anything Goes"]}
-            variant={6}
-          />
-        </StackedCardStack>
-      </section>
+      <HtfProblemStatementsSection />
 
       {/* ========== TIMELINE ========== */}
       <Timeline />
@@ -350,6 +287,22 @@ export default function HtfPage() {
               />
             </div>
           </div>
+        </div>
+      </section>
+
+      <section id="contact" className="htf-contact-section">
+        <div className="container">
+          <h2 className="section-title">Contact</h2>
+          <ul className="htf-contact-list">
+            {HTF_CONTACTS.map((person) => (
+              <li key={person.phone} className="htf-contact-item">
+                <span className="htf-contact-name">{person.name}</span>
+                <a href={`tel:${person.phone}`} className="htf-contact-phone">
+                  {person.display}
+                </a>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
     </main>
