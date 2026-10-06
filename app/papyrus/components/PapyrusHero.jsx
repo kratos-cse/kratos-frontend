@@ -2,21 +2,14 @@
 
 import { useRef } from "react";
 import Image from "next/image";
-import { Button } from "@/components/ui/Button";
 import { DarkVeil } from "@/components/motion/DarkVeil";
-import { PAPYRUS_REGISTRATION_URL } from "@/lib/links";
 import styles from "../papyrus.module.css";
 
-export default function PapyrusHero({
-  tagline,
-  description,
-  heroDate,
-  heroVenue,
-}) {
+export default function PapyrusHero({ taglineLines, heroDate, heroTime, heroVenue }) {
   const heroSectionRef = useRef(null);
 
   return (
-    <section ref={heroSectionRef} className={styles.heroSection}>
+    <section ref={heroSectionRef} id="hero" className={styles.heroSection}>
       <div className={styles.heroBackground} aria-hidden="true">
         <DarkVeil
           observeRootRef={heroSectionRef}
@@ -55,31 +48,23 @@ export default function PapyrusHero({
 
         <div className={styles.heroContent}>
           <h1 className={styles.title}>PAPYRUS</h1>
-          <p className={styles.tagline}>{tagline}</p>
-          <p className={styles.heroDescription}>{description}</p>
-
-          <div className={styles.eventInfo}>
-            <span className={`${styles.infoBadge} ${styles.infoBadgeHighlight}`}>
-              {heroDate}
-            </span>
-            <span className={styles.infoBadge}>{heroVenue}</span>
+          <div className={styles.heroTagline}>
+            {taglineLines.map((line) => (
+              <span key={line}>{line}</span>
+            ))}
           </div>
 
-          <div className={styles.ctaGroup}>
-            <Button
-              href={PAPYRUS_REGISTRATION_URL}
-              size="lg"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Register now (opens Google Form in a new tab)"
-            >
-              Register Now
-            </Button>
-            <Button href="#themes" variant="secondary" size="lg">
-              Explore Themes
-            </Button>
+          <div className={styles.heroMeta}>
+            <p className={styles.heroMetaLine}>{heroDate}</p>
+            {heroTime ? <p className={styles.heroMetaLine}>{heroTime}</p> : null}
+            <p className={styles.heroMetaLine}>{heroVenue}</p>
           </div>
         </div>
+
+        <a href="#about" className={styles.scrollHint}>
+          <span className={styles.scrollHintText}>Scroll to explore</span>
+          <span className={styles.scrollHintIcon} aria-hidden="true">↓</span>
+        </a>
       </div>
     </section>
   );

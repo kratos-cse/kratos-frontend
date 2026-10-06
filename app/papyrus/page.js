@@ -6,16 +6,17 @@ import {
   PAPYRUS_CONTACTS,
   PAPYRUS_DESCRIPTION,
   PAPYRUS_HERO_DATE,
+  PAPYRUS_HERO_TIME,
   PAPYRUS_HERO_VENUE,
-  PAPYRUS_IMPORTANT_DATES,
+  PAPYRUS_PAPER_SUBMISSION_CARDS,
   PAPYRUS_PAPER_SUBMISSION_INTRO,
   PAPYRUS_PARTICIPATION_GUIDELINES,
-  PAPYRUS_SUBMISSION_REQUIREMENTS,
-  PAPYRUS_TAGLINE,
+  PAPYRUS_SUBMISSION_SPECS,
+  PAPYRUS_TAGLINE_LINES,
   PAPYRUS_THEMES,
+  PAPYRUS_TIMELINE_DATES,
 } from "@/data/papyrusContent";
 import PapyrusHero from "./components/PapyrusHero";
-import ThemesSection from "./components/ThemesSection";
 import styles from "./papyrus.module.css";
 
 export default function PapyrusPage() {
@@ -24,83 +25,113 @@ export default function PapyrusPage() {
       <PageShell immersive>
         <div className={styles.pageWrapper}>
           <PapyrusHero
-            tagline={PAPYRUS_TAGLINE}
-            description={PAPYRUS_DESCRIPTION}
+            taglineLines={PAPYRUS_TAGLINE_LINES}
             heroDate={PAPYRUS_HERO_DATE}
+            heroTime={PAPYRUS_HERO_TIME}
             heroVenue={PAPYRUS_HERO_VENUE}
           />
 
-          <section id="registration" className={styles.section}>
-            <div className={`container ${styles.sectionNarrow}`}>
+          <section id="about" className={`${styles.screenSection} ${styles.screenAbout}`}>
+            <div className={styles.screenInner}>
+              <p className={styles.eyebrow}>About</p>
+              <h2 className={styles.sectionTitle}>About PAPYRUS</h2>
+              <div className={styles.aboutTagline}>
+                {PAPYRUS_TAGLINE_LINES.map((line) => (
+                  <span key={line}>{line}</span>
+                ))}
+              </div>
+              <p className={styles.aboutBody}>{PAPYRUS_DESCRIPTION}</p>
+            </div>
+          </section>
+
+          <section id="themes" className={`${styles.screenSection} ${styles.screenThemes}`}>
+            <div className={styles.screenInner}>
+              <p className={styles.eyebrow}>Explore</p>
+              <h2 className={styles.sectionTitle}>Themes</h2>
+              <ul className={styles.themesGrid}>
+                {PAPYRUS_THEMES.map((title, index) => (
+                  <li key={title} className={styles.themeCard}>
+                    <span className={styles.themeNum}>{String(index + 1).padStart(2, "0")}</span>
+                    <span className={styles.themeTitle}>{title}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </section>
+
+          <section id="registration" className={`${styles.screenSection} ${styles.screenRegistration}`}>
+            <div className={styles.screenInner}>
+              <p className={styles.eyebrow}>Participate</p>
               <h2 className={styles.sectionTitle}>Registration</h2>
-              <h3 className={styles.subsectionTitle}>Participation guidelines</h3>
-              <ul className={styles.compactList}>
-                {PAPYRUS_PARTICIPATION_GUIDELINES.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-              <p className={styles.rulesLinkWrap}>
-                <Link href="/papyrus/rules" className={styles.textLink}>
-                  Rules and regulation
-                </Link>
-              </p>
-            </div>
-          </section>
-
-          <section id="submission-guidelines" className={styles.section}>
-            <div className={`container ${styles.sectionNarrow}`}>
-              <h2 className={styles.sectionTitle}>Submission guidelines</h2>
-              <p className={styles.sectionLead}>
-                IEEE format, page limit and submission instructions
-              </p>
-              <h3 className={styles.subsectionTitle}>Submission requirements</h3>
-              <ul className={styles.compactList}>
-                {PAPYRUS_SUBMISSION_REQUIREMENTS.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </div>
-          </section>
-
-          <section id="paper-submission" className={styles.section}>
-            <div className={`container ${styles.sectionNarrow}`}>
-              <h2 className={styles.sectionTitle}>Paper submission</h2>
-              <p className={styles.sectionLead}>{PAPYRUS_PAPER_SUBMISSION_INTRO}</p>
-              <ul className={styles.processList}>
-                <li>
-                  <strong>PDF upload</strong> — Submit your paper in PDF format (IEEE, max 6 pages).
-                </li>
-                <li>
-                  <strong>Author details</strong> — Provide author names and institution details in the
-                  registration form.
-                </li>
-              </ul>
-              <div className={styles.ctaGroup}>
-                <Button
-                  href={PAPYRUS_REGISTRATION_URL}
-                  size="lg"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Open registration form (new tab)"
-                >
-                  Register &amp; submit via form
-                </Button>
+              <p className={styles.sectionLead}>Participation guidelines</p>
+              <div className={styles.regPanel}>
+                <ul className={styles.regList}>
+                  {PAPYRUS_PARTICIPATION_GUIDELINES.map((item) => (
+                    <li key={item.num} className={styles.regItem}>
+                      <span className={styles.regNum}>{item.num}</span>
+                      <span className={styles.regText}>{item.text}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className={styles.regPanelFooter}>
+                  <Link href="/papyrus/rules" className={styles.rulesLink}>
+                    Rules and regulation →
+                  </Link>
+                </div>
               </div>
             </div>
           </section>
 
-          <ThemesSection themes={PAPYRUS_THEMES} />
+          <section
+            id="submission-guidelines"
+            className={`${styles.screenSection} ${styles.screenSubmission}`}
+          >
+            <div className={styles.screenInner}>
+              <p className={styles.eyebrow}>Submit</p>
+              <h2 className={styles.sectionTitle}>Submission guidelines</h2>
+              <p className={styles.sectionLead}>
+                IEEE format, page limit and submission instructions
+              </p>
 
-          <section id="dates" className={styles.section}>
-            <div className={`container ${styles.sectionNarrow}`}>
+              <h3 className={styles.panelTitle}>Submission requirements</h3>
+              <dl className={styles.specGrid}>
+                {PAPYRUS_SUBMISSION_SPECS.map((row) => (
+                  <div key={row.key} className={styles.specRow}>
+                    <dt>{row.key}</dt>
+                    <dd>{row.value}</dd>
+                  </div>
+                ))}
+              </dl>
+
+              <h3 className={styles.panelTitle}>Paper submission</h3>
+              <p className={styles.submissionIntro}>{PAPYRUS_PAPER_SUBMISSION_INTRO}</p>
+              <div className={styles.submissionCards}>
+                {PAPYRUS_PAPER_SUBMISSION_CARDS.map((card) => (
+                  <div key={card.title} className={styles.submissionCard}>
+                    <h4>{card.title}</h4>
+                    <p>{card.body}</p>
+                  </div>
+                ))}
+              </div>
+              <p className={styles.formNote}>Submit through the official registration form.</p>
+            </div>
+          </section>
+
+          <section id="dates" className={`${styles.screenSection} ${styles.screenDates}`}>
+            <div className={styles.screenInner}>
+              <p className={styles.eyebrow}>Plan</p>
               <h2 className={styles.sectionTitle}>Important dates</h2>
-              <ol className={styles.datesList}>
-                {PAPYRUS_IMPORTANT_DATES.map((row) => (
-                  <li key={row.label} className={styles.datesItem}>
-                    <div className={styles.datesDate}>{row.date}</div>
-                    <div>
-                      <div className={styles.datesLabel}>{row.label}</div>
-                      <div className={styles.datesDetail}>{row.detail}</div>
+              <ol className={styles.timeline}>
+                {PAPYRUS_TIMELINE_DATES.map((item, index) => (
+                  <li key={item.date + item.label} className={styles.timelineItem}>
+                    <div className={styles.timelineMarker} aria-hidden="true">
+                      {index < PAPYRUS_TIMELINE_DATES.length - 1 ? (
+                        <span className={styles.timelineLine} />
+                      ) : null}
+                    </div>
+                    <div className={styles.timelineContent}>
+                      <time className={styles.timelineDate}>{item.date}</time>
+                      <p className={styles.timelineLabel}>{item.label}</p>
                     </div>
                   </li>
                 ))}
@@ -108,15 +139,35 @@ export default function PapyrusPage() {
             </div>
           </section>
 
-          <section id="contact" className={styles.section}>
-            <div className={`container ${styles.sectionNarrow}`}>
+          <section id="cta" className={`${styles.screenSection} ${styles.screenCta}`}>
+            <div className={styles.screenInner}>
+              <h2 className={styles.ctaTitle}>Ready to present your idea?</h2>
+              <p className={styles.ctaLead}>
+                Submit your research paper and be part of PAPYRUS.
+              </p>
+              <Button
+                href={PAPYRUS_REGISTRATION_URL}
+                size="lg"
+                className={styles.ctaButton}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Register now (opens Google Form in a new tab)"
+              >
+                Register Now
+              </Button>
+            </div>
+          </section>
+
+          <section id="contact" className={`${styles.screenSection} ${styles.screenContact}`}>
+            <div className={styles.screenInner}>
+              <p className={styles.eyebrow}>Reach us</p>
               <h2 className={styles.sectionTitle}>Contact</h2>
+              <p className={styles.sectionLead}>For queries and coordination</p>
               <ul className={styles.contactList}>
                 {PAPYRUS_CONTACTS.map((person) => (
-                  <li key={person.phone} className={styles.contactItem}>
-                    <span className={styles.contactName}>
-                      {person.name} — {person.detail}
-                    </span>
+                  <li key={person.phone} className={styles.contactCard}>
+                    <span className={styles.contactName}>{person.name}</span>
+                    <span className={styles.contactDetail}>{person.detail}</span>
                     <a href={`tel:${person.phone}`} className={styles.contactPhone}>
                       {person.display}
                     </a>

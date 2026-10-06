@@ -1,19 +1,33 @@
 /** Approved PAPYRUS conference content (source of truth). */
 
 export const PAPYRUS_TAGLINE = "Ideas That Connect. Research That Inspires";
+export const PAPYRUS_TAGLINE_LINES = ["Ideas That Connect.", "Research That Inspires."];
 
-export const PAPYRUS_HERO_DATE = "28th October 2026";
-export const PAPYRUS_HERO_VENUE = "Easwari Engineering College";
+export const PAPYRUS_HERO_DATE = "28 OCTOBER 2026";
+/** Omit hero time row when empty — do not invent schedule times. */
+export const PAPYRUS_HERO_TIME = "";
+export const PAPYRUS_HERO_VENUE = "EASWARI ENGINEERING COLLEGE";
 
 export const PAPYRUS_DESCRIPTION =
   "PAPYRUS is a research paper and idea submission conference that provides participants with a platform to present innovative research, emerging ideas and technical solutions across diverse fields of technology and engineering. The event encourages students to explore research-oriented problem solving and communicate their technical ideas effectively. Participants submit their research papers in the prescribed IEEE format, which are evaluated based on originality, relevance and technical content. Shortlisted participants will then present their work before a panel of judges, followed by a brief question-and-answer session. The conference provides participants with an opportunity to gain experience in research, technical presentation, critical thinking and academic communication.";
 
 export const PAPYRUS_PARTICIPATION_GUIDELINES = [
-  "Individual participation is allowed.",
-  "Each paper can have a maximum of 3 authors.",
-  "Participants may register as a single author or as a team of two / three.",
-  "Both UG and PG students are eligible to participate.",
-  "Each participant must belong to a recognized educational institution.",
+  { num: "01", text: "Individual participation is allowed." },
+  { num: "02", text: "Each paper can have a maximum of 3 authors." },
+  { num: "03", text: "Participants may register as a single author or as a team of two / three." },
+  { num: "04", text: "Both UG and PG students are eligible to participate." },
+  { num: "05", text: "Each participant must belong to a recognized educational institution." },
+];
+
+export const PAPYRUS_SUBMISSION_SPECS = [
+  { key: "Format", value: "IEEE prescribed format" },
+  { key: "Length", value: "Maximum 6 pages" },
+  { key: "File", value: "PDF" },
+  { key: "Originality", value: "Original technology or engineering research" },
+  { key: "Domain", value: "Symposium themes (core or interdisciplinary)" },
+  { key: "Deadline", value: "Before the specified deadline" },
+  { key: "Late submissions", value: "Not accepted" },
+  { key: "Plagiarism", value: "Above 15% → disqualification" },
 ];
 
 export const PAPYRUS_SUBMISSION_REQUIREMENTS = [
@@ -30,6 +44,17 @@ export const PAPYRUS_SUBMISSION_REQUIREMENTS = [
 export const PAPYRUS_PAPER_SUBMISSION_INTRO =
   "Submit your paper and author details through the official registration form. You will upload your paper as a PDF and provide author information as part of that process.";
 
+export const PAPYRUS_PAPER_SUBMISSION_CARDS = [
+  {
+    title: "PDF upload",
+    body: "Submit your paper in PDF format (IEEE, max 6 pages).",
+  },
+  {
+    title: "Author details",
+    body: "Provide author names and institution details in the registration form.",
+  },
+];
+
 export const PAPYRUS_THEMES = [
   "AI, Machine Learning & Generative Intelligence",
   "Cybersecurity, Blockchain & Digital Trust",
@@ -40,21 +65,19 @@ export const PAPYRUS_THEMES = [
   "Sustainable Technology, Smart Infrastructure & Social Impact",
 ];
 
-export const PAPYRUS_IMPORTANT_DATES = [
-  { date: "10 Oct 2026", label: "Paper submission", detail: "Last date to submit paper (opens 1 Oct 2026)" },
-  { date: "15 Oct 2026", label: "Acceptance / shortlisting", detail: "Notification to shortlisted authors" },
-  { date: "20 Oct 2026", label: "Final submission", detail: "Final paper submission" },
-  {
-    date: "28–29 Oct 2026",
-    label: "Event",
-    detail: "Paper conference, presentations & winner announcement",
-  },
+export const PAPYRUS_TIMELINE_DATES = [
+  { date: "01 OCT", label: "Paper submission opens" },
+  { date: "10 OCT", label: "Last date to submit paper" },
+  { date: "15 OCT", label: "Acceptance / shortlisting notification" },
+  { date: "20 OCT", label: "Final paper submission" },
+  { date: "28 OCT", label: "Paper conference — presentation round" },
+  { date: "29 OCT", label: "Final presentations & winner announcement" },
 ];
 
 export const PAPYRUS_CONTACTS = [
-  { name: "Chelsia", detail: "(IV - A)", phone: "7305944614", display: "7305944614" },
-  { name: "Sowmiya M S", detail: "(III - F)", phone: "9790884274", display: "9790884274" },
-  { name: "Shreyan Arunlal", detail: "(II - F)", phone: "7010102889", display: "7010102889" },
+  { name: "Chelsia", detail: "IV - A", phone: "7305944614", display: "7305944614" },
+  { name: "Sowmiya M S", detail: "III - F", phone: "9790884274", display: "9790884274" },
+  { name: "Shreyan Arunlal", detail: "II - F", phone: "7010102889", display: "7010102889" },
 ];
 
 export const PAPYRUS_RULES = [
