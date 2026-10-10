@@ -20,6 +20,7 @@ import { DynamicRegistrationForm } from "@/components/registration/DynamicRegist
 import { toUserMessage } from "@/lib/errors/userMessages";
 import {
   buildFieldResponses,
+  dynamicFieldsForLeaderEntry,
   validateRequiredFields,
 } from "@/lib/registration/fieldUtils";
 import CountUp from "@/components/micro/CountUp/CountUp";
@@ -46,7 +47,14 @@ function roleLabel(role) {
   return "Member";
 }
 
-const EMPTY_FORM = { full_name: "", phone: "", contact_email: "", college_name: "", year_of_study: "" };
+const EMPTY_FORM = {
+  full_name: "",
+  phone: "",
+  contact_email: "",
+  college_name: "",
+  department: "",
+  year_of_study: "",
+};
 
 /**
  * Authoritative team UI — loads GET /teams/{id}.
@@ -207,7 +215,7 @@ export function TeamPanel({ teamId, event, teamMemberFields = [], onChanged }) {
   async function onAddRoster(e) {
     e.preventDefault();
     if (!team?.id || !addRole) return;
-    const missing = validateRequiredFields(teamMemberFields, fieldValues);
+    const missing = validateRequiredFields(teamMemberFields, fieldValues, form);
     if (missing.length) {
       setError(`Please complete: ${missing.join(", ")}`);
       return;
@@ -221,6 +229,7 @@ export function TeamPanel({ teamId, event, teamMemberFields = [], onChanged }) {
         phone: form.phone.trim(),
         contact_email: form.contact_email.trim() || undefined,
         college_name: form.college_name.trim() || undefined,
+        department: form.department.trim() || undefined,
         year_of_study: form.year_of_study.trim() || undefined,
         field_responses: buildFieldResponses(teamMemberFields, fieldValues),
       });
@@ -417,12 +426,17 @@ export function TeamPanel({ teamId, event, teamMemberFields = [], onChanged }) {
               onChange={(e) => setForm((f) => ({ ...f, college_name: e.target.value }))}
             />
             <Input
+              label="Department"
+              value={form.department}
+              onChange={(e) => setForm((f) => ({ ...f, department: e.target.value }))}
+            />
+            <Input
               label="Year of study"
               value={form.year_of_study}
               onChange={(e) => setForm((f) => ({ ...f, year_of_study: e.target.value }))}
             />
             <DynamicRegistrationForm
-              fields={teamMemberFields}
+              fields={dynamicFieldsForLeaderEntry(teamMemberFields)}
               values={fieldValues}
               disabled={busy}
               onChange={(fieldId, value) => setFieldValues((prev) => ({ ...prev, [fieldId]: value }))}

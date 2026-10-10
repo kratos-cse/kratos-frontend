@@ -12,6 +12,7 @@ import { addRosterMember, getTeam } from "@/lib/api/teams";
 import { toUserMessage } from "@/lib/errors/userMessages";
 import {
   buildFieldResponses,
+  dynamicFieldsForLeaderEntry,
   validateRequiredFields,
 } from "@/lib/registration/fieldUtils";
 import {
@@ -24,7 +25,14 @@ import {
 import styles from "./TeamRosterWizard.module.css";
 
 const YEARS = ["1", "2", "3", "4", "PG", "Other"];
-const EMPTY_FORM = { full_name: "", phone: "", contact_email: "", college_name: "", year_of_study: "" };
+const EMPTY_FORM = {
+  full_name: "",
+  phone: "",
+  contact_email: "",
+  college_name: "",
+  department: "",
+  year_of_study: "",
+};
 
 export function TeamRosterWizard({
   teamId,
@@ -76,7 +84,7 @@ export function TeamRosterWizard({
       setError("Full name and phone are required.");
       return;
     }
-    const missing = validateRequiredFields(teamMemberFields, fieldValues);
+    const missing = validateRequiredFields(teamMemberFields, fieldValues, form);
     if (missing.length) {
       setError(`Please complete: ${missing.join(", ")}`);
       return;
@@ -90,6 +98,7 @@ export function TeamRosterWizard({
         phone: form.phone.trim(),
         contact_email: form.contact_email.trim() || undefined,
         college_name: form.college_name.trim() || undefined,
+        department: form.department.trim() || undefined,
         year_of_study: form.year_of_study.trim() || undefined,
         field_responses: buildFieldResponses(teamMemberFields, fieldValues),
       });
@@ -173,6 +182,11 @@ export function TeamRosterWizard({
             value={form.college_name}
             onChange={(e) => setForm((f) => ({ ...f, college_name: e.target.value }))}
           />
+          <Input
+            label="Department"
+            value={form.department}
+            onChange={(e) => setForm((f) => ({ ...f, department: e.target.value }))}
+          />
           <Select
             label="Year of study"
             value={form.year_of_study}
@@ -186,7 +200,7 @@ export function TeamRosterWizard({
             ))}
           </Select>
           <DynamicRegistrationForm
-            fields={teamMemberFields}
+            fields={dynamicFieldsForLeaderEntry(teamMemberFields)}
             values={fieldValues}
             disabled={isBusy}
             onChange={(fieldId, value) => setFieldValues((prev) => ({ ...prev, [fieldId]: value }))}
