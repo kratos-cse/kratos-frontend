@@ -5,9 +5,7 @@ import { Footer } from "@/components/layout/Footer";
 import { OrbitHero } from "@/components/landing/OrbitHero";
 import { LionJourney } from "@/components/landing/LionJourney";
 import { MainHero } from "@/components/landing/MainHero";
-import { UnstopLink } from "@/components/landing/UnstopTransition";
 import { HomeFinalCta } from "@/components/home/HomeFinalCta";
-import { UNSTOP_HACKATHON_URL } from "@/lib/links";
 import styles from "./landing.module.css";
 
 const ARENAS = [
@@ -22,14 +20,14 @@ const ARENAS = [
     href: "/events?category=TECHNICAL",
   },
   {
-    key: "spark",
+    key: "title",
     icon: "/landing/spark-stage.png",
     num: "02",
-    verb: "Create",
-    title: "Spark",
-    tag: "Ideas that ignite.",
-    desc: "Open arenas for design, storytelling, and original thinking.",
-    href: "/events?category=SPARK",
+    verb: "Perform",
+    title: "Title Event",
+    tag: "The stage is yours.",
+    desc: "The fest's flagship showcases, where the spotlight finds its champions.",
+    href: "/events?category=TITLE_EVENT",
   },
   {
     key: "online",
@@ -52,19 +50,16 @@ const ARENAS = [
     href: "/events?category=PLAYGROUND",
   },
   {
-    key: "hackathon",
+    key: "spark",
     icon: "/landing/hackathon.png",
     num: "05",
-    verb: "Invent",
-    title: "Hackathon",
-    tag: "Build the future overnight.",
-    desc: "A 24-hour realm for teams shipping something from nothing. Registration is hosted on Unstop.",
-    href: UNSTOP_HACKATHON_URL,
-    external: true,
+    verb: "Create",
+    title: "Spark",
+    tag: "Ideas that ignite.",
+    desc: "Open arenas for design, storytelling, and original thinking.",
+    href: "/events?category=SPARK",
   },
 ];
-
-
 
 export default function HomePage() {
   return (

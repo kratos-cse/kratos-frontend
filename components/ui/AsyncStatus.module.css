@@ -1,0 +1,14 @@
+.status {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.mark {
+  flex-shrink: 0;
+  color: var(--brand-bright);
+}

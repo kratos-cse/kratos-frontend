@@ -6,9 +6,15 @@ import { Card } from "@/components/ui/Card";
 import { Input, Select } from "@/components/ui/Input";
 import { StatusBanner } from "@/components/ui/ErrorState";
 import { TeamSkeleton } from "@/components/ui/Skeleton";
+import { DynamicRegistrationForm } from "@/components/registration/DynamicRegistrationForm";
 import { ProgressBar } from "@/components/registration/ProgressBar";
 import { addRosterMember, getTeam } from "@/lib/api/teams";
 import { toUserMessage } from "@/lib/errors/userMessages";
+import {
+  buildFieldResponses,
+  dynamicFieldsForLeaderEntry,
+  validateRequiredFields,
+} from "@/lib/registration/fieldUtils";
 import {
   countMandatory,
   countSubstitutes,
@@ -19,14 +25,29 @@ import {
 import styles from "./TeamRosterWizard.module.css";
 
 const YEARS = ["1", "2", "3", "4", "PG", "Other"];
-const EMPTY_FORM = { full_name: "", phone: "", contact_email: "", college_name: "", year_of_study: "" };
+const EMPTY_FORM = {
+  full_name: "",
+  phone: "",
+  contact_email: "",
+  college_name: "",
+  department: "",
+  year_of_study: "",
+};
 
-export function TeamRosterWizard({ teamId, event, onContinuePayment, onBack, busy: parentBusy }) {
+export function TeamRosterWizard({
+  teamId,
+  event,
+  teamMemberFields = [],
+  onContinuePayment,
+  onBack,
+  busy: parentBusy,
+}) {
   const [team, setTeam] = useState(null);
   const [loading, setLoading] = useState(Boolean(teamId));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
+  const [fieldValues, setFieldValues] = useState({});
 
   const refresh = useCallback(async () => {
     if (!teamId) return null;
@@ -63,6 +84,11 @@ export function TeamRosterWizard({ teamId, event, onContinuePayment, onBack, bus
       setError("Full name and phone are required.");
       return;
     }
+    const missing = validateRequiredFields(teamMemberFields, fieldValues, form);
+    if (missing.length) {
+      setError(`Please complete: ${missing.join(", ")}`);
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
@@ -72,9 +98,12 @@ export function TeamRosterWizard({ teamId, event, onContinuePayment, onBack, bus
         phone: form.phone.trim(),
         contact_email: form.contact_email.trim() || undefined,
         college_name: form.college_name.trim() || undefined,
+        department: form.department.trim() || undefined,
         year_of_study: form.year_of_study.trim() || undefined,
+        field_responses: buildFieldResponses(teamMemberFields, fieldValues),
       });
       setForm(EMPTY_FORM);
+      setFieldValues({});
       await refresh();
     } catch (err) {
       setError(toUserMessage(err));
@@ -93,9 +122,11 @@ export function TeamRosterWizard({ teamId, event, onContinuePayment, onBack, bus
       <header className={styles.head}>
         <h2 className={styles.title}>Team members</h2>
         <p className="meta">
-          {limits.substitutes > 0
+          {limits.style === "MEMBERS_SUBSTITUTES"
             ? `${limits.required} required · up to ${limits.substitutes} substitutes`
-            : `${limits.required} members required`}
+            : limits.teamMax > limits.required
+              ? `${limits.required}–${limits.teamMax} members (minimum ${limits.required})`
+              : `${limits.required} members required`}
         </p>
       </header>
 
@@ -121,7 +152,12 @@ export function TeamRosterWizard({ teamId, event, onContinuePayment, onBack, bus
       {slot ? (
         <form className={styles.form} onSubmit={onSave}>
           <p className={styles.stepMeta}>
-            {slot.phase === "mandatory" ? "Required member" : "Substitute"} · {slot.label}
+            {slot.phase === "mandatory"
+              ? "Required member"
+              : slot.phase === "optional"
+                ? "Optional member"
+                : "Substitute"}{" "}
+            · {slot.label}
           </p>
           <Input
             label="Full name"
@@ -146,6 +182,11 @@ export function TeamRosterWizard({ teamId, event, onContinuePayment, onBack, bus
             value={form.college_name}
             onChange={(e) => setForm((f) => ({ ...f, college_name: e.target.value }))}
           />
+          <Input
+            label="Department"
+            value={form.department}
+            onChange={(e) => setForm((f) => ({ ...f, department: e.target.value }))}
+          />
           <Select
             label="Year of study"
             value={form.year_of_study}
@@ -158,6 +199,12 @@ export function TeamRosterWizard({ teamId, event, onContinuePayment, onBack, bus
               </option>
             ))}
           </Select>
+          <DynamicRegistrationForm
+            fields={dynamicFieldsForLeaderEntry(teamMemberFields)}
+            values={fieldValues}
+            disabled={isBusy}
+            onChange={(fieldId, value) => setFieldValues((prev) => ({ ...prev, [fieldId]: value }))}
+          />
           <div className={styles.actions}>
             <Button type="submit" loading={isBusy}>
               Save &amp; Next

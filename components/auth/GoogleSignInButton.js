@@ -1,14 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { AsyncStatus } from "@/components/ui/AsyncStatus";
+import styles from "./GoogleSignInButton.module.css";
 
 /**
  * Loads Google Identity Services and renders Sign in with Google.
  * Client ID from GET /api/config (server-only GOOGLE_CLIENT_ID).
  */
-export default function GoogleSignInButton({ onCredential, text = "signin_with", disabled }) {
+export default function GoogleSignInButton({
+  onCredential,
+  text = "signin_with",
+  disabled,
+  authenticating = false,
+}) {
   const [ready, setReady] = useState(false);
   const [error, setError] = useState(null);
+  const blocked = disabled || authenticating;
 
   useEffect(() => {
     let cancelled = false;
@@ -97,9 +105,19 @@ export default function GoogleSignInButton({ onCredential, text = "signin_with",
   }
 
   return (
-    <div aria-busy={!ready} style={{ opacity: disabled ? 0.5 : 1, pointerEvents: disabled ? "none" : "auto" }}>
-      <div id="google-signin-btn" />
-      {!ready ? <p className="muted">Loading Google Sign-In…</p> : null}
+    <div
+      className={styles.wrap}
+      aria-busy={!ready || authenticating}
+      data-authenticating={authenticating ? "true" : undefined}
+    >
+      <div
+        className={styles.buttonHost}
+        style={{ opacity: blocked ? 0.55 : 1, pointerEvents: blocked ? "none" : "auto" }}
+      >
+        <div id="google-signin-btn" />
+      </div>
+      {!ready ? <AsyncStatus>Loading Google Sign-In…</AsyncStatus> : null}
+      {authenticating ? <AsyncStatus>Completing sign-in…</AsyncStatus> : null}
     </div>
   );
 }

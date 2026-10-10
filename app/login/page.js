@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback, useEffect } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { PageShell } from "@/components/layout/PageShell";
@@ -18,6 +18,8 @@ function LoginInner() {
   const next = searchParams.get("next") || "/events";
   const safeNext = next.startsWith("/") ? next : "/events";
   const { signInWithGoogleCredential, isAuthenticated, loading, error } = useAuth();
+  const [authenticating, setAuthenticating] = useState(false);
+  const authenticatingRef = useRef(false);
 
   useEffect(() => {
     if (!loading && isAuthenticated) {
@@ -27,8 +29,18 @@ function LoginInner() {
 
   const onCredential = useCallback(
     async (idToken) => {
-      await signInWithGoogleCredential(idToken);
-      router.replace(safeNext);
+      if (authenticatingRef.current) return;
+      authenticatingRef.current = true;
+      setAuthenticating(true);
+      try {
+        await signInWithGoogleCredential(idToken);
+        router.replace(safeNext);
+      } catch {
+        /* AuthProvider sets error */
+      } finally {
+        authenticatingRef.current = false;
+        setAuthenticating(false);
+      }
     },
     [signInWithGoogleCredential, router, safeNext]
   );
@@ -43,7 +55,11 @@ function LoginInner() {
         <Image src="/kratos26.png" alt="KRATOS'26" width={220} height={56} className={styles.logo} />
         <h1 className={styles.title}>Sign in</h1>
         <p className={styles.lead}>Use your Google account to register for events and manage teams.</p>
-        <GoogleSignInButton onCredential={onCredential} />
+        <GoogleSignInButton
+          onCredential={onCredential}
+          authenticating={authenticating}
+          disabled={authenticating}
+        />
         {error ? <ErrorState title="Sign-in failed" description={toUserMessage(error)} /> : null}
       </Card>
     </div>
