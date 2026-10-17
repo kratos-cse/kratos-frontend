@@ -47,7 +47,7 @@ const ARENAS = [
     title: "Project Expo",
     tag: "Build. Demo. Inspire.",
     desc: "Engineering projects and prototypes on the fest exhibition floor.",
-    href: "/project-expo",
+    href: "/events?category=PROJECT_EXPO",
   },
 ];
 

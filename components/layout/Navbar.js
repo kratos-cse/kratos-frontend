@@ -11,7 +11,7 @@ import styles from "./Navbar.module.css";
 const LINKS = [
   { href: "/", label: "Home" },
   { href: "/events", label: "Events" },
-  { href: "/project-expo", label: "Project Expo" },
+  { href: "/events?category=PROJECT_EXPO", label: "Project Expo" },
   { href: "/papyrus", label: "PAPYRUS" },
   { href: "/about", label: "About" },
   { href: "/registrations", label: "My Registrations", auth: true },
