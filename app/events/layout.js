@@ -3,7 +3,7 @@ import { EventsProvider } from "@/context/EventsProvider";
 export const metadata = {
   title: "Events",
   description:
-    "Browse every KRATOS'26 event — technical, playground, spark, online and title events — and register as an individual or a team.",
+    "Browse every KRATOS'26 event — technical, online, title, and project expo — and register as an individual or a team.",
   alternates: { canonical: "/events" },
   openGraph: { url: "/events", title: "Events · KRATOS'26" },
 };

@@ -268,17 +268,12 @@
   top: 12%;
 }
 
-.n_playground {
-  left: 3%;
-  top: 56%;
-}
-
 .n_online {
   right: 3%;
   top: 56%;
 }
 
-.n_spark {
+.n_projectexpo {
   left: 50%;
   bottom: 3%;
   transform: translateX(-50%);
@@ -332,9 +327,7 @@
     width: auto;
   }
 
-  .n_spark {
-    grid-column: 1 / -1;
-    justify-self: center;
+  .n_projectexpo {
     left: auto;
     bottom: auto;
     transform: none;
