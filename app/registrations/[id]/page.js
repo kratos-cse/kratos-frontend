@@ -20,6 +20,7 @@ import { cancelRegistration, getRegistration } from "@/lib/api/registrations";
 import { syncPayment } from "@/lib/api/payments";
 import { getEventWhatsapp, getRegistrationForm } from "@/lib/api/events";
 import { visibleFields } from "@/lib/registration/fieldUtils";
+import { isPaymentCancelled } from "@/lib/errors/checkoutErrors";
 import {
   toUserMessage,
   canRetryPayment,
@@ -182,10 +183,11 @@ function RegistrationDetailInner() {
         },
       });
     } catch (err) {
-      if (!String(err?.message || "").toLowerCase().includes("cancelled")) {
-        setError(err);
-      } else {
+      if (isPaymentCancelled(err)) {
+        setError(toUserMessage(err));
         await refresh();
+      } else {
+        setError(toUserMessage(err));
       }
     } finally {
       setBusy(false);
@@ -201,7 +203,7 @@ function RegistrationDetailInner() {
       await syncPayment(registration.payment.id);
       await refresh();
     } catch (err) {
-      setError(err);
+      setError(toUserMessage(err));
     } finally {
       setBusy(false);
     }
@@ -212,7 +214,7 @@ function RegistrationDetailInner() {
     try {
       await openRegistrationReceipt(registration.id);
     } catch (err) {
-      setError(err);
+      setError(toUserMessage(err));
     } finally {
       setBusy(false);
     }
@@ -224,7 +226,7 @@ function RegistrationDetailInner() {
       await cancelRegistration(registration.id);
       await refresh();
     } catch (err) {
-      setError(err);
+      setError(toUserMessage(err));
     } finally {
       setBusy(false);
     }

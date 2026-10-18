@@ -21,6 +21,7 @@ import { getRegistrationForm } from "@/lib/api/events";
 import { createRegistration, getRegistration, listMyRegistrations } from "@/lib/api/registrations";
 import { executePaidCheckout } from "@/lib/payments/checkoutFlow";
 import { PaymentStatus } from "@/components/registration/PaymentStatus";
+import { isPaymentCancelled } from "@/lib/errors/checkoutErrors";
 import { toUserMessage, canRetryPayment, isRegistrationConfirmed } from "@/lib/errors/userMessages";
 import {
   canRegisterForEvent,
@@ -171,12 +172,10 @@ function RegisterWizard() {
         },
       });
     } catch (err) {
-      if (String(err?.message || "").toLowerCase().includes("cancelled")) {
-        setError("Payment was cancelled. You can continue when ready.");
-        setStep("payment");
-      } else {
-        setError(toUserMessage(err));
-        setStep("payment");
+      setError(toUserMessage(err));
+      setStep("payment");
+      if (isPaymentCancelled(err)) {
+        /* stay on payment step; refresh optional */
       }
     } finally {
       setBusy(false);
