@@ -8,9 +8,9 @@ const path = require("path");
 const categoriesPath = path.join(__dirname, "..", "lib", "events", "categories.js");
 const src = fs.readFileSync(categoriesPath, "utf8");
 
-const requiredInFilters = ["TECHNICAL", "ONLINE", "TITLE_EVENT", "PROJECT_EXPO"];
+const requiredInFilters = ["TECHNICAL", "ONLINE", "TITLE_EVENT", "PROJECT_EXPO", "SPARK"];
 
-const removedFromNav = ["PLAYGROUND", "SPARK"];
+const removedFromNav = ["PLAYGROUND"];
 
 for (const key of requiredInFilters) {
   if (!src.includes(`"${key}"`)) {
