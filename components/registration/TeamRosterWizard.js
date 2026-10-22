@@ -18,6 +18,7 @@ import {
 import {
   countMandatory,
   countSubstitutes,
+  coalesceRosterEvent,
   getNextRosterSlot,
   getRosterLimits,
   remainingLeaderEntrySlots,
@@ -70,9 +71,16 @@ export function TeamRosterWizard({
     refresh();
   }, [teamId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const slot = useMemo(() => (team && event ? getNextRosterSlot(event, team) : null), [team, event]);
-  const limits = useMemo(() => getRosterLimits(event), [event]);
-  const remaining = useMemo(() => (team ? remainingLeaderEntrySlots(event, team) : null), [event, team]);
+  const rosterEvent = useMemo(() => coalesceRosterEvent(event, team), [event, team]);
+  const slot = useMemo(
+    () => (team && rosterEvent ? getNextRosterSlot(rosterEvent, team) : null),
+    [team, rosterEvent],
+  );
+  const limits = useMemo(() => getRosterLimits(rosterEvent), [rosterEvent]);
+  const remaining = useMemo(
+    () => (team && rosterEvent ? remainingLeaderEntrySlots(rosterEvent, team) : null),
+    [rosterEvent, team],
+  );
 
   const mandatoryCount = team ? countMandatory(team) : 0;
   const substituteCount = team ? countSubstitutes(team) : 0;
