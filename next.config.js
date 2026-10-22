@@ -16,7 +16,8 @@ const nextConfig = {
     ];
   },
   async rewrites() {
-    const backend = (process.env.API_BASE_URL || "http://localhost:8000").replace(/\/$/, "");
+    const backend = process.env.API_BASE_URL ? process.env.API_BASE_URL.replace(/\/$/, "") : null;
+    if (!backend) return [];
     return [
       {
         source: "/api/v1/:path*",
