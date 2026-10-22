@@ -1,0 +1,36 @@
+# Validates every push to main and triggers Vercel production when VERCEL_DEPLOY_HOOK is set.
+# Create hook: Vercel project → Settings → Git → Deploy Hooks → main branch.
+# Then: gh secret set VERCEL_DEPLOY_HOOK --body "<hook-url>"
+name: Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci
+      - run: npm run test:matrix
+      - run: npm run build
+
+  deploy:
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Vercel production deploy
+        env:
+          DEPLOY_HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$DEPLOY_HOOK" ]; then
+            echo "::warning::Add repository secret VERCEL_DEPLOY_HOOK (Vercel Deploy Hook URL) to deploy production automatically."
+            exit 0
+          fi
+          curl -fsS -X POST "$DEPLOY_HOOK"
