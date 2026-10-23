@@ -14,7 +14,6 @@ import { useMyRegistrations } from "@/hooks/useMyRegistrations";
 import { useEvents } from "@/hooks/useEvents";
 import { ShareInviteButton } from "@/components/registration/ShareInviteButton";
 import { deriveRegistrationJourneyState } from "@/lib/events/registrationUiState";
-import { formatWhen } from "@/lib/events/utils";
 import { useAuth } from "@/context/AuthProvider";
 import styles from "./registrations.module.css";
 
@@ -89,10 +88,7 @@ function RegistrationsInner() {
                 <Link href={`/events/${reg.event_id}`} className={styles.eventName}>
                   {event?.name || "Event"}
                 </Link>
-                <p className="meta">
-                  {event ? formatWhen(event.starts_at, event.ends_at, event.slot) : null}
-                  {event?.venue ? ` · ${event.venue}` : ""}
-                </p>
+                {event?.venue ? <p className="meta">{event.venue}</p> : null}
               </div>
               <div className={styles.badges}>
                 <Badge tone={status === "CONFIRMED" ? "ok" : status === "CANCELLED" ? "muted" : "warn"}>

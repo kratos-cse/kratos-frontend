@@ -4,9 +4,11 @@ import DriftWallResponsive from "@/components/effects/DriftWallResponsive";
 import styles from "./about.module.css";
 
 export const metadata = {
-  title: "About — KRATOS'26",
+  title: "About",
   description:
     "KRATOS is the National Level Technical Symposium of the Department of Computer Science and Engineering, Easwari Engineering College, Chennai.",
+  alternates: { canonical: "/about" },
+  openGraph: { url: "/about", title: "About · KRATOS'26" },
 };
 
 const WALL_ITEMS = [

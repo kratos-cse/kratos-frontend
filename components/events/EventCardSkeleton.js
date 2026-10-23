@@ -9,10 +9,7 @@ export function EventCardSkeleton() {
       <Skeleton className={styles.skelCategory} />
       <Skeleton className={styles.skelTitle} />
       <Skeleton className={styles.skelTagline} />
-      <div className={styles.schedule}>
-        <Skeleton className={styles.skelWhen} />
-        <Skeleton className={styles.skelVenue} />
-      </div>
+      <Skeleton className={styles.skelVenue} />
       <div className={styles.skelDivider} />
       <div className={styles.skelFacts}>
         <Skeleton className={styles.skelFee} />

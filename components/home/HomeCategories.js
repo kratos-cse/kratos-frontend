@@ -22,7 +22,7 @@ export function HomeCategories() {
       <section className={styles.section}>
         <div className={styles.sectionHead}>
           <h2 className="section-title">Categories</h2>
-          <p className="muted">Five tracks. Find your arena.</p>
+          <p className="muted">Find your arena.</p>
         </div>
         {loading && !events.length ? (
           <div className={styles.cats} aria-busy="true" aria-label="Loading categories">

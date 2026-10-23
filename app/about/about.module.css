@@ -11,7 +11,7 @@
    */
   margin-inline: calc(-1 * var(--page-pad));
   /* Sit behind the floating navbar, as before */
-  margin-top: calc(-1 * var(--nav-h));
+  margin-top: calc(-1 * var(--page-top));
   /* No explicit width — let it be 100% of parent after margin expansion */
   min-height: clamp(600px, 92vh, 940px);
   display: flex;
@@ -283,8 +283,8 @@
     0 16px 48px rgba(0,0,0,0.55),
     0 2px 8px rgba(0,0,0,0.3);
   transition:
-    transform 280ms cubic-bezier(0.22,1,0.36,1),
-    box-shadow 280ms cubic-bezier(0.22,1,0.36,1);
+    transform 280ms var(--ease-out),
+    box-shadow 280ms var(--ease-out);
 }
 
 /* ── Top accent bar ── */
@@ -302,7 +302,7 @@
   inset: 0;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 280ms cubic-bezier(0.22,1,0.36,1);
+  transition: opacity 280ms var(--ease-out);
 }
 
 .card:hover {
@@ -350,7 +350,7 @@
   flex-shrink: 0;
   border: 1px solid;
   /* colour overrides per card */
-  transition: transform 280ms cubic-bezier(0.22,1,0.36,1);
+  transition: transform 280ms var(--ease-out);
 }
 .card:hover .cardIconWrap { transform: scale(1.1) rotate(-4deg); }
 

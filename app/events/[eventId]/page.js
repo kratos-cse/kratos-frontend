@@ -3,9 +3,12 @@
 import { useMemo } from "react";
 import { useParams } from "next/navigation";
 import { PageShell } from "@/components/layout/PageShell";
+import { EventContentSections } from "@/components/events/EventContentSections";
+import { EventCoordinatorList } from "@/components/events/EventCoordinatorList";
 import { RegistrationCTA } from "@/components/events/RegistrationCTA";
 import { Badge } from "@/components/ui/Badge";
 import { ErrorState } from "@/components/ui/ErrorState";
+import { EventDetailBack } from "@/components/events/EventDetailBack";
 import { EventDetailSkeleton } from "@/components/events/EventDetailSkeleton";
 import { PageTransition } from "@/components/motion/Reveal";
 import { useEvent } from "@/hooks/useEvents";
@@ -14,7 +17,6 @@ import { formatCategory } from "@/lib/events/categories";
 import { formatRosterParticipantLine } from "@/lib/events/utils";
 import {
   findMyRegistrationForEvent,
-  formatDateRange,
   formatFee,
   registrationAvailabilityLabel,
   registrationModeLabel,
@@ -54,12 +56,12 @@ export default function EventDetailPage() {
     );
   }
 
-  const when = formatDateRange(event.starts_at, event.ends_at);
   const rosterLine = formatRosterParticipantLine(
     event.required_member_count,
     event.substitute_count,
     event.team_min_size,
     event.team_max_size,
+    event.roster_style,
   );
   const mode = registrationModeLabel(
     event.registration_mode,
@@ -67,7 +69,8 @@ export default function EventDetailPage() {
     event.team_min_size,
     event.team_max_size,
     event.required_member_count,
-    event.substitute_count
+    event.substitute_count,
+    event.roster_style,
   );
 
   return (
@@ -75,6 +78,7 @@ export default function EventDetailPage() {
       <PageTransition>
         <article className={styles.layout}>
           <div className={styles.main}>
+            <EventDetailBack />
             <div className={styles.kicker}>
               <Badge tone="brand">{formatCategory(event.category)}</Badge>
               <Badge tone={event.registration_availability === "OPEN" ? "ok" : "muted"}>
@@ -90,10 +94,6 @@ export default function EventDetailPage() {
                 <dd>{formatFee(event.fee)}</dd>
               </div>
               <div>
-                <dt>When</dt>
-                <dd>{when || event.slot?.replace?.(/_/g, " ") || "TBA"}</dd>
-              </div>
-              <div>
                 <dt>Venue</dt>
                 <dd>{event.venue || "TBA"}</dd>
               </div>
@@ -105,12 +105,6 @@ export default function EventDetailPage() {
                 <div>
                   <dt>Team roster</dt>
                   <dd>{rosterLine}</dd>
-                </div>
-              ) : null}
-              {event.spots_remaining != null ? (
-                <div>
-                  <dt>Spots left</dt>
-                  <dd>{event.spots_remaining}</dd>
                 </div>
               ) : null}
               {event.whatsapp_group_available ? (
@@ -128,6 +122,8 @@ export default function EventDetailPage() {
               </section>
             ) : null}
 
+            <EventContentSections sections={event.content_sections} />
+            <EventCoordinatorList coordinators={event.coordinators} />
           </div>
 
           <aside className={styles.aside}>
