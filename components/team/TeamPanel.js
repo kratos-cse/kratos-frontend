@@ -24,6 +24,14 @@ import {
   validateRequiredFields,
 } from "@/lib/registration/fieldUtils";
 import CountUp from "@/components/micro/CountUp/CountUp";
+import { formatRosterParticipantLine } from "@/lib/events/utils";
+import {
+  activeMembers,
+  coalesceRosterEvent,
+  countMandatory,
+  getNextRosterSlot,
+  getRosterLimits,
+} from "@/lib/events/rosterPlan";
 import styles from "./TeamPanel.module.css";
 
 function memberTone(status) {
@@ -124,29 +132,29 @@ export function TeamPanel({ teamId, event, teamMemberFields = [], onChanged }) {
     String(myMember?.role).toUpperCase() === "LEADER";
   const teamStatus = String(team?.status || "").toUpperCase();
 
-  const required =
-    typeof team?.required_member_count === "number"
-      ? team.required_member_count
-      : typeof event?.required_member_count === "number"
-        ? event.required_member_count
-        : typeof event?.team_min_size === "number"
-          ? event.team_min_size
-          : null;
-  const maxSubs =
-    typeof team?.substitute_count === "number"
-      ? team.substitute_count
-      : typeof event?.substitute_count === "number"
-        ? event.substitute_count
-        : typeof event?.team_max_size === "number" && typeof event?.team_min_size === "number"
-          ? Math.max(0, event.team_max_size - event.team_min_size)
-          : 0;
+  const rosterEvent = useMemo(() => coalesceRosterEvent(event, team), [event, team]);
+  const limits = useMemo(() => (rosterEvent ? getRosterLimits(rosterEvent) : null), [rosterEvent]);
+  const nextSlot = useMemo(
+    () => (team && rosterEvent ? getNextRosterSlot(rosterEvent, team) : null),
+    [team, rosterEvent],
+  );
+
+  const teamMin = limits?.required ?? null;
+  const teamMax = limits?.teamMax ?? null;
+  const rosterStyle = limits?.style ?? null;
+  const maxSubs = rosterStyle === "MEMBERS_SUBSTITUTES" ? (limits?.substitutes ?? 0) : 0;
+
   const mandatoryFilled =
-    typeof team?.mandatory_filled === "number" ? team.mandatory_filled : mandatory.length;
+    typeof team?.mandatory_filled === "number" ? team.mandatory_filled : countMandatory(team);
   const subsFilled =
     typeof team?.substitutes_filled === "number" ? team.substitutes_filled : substitutes.length;
-  const mandatoryOpen =
-    typeof required === "number" ? Math.max(0, required - mandatoryFilled) : 0;
-  const subOpen = Math.max(0, maxSubs - subsFilled);
+  const mandatoryOpen = teamMin != null ? Math.max(0, teamMin - mandatoryFilled) : 0;
+  const subOpen = maxSubs > 0 ? Math.max(0, maxSubs - subsFilled) : 0;
+  const activeCount = team ? activeMembers(team).length : members.length;
+  const optionalOpen =
+    rosterStyle === "RANGE" && teamMax != null && mandatoryFilled >= (teamMin ?? 0)
+      ? Math.max(0, teamMax - activeCount)
+      : 0;
 
   const memberMode = String(event?.member_registration_mode || "").toUpperCase();
   const leaderCanEnter = memberMode === "LEADER_MANAGED";
@@ -265,12 +273,15 @@ export function TeamPanel({ teamId, event, teamMemberFields = [], onChanged }) {
         ? `/join/${inviteCode}`
         : null;
 
-  const rosterLine =
-    typeof required === "number"
-      ? maxSubs > 0
-        ? `${required} members + up to ${maxSubs} substitutes`
-        : `${required} members`
-      : null;
+  const rosterLine = rosterEvent
+    ? formatRosterParticipantLine(
+        rosterEvent.required_member_count,
+        rosterEvent.substitute_count,
+        rosterEvent.team_min_size,
+        rosterEvent.team_max_size,
+        rosterEvent.roster_style,
+      )
+    : null;
 
   function renderMember(m) {
     const you = m.profile_id && String(m.profile_id) === String(profile?.id);
@@ -303,11 +314,11 @@ export function TeamPanel({ teamId, event, teamMemberFields = [], onChanged }) {
           <h2 className={styles.title}>{team.name}</h2>
           <p className="meta">
             {rosterLine || `${members.length} on roster`}
-            {typeof required === "number" ? (
+            {typeof teamMin === "number" ? (
               <>
                 {" · mandatory "}
                 <CountUp to={mandatoryFilled} duration={0.35} />
-                /{required}
+                /{teamMin}
               </>
             ) : null}
             {maxSubs > 0 ? (
@@ -351,6 +362,19 @@ export function TeamPanel({ teamId, event, teamMemberFields = [], onChanged }) {
         </ul>
       </section>
 
+      {rosterStyle === "RANGE" && optionalOpen > 0 ? (
+        <section className={styles.section}>
+          <h3 className={styles.sectionTitle}>Optional members</h3>
+          <ul className={styles.list}>
+            {Array.from({ length: optionalOpen }).map((_, i) => (
+              <li key={`o-open-${i}`} className={styles.openSlot}>
+                OPEN OPTIONAL SLOT
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
       {maxSubs > 0 ? (
         <section className={styles.section}>
           <h3 className={styles.sectionTitle}>Substitutes</h3>
@@ -372,35 +396,37 @@ export function TeamPanel({ teamId, event, teamMemberFields = [], onChanged }) {
           </StatusBanner>
         ) : null}
 
-        {canManageRoster && leaderCanEnter ? (
+        {canManageRoster && leaderCanEnter && nextSlot ? (
           <div className={styles.addActions}>
-            {mandatoryOpen > 0 ? (
-              <Button
-                type="button"
-                variant={addRole === "MEMBER" ? "primary" : "secondary"}
-                size="sm"
-                onClick={() => setAddRole(addRole === "MEMBER" ? null : "MEMBER")}
-              >
-                Add member
-              </Button>
-            ) : null}
-            {subOpen > 0 ? (
-              <Button
-                type="button"
-                variant={addRole === "SUBSTITUTE" ? "primary" : "secondary"}
-                size="sm"
-                onClick={() => setAddRole(addRole === "SUBSTITUTE" ? null : "SUBSTITUTE")}
-              >
-                Add substitute
-              </Button>
-            ) : null}
+            <Button
+              type="button"
+              variant={addRole ? "primary" : "secondary"}
+              size="sm"
+              onClick={() =>
+                setAddRole(
+                  addRole === nextSlot.role ? null : nextSlot.role,
+                )
+              }
+            >
+              {nextSlot.phase === "substitute"
+                ? "Add substitute"
+                : nextSlot.phase === "optional"
+                  ? "Add optional member"
+                  : "Add member"}
+            </Button>
           </div>
         ) : null}
 
         {addRole && leaderCanEnter ? (
           <form className={styles.addForm} onSubmit={onAddRoster}>
             <p className="meta">
-              Adding {addRole === "SUBSTITUTE" ? "substitute" : "mandatory member"} (no account required)
+              Adding{" "}
+              {addRole === "SUBSTITUTE"
+                ? "substitute"
+                : nextSlot?.phase === "optional"
+                  ? "optional member"
+                  : "mandatory member"}{" "}
+              (no account required)
             </p>
             <Input
               label="Full name"
