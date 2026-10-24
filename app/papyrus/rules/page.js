@@ -6,7 +6,7 @@ import styles from "../papyrus.module.css";
 export const metadata = {
   title: "Rules and Regulation",
   description:
-    "Official rules and regulations for PAPYRUS — participation, paper format, deadlines, presentation, and conduct.",
+    "Official rules for PAPYRUS Paper Presentation Round — eligibility, PDF and PPT formats, evaluation, presentation timing, and event schedule.",
   alternates: { canonical: "/papyrus/rules" },
   openGraph: {
     url: "/papyrus/rules",

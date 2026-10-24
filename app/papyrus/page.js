@@ -90,7 +90,7 @@ export default function PapyrusPage() {
               <p className={styles.eyebrow}>Submit</p>
               <h2 className={styles.sectionTitle}>Submission guidelines</h2>
               <p className={styles.sectionLead}>
-                IEEE format, page limit and submission instructions
+                PDF paper, PPT slides, evaluation, and presentation timing
               </p>
 
               <h3 className={styles.panelTitle}>Submission requirements</h3>

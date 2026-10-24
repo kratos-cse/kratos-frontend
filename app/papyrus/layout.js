@@ -1,13 +1,15 @@
+import { PAPYRUS_EVENT_NAME, PAPYRUS_TAGLINE } from "@/data/papyrusContent";
+
 export const metadata = {
-  title: "PAPYRUS",
+  title: PAPYRUS_EVENT_NAME,
   description:
-    "PAPYRUS — ideas that connect, research that inspires. Seven symposium themes, submission guidelines, and important dates for UG and PG students.",
+    `${PAPYRUS_TAGLINE} Paper presentation for UG and PG students: PDF submissions (max 8 pages), prescribed PPT slides, and the presentation round on 28 October 2026 at Easwari Engineering College.`,
   alternates: { canonical: "/papyrus" },
   openGraph: {
     url: "/papyrus",
-    title: "PAPYRUS",
+    title: PAPYRUS_EVENT_NAME,
     description:
-      "National symposium paper conference: seven research themes, IEEE submission guidelines, and presentation rounds at KRATOS '26.",
+      "KRATOS '26 paper presentation round — research PDFs, presentation slides, and shortlisted talks with Q&A.",
   },
 };
 
