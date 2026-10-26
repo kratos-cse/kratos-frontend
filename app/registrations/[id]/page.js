@@ -90,20 +90,32 @@ function RegistrationDetailInner() {
     };
   }, [registration?.event_id]);
 
-  // Explicit reconcile: if payment still CREATED after load, call sync once.
+  // In-flight CREATED: sync once. FAILED: reconcile (sync does not repair FAILED).
   useEffect(() => {
     if (!registration || autoSynced.current) return;
-    if (!needsPaymentSync(registration)) return;
+    const pay = registration.payment;
+    const payStatus = String(pay?.status || "").toUpperCase();
+    const shouldSync = needsPaymentSync(registration);
+    const shouldReconcile = pay?.id && payStatus === "FAILED";
+    if (!shouldSync && !shouldReconcile) return;
 
     autoSynced.current = true;
     let cancelled = false;
     (async () => {
       setSyncing(true);
       try {
-        await syncPayment(registration.payment.id);
+        if (shouldReconcile) {
+          const { reconcilePayment } = await import("@/lib/api/payments");
+          await reconcilePayment({
+            razorpayOrderId: pay.razorpay_order_id,
+            razorpayPaymentId: pay.razorpay_payment_id,
+          });
+        } else {
+          await syncPayment(registration.payment.id);
+        }
         if (!cancelled) await refresh();
       } catch {
-        /* keep CREATED UI; user can Sync or Continue payment */
+        /* keep current UI; user can retry sync/reconcile or pay again */
       } finally {
         if (!cancelled) setSyncing(false);
       }
