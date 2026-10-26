@@ -1,12 +1,11 @@
 import Link from "next/link";
 import { PageShell } from "@/components/layout/PageShell";
-import { PAPYRUS_RULES } from "@/data/papyrusContent";
+import { PAPYRUS_EVENT_NAME, PAPYRUS_RULES } from "@/data/papyrusContent";
 import styles from "../papyrus.module.css";
 
 export const metadata = {
   title: "Rules and Regulation",
-  description:
-    "Official rules for PAPYRUS Paper Presentation Round — eligibility, PDF and PPT formats, evaluation, presentation timing, and event schedule.",
+  description: `Rules and regulations for ${PAPYRUS_EVENT_NAME}.`,
   alternates: { canonical: "/papyrus/rules" },
   openGraph: {
     url: "/papyrus/rules",

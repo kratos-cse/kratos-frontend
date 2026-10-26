@@ -5,16 +5,17 @@ import { PAPYRUS_REGISTRATION_URL } from "@/lib/links";
 import {
   PAPYRUS_CONTACTS,
   PAPYRUS_DESCRIPTION,
+  PAPYRUS_ELIGIBILITY,
+  PAPYRUS_EVENT_NAME,
+  PAPYRUS_EVENT_SCHEDULE,
   PAPYRUS_HERO_DATE,
   PAPYRUS_HERO_TIME,
   PAPYRUS_HERO_VENUE,
-  PAPYRUS_PAPER_SUBMISSION_CARDS,
-  PAPYRUS_PAPER_SUBMISSION_INTRO,
-  PAPYRUS_PARTICIPATION_GUIDELINES,
-  PAPYRUS_SUBMISSION_SPECS,
+  PAPYRUS_PARTICIPANT_COMMUNICATION,
+  PAPYRUS_PARTICIPATION,
+  PAPYRUS_SUBMISSION_FORMAT_NOTE,
+  PAPYRUS_SUBMISSION_REQUIREMENTS,
   PAPYRUS_TAGLINE_LINES,
-  PAPYRUS_THEMES,
-  PAPYRUS_TIMELINE_DATES,
 } from "@/data/papyrusContent";
 import PapyrusHero from "./components/PapyrusHero";
 import styles from "./papyrus.module.css";
@@ -34,50 +35,23 @@ export default function PapyrusPage() {
           <section id="about" className={`${styles.screenSection} ${styles.screenAbout}`}>
             <div className={styles.screenInner}>
               <p className={styles.eyebrow}>About</p>
-              <h2 className={styles.sectionTitle}>About PAPYRUS</h2>
-              <div className={styles.aboutTagline}>
-                {PAPYRUS_TAGLINE_LINES.map((line) => (
-                  <span key={line}>{line}</span>
-                ))}
-              </div>
+              <h2 className={styles.sectionTitle}>{PAPYRUS_EVENT_NAME}</h2>
               <p className={styles.aboutBody}>{PAPYRUS_DESCRIPTION}</p>
-            </div>
-          </section>
-
-          <section id="themes" className={`${styles.screenSection} ${styles.screenThemes}`}>
-            <div className={styles.screenInner}>
-              <p className={styles.eyebrow}>Explore</p>
-              <h2 className={styles.sectionTitle}>Themes</h2>
-              <ul className={styles.themesGrid}>
-                {PAPYRUS_THEMES.map((title, index) => (
-                  <li key={title} className={styles.themeCard}>
-                    <span className={styles.themeNum}>{String(index + 1).padStart(2, "0")}</span>
-                    <span className={styles.themeTitle}>{title}</span>
-                  </li>
-                ))}
-              </ul>
             </div>
           </section>
 
           <section id="registration" className={`${styles.screenSection} ${styles.screenRegistration}`}>
             <div className={styles.screenInner}>
-              <p className={styles.eyebrow}>Participate</p>
-              <h2 className={styles.sectionTitle}>Registration</h2>
-              <p className={styles.sectionLead}>Participation guidelines</p>
-              <div className={styles.regPanel}>
-                <ul className={styles.regList}>
-                  {PAPYRUS_PARTICIPATION_GUIDELINES.map((item) => (
-                    <li key={item.num} className={styles.regItem}>
-                      <span className={styles.regNum}>{item.num}</span>
-                      <span className={styles.regText}>{item.text}</span>
-                    </li>
-                  ))}
-                </ul>
-                <div className={styles.regPanelFooter}>
-                  <Link href="/papyrus/rules" className={styles.rulesLink}>
-                    Rules and regulation →
-                  </Link>
-                </div>
+              <p className={styles.eyebrow}>Registration</p>
+              <h2 className={styles.sectionTitle}>Eligibility</h2>
+              <p className={styles.sectionLead}>{PAPYRUS_ELIGIBILITY}</p>
+              <h3 className={styles.panelTitle}>Participation</h3>
+              <p className={styles.sectionLead}>{PAPYRUS_PARTICIPATION}</p>
+              <p className={styles.sectionLead}>{PAPYRUS_PARTICIPANT_COMMUNICATION}</p>
+              <div className={styles.regPanelFooter}>
+                <Link href="/papyrus/rules" className={styles.rulesLink}>
+                  Rules and regulation →
+                </Link>
               </div>
             </div>
           </section>
@@ -87,64 +61,43 @@ export default function PapyrusPage() {
             className={`${styles.screenSection} ${styles.screenSubmission}`}
           >
             <div className={styles.screenInner}>
-              <p className={styles.eyebrow}>Submit</p>
-              <h2 className={styles.sectionTitle}>Submission guidelines</h2>
-              <p className={styles.sectionLead}>
-                PDF paper, PPT slides, evaluation, and presentation timing
-              </p>
-
-              <h3 className={styles.panelTitle}>Submission requirements</h3>
+              <p className={styles.eyebrow}>Submission</p>
+              <h2 className={styles.sectionTitle}>Submission requirements</h2>
+              <p className={styles.submissionIntro}>{PAPYRUS_SUBMISSION_FORMAT_NOTE}</p>
               <dl className={styles.specGrid}>
-                {PAPYRUS_SUBMISSION_SPECS.map((row) => (
-                  <div key={row.key} className={styles.specRow}>
-                    <dt>{row.key}</dt>
-                    <dd>{row.value}</dd>
+                {PAPYRUS_SUBMISSION_REQUIREMENTS.map((row) => (
+                  <div key={row.label} className={styles.specRow}>
+                    <dt>{row.label}</dt>
+                    <dd>{row.text}</dd>
                   </div>
                 ))}
               </dl>
-
-              <h3 className={styles.panelTitle}>Paper submission</h3>
-              <p className={styles.submissionIntro}>{PAPYRUS_PAPER_SUBMISSION_INTRO}</p>
-              <div className={styles.submissionCards}>
-                {PAPYRUS_PAPER_SUBMISSION_CARDS.map((card) => (
-                  <div key={card.title} className={styles.submissionCard}>
-                    <h4>{card.title}</h4>
-                    <p>{card.body}</p>
-                  </div>
-                ))}
-              </div>
-              <p className={styles.formNote}>Submit through the official registration form.</p>
             </div>
           </section>
 
           <section id="dates" className={`${styles.screenSection} ${styles.screenDates}`}>
             <div className={styles.screenInner}>
-              <p className={styles.eyebrow}>Plan</p>
-              <h2 className={styles.sectionTitle}>Important dates</h2>
-              <ol className={styles.timeline}>
-                {PAPYRUS_TIMELINE_DATES.map((item, index) => (
-                  <li key={item.date + item.label} className={styles.timelineItem}>
-                    <div className={styles.timelineMarker} aria-hidden="true">
-                      {index < PAPYRUS_TIMELINE_DATES.length - 1 ? (
-                        <span className={styles.timelineLine} />
-                      ) : null}
-                    </div>
-                    <div className={styles.timelineContent}>
-                      <time className={styles.timelineDate}>{item.date}</time>
-                      <p className={styles.timelineLabel}>{item.label}</p>
-                    </div>
-                  </li>
-                ))}
-              </ol>
+              <p className={styles.eyebrow}>Schedule</p>
+              <h2 className={styles.sectionTitle}>Event schedule</h2>
+              <dl className={styles.specGrid}>
+                <div className={styles.specRow}>
+                  <dt>Date</dt>
+                  <dd>{PAPYRUS_EVENT_SCHEDULE.date}</dd>
+                </div>
+                <div className={styles.specRow}>
+                  <dt>Time</dt>
+                  <dd>{PAPYRUS_EVENT_SCHEDULE.time}</dd>
+                </div>
+                <div className={styles.specRow}>
+                  <dt>Venue</dt>
+                  <dd>{PAPYRUS_EVENT_SCHEDULE.venue}</dd>
+                </div>
+              </dl>
             </div>
           </section>
 
           <section id="cta" className={`${styles.screenSection} ${styles.screenCta}`}>
             <div className={styles.screenInner}>
-              <h2 className={styles.ctaTitle}>Ready to present your idea?</h2>
-              <p className={styles.ctaLead}>
-                Submit your research paper and be part of PAPYRUS.
-              </p>
               <Button
                 href={PAPYRUS_REGISTRATION_URL}
                 size="lg"
@@ -160,16 +113,14 @@ export default function PapyrusPage() {
 
           <section id="contact" className={`${styles.screenSection} ${styles.screenContact}`}>
             <div className={styles.screenInner}>
-              <p className={styles.eyebrow}>Reach us</p>
-              <h2 className={styles.sectionTitle}>Contact</h2>
-              <p className={styles.sectionLead}>For queries and coordination</p>
+              <p className={styles.eyebrow}>Contact</p>
+              <h2 className={styles.sectionTitle}>Event coordinators</h2>
               <ul className={styles.contactList}>
                 {PAPYRUS_CONTACTS.map((person) => (
                   <li key={person.phone} className={styles.contactCard}>
                     <span className={styles.contactName}>{person.name}</span>
-                    <span className={styles.contactDetail}>{person.detail}</span>
                     <a href={`tel:${person.phone}`} className={styles.contactPhone}>
-                      {person.display}
+                      {person.phone}
                     </a>
                   </li>
                 ))}

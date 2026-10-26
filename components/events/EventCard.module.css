@@ -91,6 +91,16 @@
   line-height: 1.4;
 }
 
+.slot {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
 .divider {
   height: 1px;
   background: var(--border);

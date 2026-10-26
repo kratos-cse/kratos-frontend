@@ -14,6 +14,7 @@ import { PageTransition } from "@/components/motion/Reveal";
 import { useEvent } from "@/hooks/useEvents";
 import { useMyRegistrations } from "@/hooks/useMyRegistrations";
 import { formatCategory } from "@/lib/events/categories";
+import { formatEventSlotLabel } from "@/lib/events/eventSlot";
 import { formatRosterParticipantLine } from "@/lib/events/utils";
 import {
   findMyRegistrationForEvent,
@@ -96,6 +97,10 @@ export default function EventDetailPage() {
               <div>
                 <dt>Venue</dt>
                 <dd>{event.venue || "TBA"}</dd>
+              </div>
+              <div>
+                <dt>Slot</dt>
+                <dd>{formatEventSlotLabel(event)}</dd>
               </div>
               <div>
                 <dt>Format</dt>
