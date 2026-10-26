@@ -8,12 +8,12 @@ import {
   deriveEventCardActions,
   deriveEventCardStatus,
   deriveTeamLeaderSummary,
-  formatCardWhen,
   formatCategoryEditorial,
   formatFeeCard,
   formatRegistrationModeShort,
   formatRosterCardLine,
 } from "@/lib/events/eventCard";
+import { formatEventSlotLabel } from "@/lib/events/eventSlot";
 import { deriveEventUiState } from "@/lib/events/registrationUiState";
 import styles from "./EventCard.module.css";
 
@@ -25,8 +25,8 @@ export function EventCard({ event, registration }) {
   const leaderSummary = deriveTeamLeaderSummary(event, registration, profile?.id);
   const rosterLine = formatRosterCardLine(event);
   const regMode = formatRegistrationModeShort(event.registration_mode);
-  const when = formatCardWhen(event.starts_at, event.ends_at, event.slot);
   const venue = event.venue?.trim() || "TBA";
+  const slotLabel = formatEventSlotLabel(event);
   const fee = formatFeeCard(event.fee);
   const detailHref = actions.view.href;
 
@@ -45,10 +45,8 @@ export function EventCard({ event, registration }) {
 
       {event.tagline ? <p className={styles.tagline}>{event.tagline}</p> : null}
 
-      <div className={styles.schedule}>
-        <p className={styles.when}>{when}</p>
-        <p className={styles.venue}>{venue}</p>
-      </div>
+      <p className={styles.venue}>{venue}</p>
+      <p className={styles.slot}>{slotLabel}</p>
 
       <div className={styles.divider} aria-hidden />
 

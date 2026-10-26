@@ -1,0 +1,32 @@
+.hold {
+  position: relative;
+  overflow: hidden;
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
+}
+
+.fill {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: rgba(248, 113, 113, 0.38);
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 200ms var(--ease-out);
+}
+
+.holding .fill {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path var(--hold-ms, 2000ms) linear;
+}
+
+.hint {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

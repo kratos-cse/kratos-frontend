@@ -1,5 +1,7 @@
 "use client";
 
+import { PaymentCancelledError } from "@/lib/errors/checkoutErrors";
+
 /**
  * Razorpay Checkout helpers.
  * Amount and key come from backend create-order response — never invent amounts.
@@ -17,7 +19,9 @@ export function loadRazorpayScript() {
     const existing = document.querySelector('script[data-razorpay="1"]');
     if (existing) {
       existing.addEventListener("load", () => resolve(window.Razorpay));
-      existing.addEventListener("error", () => reject(new Error("Failed to load Razorpay")));
+      existing.addEventListener("error", () =>
+        reject(Object.assign(new Error("Failed to load Razorpay"), { code: "PAYMENT_GATEWAY_UNAVAILABLE" })),
+      );
       return;
     }
     const script = document.createElement("script");
@@ -25,11 +29,16 @@ export function loadRazorpayScript() {
     script.async = true;
     script.dataset.razorpay = "1";
     script.onload = () => resolve(window.Razorpay);
-    script.onerror = () => reject(new Error("Failed to load Razorpay"));
+    script.onerror = () =>
+      reject(Object.assign(new Error("Failed to load Razorpay"), { code: "PAYMENT_GATEWAY_UNAVAILABLE" }));
     document.body.appendChild(script);
   });
 }
 
+/**
+ * Opens Razorpay and resolves only after onSuccess (verify/finalize) completes.
+ * Rejects with PaymentCancelledError when the participant closes the modal.
+ */
 export async function openRazorpayCheckout(opts) {
   const Razorpay = await loadRazorpayScript();
   return new Promise((resolve, reject) => {
@@ -43,15 +52,31 @@ export async function openRazorpayCheckout(opts) {
       prefill: opts.prefill || {},
       theme: { color: "#c62828" },
       handler(response) {
-        opts.onSuccess?.(response);
-        resolve(response);
+        const run = async () => {
+          try {
+            if (opts.onSuccess) {
+              await opts.onSuccess(response);
+            }
+            resolve(response);
+          } catch (err) {
+            reject(err);
+          }
+        };
+        void run();
       },
       modal: {
         ondismiss() {
           opts.onDismiss?.();
-          reject(new Error("Payment cancelled"));
+          reject(new PaymentCancelledError());
         },
       },
+    });
+    rzp.on("payment.failed", (response) => {
+      const reason =
+        response?.error?.description ||
+        response?.error?.reason ||
+        "Payment did not complete.";
+      reject(Object.assign(new Error(reason), { code: "PAYMENT_FAILED" }));
     });
     rzp.open();
   });

@@ -16,7 +16,7 @@ Studied `lion-mark.png`, `kratos26.png`, institutional logos, React Bits Spotlig
 
 1. **Palette is not predetermined.** Establish visual system only after studying brand assets (`public/`), React Bits patterns, Motion usage, and content hierarchy. Target feel: premium, bold, modern, technical, energetic — colors emerge from that work.
 2. **Typography is not forced “expressive.”** Choose fonts for branding + readability + discovery + forms + mobile. Distinctive display OK where appropriate; body prioritizes readability.
-3. **Categories (exact):** TECHNICAL · PLAYGROUND · SPARK · ONLINE · CULTURAL
+3. **Categories (exact):** TECHNICAL · PLAYGROUND · SPARK · ONLINE · TITLE_EVENT
 4. **Routes:** Keep proposed IA unless backend proves a route unnecessary.
 5. **React Bits:** Inspect cloned implementation before adapting; selective patterns only; never install/copy entire library.
 6. **Motion:** Purposeful; short timings; `prefers-reduced-motion`; mobile performance constraints.

@@ -9,6 +9,12 @@ const nextConfig = {
    * Proxy /api/v1 → backend so the real API host stays server-only (API_BASE_URL).
    * Browser never needs NEXT_PUBLIC_API_BASE_URL.
    */
+  async redirects() {
+    return [
+      { source: "/ideaverse", destination: "/papyrus", permanent: true },
+      { source: "/ideaverse/:path*", destination: "/papyrus/:path*", permanent: true },
+    ];
+  },
   async rewrites() {
     const backend = (process.env.API_BASE_URL || "http://localhost:8000").replace(/\/$/, "");
     return [

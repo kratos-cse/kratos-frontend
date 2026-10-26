@@ -62,14 +62,11 @@
   font-weight: 700;
   font-size: 1rem;
   cursor: pointer;
-  transition: background 0.2s, transform 0.2s;
+  transition:
+    background-color var(--duration-fast) ease,
+    transform var(--duration-press) var(--ease-out);
   text-decoration: none;
   box-shadow: 0 4px 20px rgba(230, 57, 53, 0.4);
-}
-
-.btnRed:hover {
-  background: #f44336;
-  transform: translateY(-2px);
 }
 
 .btnDark {
@@ -81,13 +78,27 @@
   font-weight: 600;
   font-size: 1rem;
   cursor: pointer;
-  transition: background 0.2s, transform 0.2s;
+  transition:
+    background-color var(--duration-fast) ease,
+    transform var(--duration-press) var(--ease-out);
   text-decoration: none;
 }
 
-.btnDark:hover {
-  background: #2a2a2c;
-  transform: translateY(-2px);
+@media (hover: hover) and (pointer: fine) {
+  .btnRed:hover {
+    background: #f44336;
+    transform: translateY(-2px);
+  }
+
+  .btnDark:hover {
+    background: #2a2a2c;
+    transform: translateY(-2px);
+  }
+}
+
+.btnRed:active,
+.btnDark:active {
+  transform: scale(0.97);
 }
 
 /* Background effects */
@@ -136,5 +147,17 @@
   .btnRed,
   .btnDark {
     width: 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btnRed:hover,
+  .btnDark:hover,
+  .btnRed:active,
+  .btnDark:active {
+    transform: none;
+  }
+
+  .stars span {
+    animation: none;
   }
 }

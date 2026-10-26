@@ -5,6 +5,7 @@ import { useAuth } from "@/context/AuthProvider";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { HoldButton } from "@/components/ui/HoldButton";
 import { Input } from "@/components/ui/Input";
 import { StatusBanner } from "@/components/ui/ErrorState";
 import { TeamSkeleton } from "@/components/ui/Skeleton";
@@ -15,8 +16,22 @@ import {
   leaveTeam,
   removeMember,
 } from "@/lib/api/teams";
+import { DynamicRegistrationForm } from "@/components/registration/DynamicRegistrationForm";
 import { toUserMessage } from "@/lib/errors/userMessages";
+import {
+  buildFieldResponses,
+  dynamicFieldsForLeaderEntry,
+  validateRequiredFields,
+} from "@/lib/registration/fieldUtils";
 import CountUp from "@/components/micro/CountUp/CountUp";
+import { formatRosterParticipantLine } from "@/lib/events/utils";
+import {
+  activeMembers,
+  coalesceRosterEvent,
+  countMandatory,
+  getNextRosterSlot,
+  getRosterLimits,
+} from "@/lib/events/rosterPlan";
 import styles from "./TeamPanel.module.css";
 
 function memberTone(status) {
@@ -40,13 +55,20 @@ function roleLabel(role) {
   return "Member";
 }
 
-const EMPTY_FORM = { full_name: "", phone: "", contact_email: "", college_name: "", year_of_study: "" };
+const EMPTY_FORM = {
+  full_name: "",
+  phone: "",
+  contact_email: "",
+  college_name: "",
+  department: "",
+  year_of_study: "",
+};
 
 /**
  * Authoritative team UI — loads GET /teams/{id}.
  * Shows mandatory vs substitute sections from backend roster fields.
  */
-export function TeamPanel({ teamId, event, onChanged }) {
+export function TeamPanel({ teamId, event, teamMemberFields = [], onChanged }) {
   const { profile } = useAuth();
   const [team, setTeam] = useState(null);
   const [loading, setLoading] = useState(Boolean(teamId));
@@ -56,6 +78,7 @@ export function TeamPanel({ teamId, event, onChanged }) {
   const [loadingInvite, setLoadingInvite] = useState(false);
   const [addRole, setAddRole] = useState(null); // MEMBER | SUBSTITUTE | null
   const [form, setForm] = useState(EMPTY_FORM);
+  const [fieldValues, setFieldValues] = useState({});
 
   const refresh = useCallback(async ({ notify = false } = {}) => {
     if (!teamId) {
@@ -109,29 +132,29 @@ export function TeamPanel({ teamId, event, onChanged }) {
     String(myMember?.role).toUpperCase() === "LEADER";
   const teamStatus = String(team?.status || "").toUpperCase();
 
-  const required =
-    typeof team?.required_member_count === "number"
-      ? team.required_member_count
-      : typeof event?.required_member_count === "number"
-        ? event.required_member_count
-        : typeof event?.team_min_size === "number"
-          ? event.team_min_size
-          : null;
-  const maxSubs =
-    typeof team?.substitute_count === "number"
-      ? team.substitute_count
-      : typeof event?.substitute_count === "number"
-        ? event.substitute_count
-        : typeof event?.team_max_size === "number" && typeof event?.team_min_size === "number"
-          ? Math.max(0, event.team_max_size - event.team_min_size)
-          : 0;
+  const rosterEvent = useMemo(() => coalesceRosterEvent(event, team), [event, team]);
+  const limits = useMemo(() => (rosterEvent ? getRosterLimits(rosterEvent) : null), [rosterEvent]);
+  const nextSlot = useMemo(
+    () => (team && rosterEvent ? getNextRosterSlot(rosterEvent, team) : null),
+    [team, rosterEvent],
+  );
+
+  const teamMin = limits?.required ?? null;
+  const teamMax = limits?.teamMax ?? null;
+  const rosterStyle = limits?.style ?? null;
+  const maxSubs = rosterStyle === "MEMBERS_SUBSTITUTES" ? (limits?.substitutes ?? 0) : 0;
+
   const mandatoryFilled =
-    typeof team?.mandatory_filled === "number" ? team.mandatory_filled : mandatory.length;
+    typeof team?.mandatory_filled === "number" ? team.mandatory_filled : countMandatory(team);
   const subsFilled =
     typeof team?.substitutes_filled === "number" ? team.substitutes_filled : substitutes.length;
-  const mandatoryOpen =
-    typeof required === "number" ? Math.max(0, required - mandatoryFilled) : 0;
-  const subOpen = Math.max(0, maxSubs - subsFilled);
+  const mandatoryOpen = teamMin != null ? Math.max(0, teamMin - mandatoryFilled) : 0;
+  const subOpen = maxSubs > 0 ? Math.max(0, maxSubs - subsFilled) : 0;
+  const activeCount = team ? activeMembers(team).length : members.length;
+  const optionalOpen =
+    rosterStyle === "RANGE" && teamMax != null && mandatoryFilled >= (teamMin ?? 0)
+      ? Math.max(0, teamMax - activeCount)
+      : 0;
 
   const memberMode = String(event?.member_registration_mode || "").toUpperCase();
   const leaderCanEnter = memberMode === "LEADER_MANAGED";
@@ -200,6 +223,11 @@ export function TeamPanel({ teamId, event, onChanged }) {
   async function onAddRoster(e) {
     e.preventDefault();
     if (!team?.id || !addRole) return;
+    const missing = validateRequiredFields(teamMemberFields, fieldValues, form);
+    if (missing.length) {
+      setError(`Please complete: ${missing.join(", ")}`);
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
@@ -209,9 +237,12 @@ export function TeamPanel({ teamId, event, onChanged }) {
         phone: form.phone.trim(),
         contact_email: form.contact_email.trim() || undefined,
         college_name: form.college_name.trim() || undefined,
+        department: form.department.trim() || undefined,
         year_of_study: form.year_of_study.trim() || undefined,
+        field_responses: buildFieldResponses(teamMemberFields, fieldValues),
       });
       setForm(EMPTY_FORM);
+      setFieldValues({});
       setAddRole(null);
       await refresh({ notify: true });
     } catch (err) {
@@ -242,12 +273,15 @@ export function TeamPanel({ teamId, event, onChanged }) {
         ? `/join/${inviteCode}`
         : null;
 
-  const rosterLine =
-    typeof required === "number"
-      ? maxSubs > 0
-        ? `${required} members + up to ${maxSubs} substitutes`
-        : `${required} members`
-      : null;
+  const rosterLine = rosterEvent
+    ? formatRosterParticipantLine(
+        rosterEvent.required_member_count,
+        rosterEvent.substitute_count,
+        rosterEvent.team_min_size,
+        rosterEvent.team_max_size,
+        rosterEvent.roster_style,
+      )
+    : null;
 
   function renderMember(m) {
     const you = m.profile_id && String(m.profile_id) === String(profile?.id);
@@ -265,9 +299,9 @@ export function TeamPanel({ teamId, event, onChanged }) {
           </div>
         </div>
         {isLeader && !you && role !== "LEADER" ? (
-          <Button size="sm" variant="danger" disabled={busy} onClick={() => onRemove(m.id)}>
-            Remove
-          </Button>
+          <HoldButton size="sm" disabled={busy} onConfirm={() => onRemove(m.id)}>
+            Hold to remove
+          </HoldButton>
         ) : null}
       </li>
     );
@@ -280,11 +314,11 @@ export function TeamPanel({ teamId, event, onChanged }) {
           <h2 className={styles.title}>{team.name}</h2>
           <p className="meta">
             {rosterLine || `${members.length} on roster`}
-            {typeof required === "number" ? (
+            {typeof teamMin === "number" ? (
               <>
                 {" · mandatory "}
                 <CountUp to={mandatoryFilled} duration={0.35} />
-                /{required}
+                /{teamMin}
               </>
             ) : null}
             {maxSubs > 0 ? (
@@ -328,6 +362,19 @@ export function TeamPanel({ teamId, event, onChanged }) {
         </ul>
       </section>
 
+      {rosterStyle === "RANGE" && optionalOpen > 0 ? (
+        <section className={styles.section}>
+          <h3 className={styles.sectionTitle}>Optional members</h3>
+          <ul className={styles.list}>
+            {Array.from({ length: optionalOpen }).map((_, i) => (
+              <li key={`o-open-${i}`} className={styles.openSlot}>
+                OPEN OPTIONAL SLOT
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
       {maxSubs > 0 ? (
         <section className={styles.section}>
           <h3 className={styles.sectionTitle}>Substitutes</h3>
@@ -349,35 +396,37 @@ export function TeamPanel({ teamId, event, onChanged }) {
           </StatusBanner>
         ) : null}
 
-        {canManageRoster && leaderCanEnter ? (
+        {canManageRoster && leaderCanEnter && nextSlot ? (
           <div className={styles.addActions}>
-            {mandatoryOpen > 0 ? (
-              <Button
-                type="button"
-                variant={addRole === "MEMBER" ? "primary" : "secondary"}
-                size="sm"
-                onClick={() => setAddRole(addRole === "MEMBER" ? null : "MEMBER")}
-              >
-                Add member
-              </Button>
-            ) : null}
-            {subOpen > 0 ? (
-              <Button
-                type="button"
-                variant={addRole === "SUBSTITUTE" ? "primary" : "secondary"}
-                size="sm"
-                onClick={() => setAddRole(addRole === "SUBSTITUTE" ? null : "SUBSTITUTE")}
-              >
-                Add substitute
-              </Button>
-            ) : null}
+            <Button
+              type="button"
+              variant={addRole ? "primary" : "secondary"}
+              size="sm"
+              onClick={() =>
+                setAddRole(
+                  addRole === nextSlot.role ? null : nextSlot.role,
+                )
+              }
+            >
+              {nextSlot.phase === "substitute"
+                ? "Add substitute"
+                : nextSlot.phase === "optional"
+                  ? "Add optional member"
+                  : "Add member"}
+            </Button>
           </div>
         ) : null}
 
         {addRole && leaderCanEnter ? (
           <form className={styles.addForm} onSubmit={onAddRoster}>
             <p className="meta">
-              Adding {addRole === "SUBSTITUTE" ? "substitute" : "mandatory member"} (no account required)
+              Adding{" "}
+              {addRole === "SUBSTITUTE"
+                ? "substitute"
+                : nextSlot?.phase === "optional"
+                  ? "optional member"
+                  : "mandatory member"}{" "}
+              (no account required)
             </p>
             <Input
               label="Full name"
@@ -403,9 +452,20 @@ export function TeamPanel({ teamId, event, onChanged }) {
               onChange={(e) => setForm((f) => ({ ...f, college_name: e.target.value }))}
             />
             <Input
+              label="Department"
+              value={form.department}
+              onChange={(e) => setForm((f) => ({ ...f, department: e.target.value }))}
+            />
+            <Input
               label="Year of study"
               value={form.year_of_study}
               onChange={(e) => setForm((f) => ({ ...f, year_of_study: e.target.value }))}
+            />
+            <DynamicRegistrationForm
+              fields={dynamicFieldsForLeaderEntry(teamMemberFields)}
+              values={fieldValues}
+              disabled={busy}
+              onChange={(fieldId, value) => setFieldValues((prev) => ({ ...prev, [fieldId]: value }))}
             />
             <div className={styles.addFormActions}>
               <Button type="button" variant="ghost" size="sm" onClick={() => setAddRole(null)}>
@@ -425,9 +485,9 @@ export function TeamPanel({ teamId, event, onChanged }) {
         ) : null}
 
         {!isLeader && myMember ? (
-          <Button type="button" variant="ghost" loading={busy} onClick={onLeave}>
-            Leave team
-          </Button>
+          <HoldButton loading={busy} onConfirm={onLeave}>
+            Hold to leave team
+          </HoldButton>
         ) : null}
       </div>
 
